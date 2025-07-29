@@ -1,127 +1,263 @@
 <?php
 /**
- * Recommended way to include parent theme styles.
- * (Please see http://codex.wordpress.org/Child_Themes#How_to_Create_a_Child_Theme)
- *
- */  
-
-add_action( 'wp_enqueue_scripts', 'astra_child_style' );
-				function astra_child_style() {
-					wp_enqueue_style( 'parent-style', get_template_directory_uri() . '/style.css' );
-					wp_enqueue_style( 'child-style', get_stylesheet_directory_uri() . '/style.css', array('parent-style') );
-				}
-
-/**
- * Your code goes below.
+ * Child Theme Functions
+ * Enhanced with robust dashboard functionality and security
  */
 
+// Enqueue Parent and Child Theme Styles
+function astra_child_style() {
+    wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
+    wp_enqueue_style('child-style', get_stylesheet_directory_uri() . '/style.css', array('parent-style'));
+    
+    // Load Dashicons for dashboard
+    wp_enqueue_style('dashicons');
+}
+add_action('wp_enqueue_scripts', 'astra_child_style');
 
-// Shortcode for displaying Realtor Dashboard
-function mdk_realtor_dashboard() {
-    // Ensure the user is logged in and is a Realtor
-    if (!is_user_logged_in() || !current_user_can('realtor')) {
-        // Return the message with a login link
-        return 'You need to be logged in as a Realtor to view this page. <a href="' . home_url('/login/') . '">Login here</a>';
+// Conditionally Enqueue Dashboard Assets
+function mdk_enqueue_dashboard_assets() {
+    global $post;
+
+    if (!is_admin() && is_a($post, 'WP_Post')) {
+        $dashboard_slugs = ['realtor-dashboard', 'admin-dashboard', 'client-dashboard'];
+
+        if (in_array($post->post_name, $dashboard_slugs)) {
+            // Dashboard CSS - Check if file exists first
+            $css_path = get_stylesheet_directory() . '/assets/dashboard.css';
+            if (file_exists($css_path)) {
+                // Simplified version without filemtime
+                wp_enqueue_style(
+                    'mdk-dashboard-style',
+                    get_stylesheet_directory_uri() . '/assets/dashboard.css',
+                    array(),
+                    '1.0', // Static version number
+                    'all'
+                );
+            }
+
+            // Dashboard JS - Check if file exists first
+            $js_path = get_stylesheet_directory() . '/assets/dashboard.js';
+            if (file_exists($js_path)) {
+                wp_enqueue_script(
+                    'mdk-dashboard-script',
+                    get_stylesheet_directory_uri() . '/assets/dashboard.js',
+                    array('jquery'),
+                    filemtime($js_path),
+                    true
+                );
+            }
+        }
+    }
+}
+add_action('wp_enqueue_scripts', 'mdk_enqueue_dashboard_assets');
+
+// Dashboard Page Creator
+function mdk_create_dashboard_pages() {
+    $pages = array(
+        'admin-dashboard' => array(
+            'title' => 'Admin Dashboard',
+            'content' => '[mdk_admin_dashboard]'
+        ),
+        'realtor-dashboard' => array(
+            'title' => 'Realtor Dashboard',
+            'content' => '[mdk_realtor_dashboard]'
+        ),
+        'client-dashboard' => array(
+            'title' => 'Client Dashboard',
+            'content' => '[mdk_client_dashboard]'
+        )
+    );
+
+    foreach ($pages as $slug => $page) {
+        if (!get_page_by_path($slug)) {
+            wp_insert_post(array(
+                'post_title'   => $page['title'],
+                'post_name'    => $slug,
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+                'post_content' => $page['content']
+            ));
+        }
+    }
+    
+    // Flush rewrite rules after creation
+    flush_rewrite_rules();
+}
+add_action('after_switch_theme', 'mdk_create_dashboard_pages');
+
+// Template Loader with Enhanced Security
+function mdk_load_dashboard_template($template) {
+    global $post;
+
+    if (!$post || !is_page()) {
+        return $template;
     }
 
-    ob_start();
-    ?>
-    <div class="mdk-realtor-dashboard">
-        <h2>Welcome to Your Realtor Dashboard</h2>
-        <p>Here you can manage your properties, assign tasks, and view client information.</p>
+    $dashboard_map = array(
+        'admin-dashboard'   => array('template' => 'admin', 'capability' => 'manage_options'),
+        'realtor-dashboard' => array('template' => 'realtor', 'capability' => 'edit_properties'),
+        'client-dashboard'  => array('template' => 'client', 'capability' => 'read_properties')
+    );
+
+    if (array_key_exists($post->post_name, $dashboard_map)) {
+        $dashboard = $dashboard_map[$post->post_name];
         
-        <!-- Display Realtor's Properties -->
-        <h3>Your Properties</h3>
-        <?php
-        // Fetch assigned properties for Realtor
-        $user_id = get_current_user_id();
-        $properties = get_user_meta($user_id, 'assigned_property', false);
-
-        if (!empty($properties)) {
-            echo '<ul>';
-            foreach ($properties as $property) {
-                echo '<li>' . esc_html($property) . '</li>';
-            }
-            echo '</ul>';
-        } else {
-            echo 'You have no properties assigned.';
+        // Check user capabilities
+        if (!current_user_can($dashboard['capability'])) {
+            wp_redirect(wp_login_url(get_permalink()));
+            exit;
         }
-        ?>
 
-        <!-- Display Realtor's Tasks -->
-        <h3>Your Tasks</h3>
-        <?php
-        // Fetch tasks for the Realtor
-        $tasks = get_user_meta($user_id, 'assigned_tasks', false);
+        // Locate template file
+        $template_path = locate_template(array(
+            "dashboard-templates/{$dashboard['template']}-dashboard.php",
+            "dashboard-templates/default-dashboard.php"
+        ));
 
-        if (!empty($tasks)) {
-            echo '<ul>';
-            foreach ($tasks as $task) {
-                echo '<li>' . esc_html($task) . '</li>';
-            }
-            echo '</ul>';
-        } else {
-            echo 'You have no tasks assigned.';
+        if ($template_path) {
+            return $template_path;
         }
-        ?>
-    </div>
-    <?php
-    return ob_get_clean();
-}
-add_shortcode('mdk_realtor_dashboard', 'mdk_realtor_dashboard');
-
-
-
-// Shortcode for displaying Client Dashboard
-function mdk_client_dashboard() {
-    // Ensure the user is logged in and is a Client
-    if (!is_user_logged_in() || !current_user_can('client')) {
-        return 'You need to be logged in as a Client to view this page. <a href="' . home_url('/login/') . '">Login here</a>';
     }
 
+    return $template;
+}
+add_filter('template_include', 'mdk_load_dashboard_template', 99);
+
+// Dashboard Shortcodes with Caching
+function mdk_realtor_dashboard_shortcode($atts = array()) {
+    // Check user capabilities
+    if (!is_user_logged_in() || !current_user_can('edit_properties')) {
+        return mdk_dashboard_login_message('Realtor');
+    }
+
+    // Start output buffering
     ob_start();
-    ?>
-    <div class="mdk-client-dashboard">
-        <h2>Welcome to Your Client Dashboard</h2>
-        <p>Here you can view your assigned tasks and properties.</p>
-        
-        <!-- Display Client's Properties -->
-        <h3>Your Assigned Properties</h3>
-        <?php
-        // Fetch assigned properties for Client
-        $user_id = get_current_user_id();
-        $properties = get_user_meta($user_id, 'assigned_property', false);
-
-        if (!empty($properties)) {
-            echo '<ul>';
-            foreach ($properties as $property) {
-                echo '<li>' . esc_html($property) . '</li>';
-            }
-            echo '</ul>';
-        } else {
-            echo 'You have no properties assigned.';
-        }
-        ?>
-
-        <!-- Display Client's Tasks -->
-        <h3>Your Tasks</h3>
-        <?php
-        // Fetch tasks for the Client
-        $tasks = get_user_meta($user_id, 'assigned_tasks', false);
-
-        if (!empty($tasks)) {
-            echo '<ul>';
-            foreach ($tasks as $task) {
-                echo '<li>' . esc_html($task) . '</li>';
-            }
-            echo '</ul>';
-        } else {
-            echo 'You have no tasks assigned.';
-        }
-        ?>
-    </div>
-    <?php
+    
+    // Include template file
+    $template = locate_template('dashboard-templates/realtor-dashboard.php');
+    if ($template) {
+        include $template;
+    } else {
+        echo '<div class="mdk-alert">Dashboard template not found.</div>';
+    }
+    
     return ob_get_clean();
 }
-add_shortcode('mdk_client_dashboard', 'mdk_client_dashboard');
+add_shortcode('mdk_realtor_dashboard', 'mdk_realtor_dashboard_shortcode');
 
+function mdk_client_dashboard_shortcode($atts = array()) {
+    // Check user capabilities
+    if (!is_user_logged_in() || !current_user_can('read_properties')) {
+        return mdk_dashboard_login_message('Client');
+    }
+
+    // Start output buffering
+    ob_start();
+    
+    // Include template file
+    $template = locate_template('dashboard-templates/client-dashboard.php');
+    if ($template) {
+        include $template;
+    } else {
+        echo '<div class="mdk-alert">Dashboard template not found.</div>';
+    }
+    
+    return ob_get_clean();
+}
+add_shortcode('mdk_client_dashboard', 'mdk_client_dashboard_shortcode');
+
+// Helper function for login messages
+function mdk_dashboard_login_message($role) {
+    return sprintf(
+        '<div class="mdk-alert">%s <a href="%s">%s</a></div>',
+        sprintf(__('You need to be logged in as a %s to view this page.', 'astra-child'), $role),
+        esc_url(wp_login_url()),
+        __('Login here', 'astra-child')
+    );
+}
+
+// Dashboard Data Helper
+function mdk_get_dashboard_data($user_id, $role) {
+    $data = array(
+        'user' => wp_get_current_user(),
+        'stats' => array()
+    );
+
+    switch ($role) {
+        case 'realtor':
+            $data['stats'] = array(
+                'active_properties' => get_user_meta($user_id, 'active_properties', true) ?: 0,
+                'tasks_sent' => get_user_meta($user_id, 'tasks_sent', true) ?: 0,
+                'awaiting_response' => get_user_meta($user_id, 'awaiting_response', true) ?: 0,
+                'clients' => get_posts(array(
+                    'post_type' => 'client',
+                    'posts_per_page' => -1,
+                    'meta_query' => array(
+                        array(
+                            'key' => 'assigned_realtor',
+                            'value' => $user_id,
+                            'compare' => '='
+                        )
+                    )
+                ))
+            );
+            break;
+            
+        case 'client':
+            // Add client-specific data
+            break;
+            
+        case 'administrator':
+            // Add admin-specific data
+            break;
+    }
+
+    return apply_filters('mdk_dashboard_data', $data, $user_id, $role);
+}
+
+// Flush rewrite rules on deactivation
+function mdk_deactivate() {
+    flush_rewrite_rules();
+}
+register_deactivation_hook(__FILE__, 'mdk_deactivate');
+
+
+/**
+ * Load dashboard data for the current user
+ */
+function load_realtor_dashboard_data() {
+    if (!is_user_logged_in()) {
+        return false;
+    }
+
+    $current_user = wp_get_current_user();
+    $user_id = $current_user->ID;
+
+    return array(
+        'active_properties' => get_user_meta($user_id, 'active_properties', true) ?: 0,
+        'tasks_sent' => get_user_meta($user_id, 'tasks_sent', true) ?: 0,
+        'awaiting_response' => get_user_meta($user_id, 'awaiting_response', true) ?: 0,
+        'active_clients' => get_posts(array(
+            'post_type' => 'client',
+            'posts_per_page' => -1,
+            'meta_query' => array(
+                array(
+                    'key' => 'assigned_realtor',
+                    'value' => $user_id,
+                    'compare' => '='
+                )
+            )
+        )),
+        'current_user' => $current_user,
+        'user_id' => $user_id
+    );
+}
+
+function mdk_add_user_roles() {
+    add_role('realtor', 'Realtor', array(
+        'read' => true,
+        'edit_properties' => true,
+        'edit_clients' => true
+    ));
+}
+add_action('init', 'mdk_add_user_roles');

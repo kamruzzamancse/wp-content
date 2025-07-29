@@ -2,6 +2,67 @@
  * Theme Name:     Astra Child
  * Author:         Brainstorm Force
  * Template:       astra
- * Text Domain:	   astra-child
- * Description:    The Astra WordPress theme is lightning-fast and highly customizable. It has over 1 million downloads and the only theme in the world with 5,700+ five-star reviews! It’s ideal for professional web designers, solopreneurs, small businesses, eCommerce, membership sites and any type of website. It offers special features and templates so it works perfectly with all page builders like Spectra, Elementor, Beaver Builder, etc. Fast performance, clean code, mobile-first design and schema markup are all built-in, making the theme exceptionally SEO-friendly. It’s fully compatible with WooCommerce, SureCart and other eCommerce plugins and comes with lots of store-friendly features and templates. Astra also provides expert support for free users. A dedicated team of fully trained WordPress experts are on hand to help with every aspect of the theme. Try the live demo of Astra: https://zipwp.org/themes/astra/
+ * Text Domain:    astra-child
+ * Version:        1.0.0
  */
+
+/**
+ * Layout Adjustments
+ * Note: Use !important sparingly and only when necessary to override parent theme styles
+ */
+
+/* Main container width adjustment */
+.ast-container {
+    max-width: 1400px !important;
+    width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Header width adjustment */
+.ast-primary-header {
+    max-width: 100% !important;
+}
+
+/* Content area adjustment */
+.ast-separate-container .ast-article-single,
+.ast-separate-container .ast-article-inner {
+    max-width: 1400px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* Full width template adjustment */
+.ast-page-builder-template .ast-container {
+    max-width: 100% !important;
+    padding-left: 40px !important;
+    padding-right: 40px !important;
+}
+
+/* Specific page adjustments (replace XX with actual page ID) */
+.page-id-XX .ast-container,
+.postid-XX .ast-container {
+    max-width: 1400px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1440px) {
+    .ast-container {
+        max-width: 1200px !important;
+    }
+}
+
+@media (max-width: 1200px) {
+    .ast-container {
+        max-width: 100% !important;
+        padding-left: 30px !important;
+        padding-right: 30px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .ast-container {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+}

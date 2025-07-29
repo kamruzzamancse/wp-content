@@ -62,7 +62,7 @@ class Enhanced_Login_Shortcodes {
         $message = sprintf(
             __('You are already logged in as %s. <a href="%s">Log out?</a>', 'enhanced-login'),
             $current_user->display_name,
-            wp_logout_url(home_url())
+            wp_logout_url(site_url('/login/'))
         );
         return '<div class="enhanced-login-message">' . $message . '</div>';
     }

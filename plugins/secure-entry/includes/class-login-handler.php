@@ -48,10 +48,20 @@ class Enhanced_Login_Handler {
             ));
         }
 
-        $redirect = !empty($data['redirect']) ? $data['redirect'] : home_url();
+        // Get the user's role
+        $user_data = get_userdata($user->ID);
+        $user_role = $user_data->roles[0] ?? '';
+
+        // Determine redirect URL based on role
+        $redirect_url = $this->get_redirect_url_by_role($user_role);
+        
+        // If a specific redirect was passed in the form, use that instead
+        if (!empty($data['redirect'])) {
+            $redirect_url = $data['redirect'];
+        }
 
         wp_send_json_success(array(
-            'redirect' => $redirect
+            'redirect' => $redirect_url
         ));
     }
 
@@ -80,6 +90,7 @@ class Enhanced_Login_Handler {
 
     private function get_redirect_url_by_role($role) {
         $redirect_urls = array(
+            'administrator' => admin_url(),
             'realtor' => site_url('/realtor-dashboard/'),
             'client'  => site_url('/client-dashboard/')
         );
