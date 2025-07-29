@@ -1,0 +1,224 @@
+/* Main form styles - Responsive */
+.enhanced-login-form,
+.enhanced-register-form {
+    max-width: 600px;
+    margin: 50px auto;
+    margin-bottom: 100px!important;
+    padding: 25px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px; /* Slightly larger radius */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    box-sizing: border-box;
+}
+
+/* Force the form to respect the max-width */
+#enhanced-register {
+    max-width: 600px;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 480px) {
+    .enhanced-login-form,
+    .enhanced-register-form {
+        width: 85%; /* More width on small screens */
+        padding: 20px;
+        margin: 15px auto;
+    }
+}
+
+/* Form group styles */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Input fields - responsive */
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
+    width: 100%;
+    max-width: 100%; /* Ensure inputs don't overflow */
+    box-sizing: border-box;
+}
+
+/* Mobile adjustments for input fields */
+@media (max-width: 480px) {
+    .form-group input[type="text"],
+    .form-group input[type="email"],
+    .form-group input[type="password"],
+    .form-group select {
+        padding: 12px 8px;
+    }
+}
+
+/* Make sure the form doesn't shrink too much on mobile */
+@media (max-width: 350px) {
+    .enhanced-register-form {
+        min-width: 280px; /* Absolute minimum width */
+    }
+}
+
+/* Focus states */
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus,
+.form-group select:focus {
+    border-color: #0073aa;
+    outline: none;
+    box-shadow: 0 0 0 1px rgba(0, 115, 170, 0.2);
+}
+
+/* Remember me checkbox */
+.remember-me {
+    display: flex;
+    align-items: center;
+}
+
+.remember-me input {
+    margin-right: 8px;
+}
+
+/* Button styles - responsive */
+.form-group button {
+    width: 100%;
+    padding: 12px;
+    background: #0073aa;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.form-group button:hover {
+    background: #005d8c;
+}
+
+/* Larger tap targets on mobile */
+@media (max-width: 480px) {
+    .form-group button {
+        padding: 14px;
+    }
+}
+
+/* Form links */
+.form-links {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.form-links a {
+    color: #0073aa;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.form-links a:hover {
+    color: #005d8c;
+    text-decoration: underline;
+}
+
+/* Messages */
+.enhanced-login-message,
+.enhanced-register-message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.enhanced-login-message.error,
+.enhanced-register-message.error {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.enhanced-login-message.success,
+.enhanced-register-message.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+
+/* Password strength meter */
+.password-strength-meter {
+    height: 5px;
+    margin-top: 5px;
+    background: #eee;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.password-strength-meter::before {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 0;
+    background: transparent;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.password-strength-meter[data-strength="0"]::before {
+    width: 20%;
+    background: #ff5252;
+}
+
+.password-strength-meter[data-strength="1"]::before {
+    width: 40%;
+    background: #ff9800;
+}
+
+.password-strength-meter[data-strength="2"]::before {
+    width: 60%;
+    background: #ffeb3b;
+}
+
+.password-strength-meter[data-strength="3"]::before {
+    width: 80%;
+    background: #4caf50;
+}
+
+.password-strength-meter[data-strength="4"]::before {
+    width: 100%;
+    background: #2e7d32;
+}
+
+/* Select dropdown specific styles */
+.form-group select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 30px;
+}
+
+/* Mobile specific adjustments */
+@media (max-width: 360px) {
+    .form-group label {
+        font-size: 13px;
+    }
+    
+    .form-links {
+        font-size: 13px;
+    }
+}
+
+.entry-content[data-ast-blocks-layout] > * {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
