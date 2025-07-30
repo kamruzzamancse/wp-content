@@ -1,0 +1,242 @@
+/* Calendar Container */
+.todo-calendar-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Calendar Header */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-title {
+    margin: 0;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.calendar-actions button {
+    background: #f0f0f0;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    margin: 0 5px;
+    transition: background 0.2s;
+}
+
+.calendar-actions button:hover {
+    background: #e0e0e0;
+}
+
+/* Calendar Grid */
+.calendar-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.calendar-grid th {
+    background: #f5f5f5;
+    padding: 12px 8px;
+    text-align: center;
+    font-weight: 500;
+    color: #555;
+    border: 1px solid #e0e0e0;
+}
+
+.calendar-grid td {
+    border: 1px solid #e0e0e0;
+    padding: 8px;
+    height: 100px;
+    vertical-align: top;
+    position: relative;
+}
+
+.calendar-grid td.empty {
+    background: #f9f9f9;
+}
+
+.day-number {
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+/* Todo Items Container */
+.todos-container {
+    min-height: 60px;
+    max-height: 60px;
+    overflow-y: auto;
+    padding-right: 3px;
+}
+
+/* Todo Item Styling */
+.todo-item {
+    background: #f0f7ff;
+    padding: 4px 6px;
+    margin: 3px 0;
+    border-radius: 3px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.todo-item:hover {
+    background: #e1f0ff;
+}
+
+.todo-content {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Add Todo Button */
+.add-todo {
+    position: relative;
+    bottom: 5px;
+    right: 5px;
+    background: #2b6cb0;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 24px;
+    text-align: center;
+    transition: background 0.2s;
+}
+
+.add-todo:hover {
+    background: #1a56a0;
+}
+
+/* Delete Button */
+.delete-todo {
+    background: transparent;
+    border: none;
+    color: #f44336;
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0 4px;
+    margin-left: 5px;
+    flex-shrink: 0;
+}
+
+/* Modal Styles */
+.todo-form-modal,
+.todo-view-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #2b6cb0;
+    font-size: 1.3em;
+}
+
+.todo-detail-content {
+    padding: 10px 0;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.modal-actions button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.modal-actions .save-todo,
+.modal-actions .close-todo {
+    background: #2b6cb0;
+    color: white;
+}
+
+.modal-actions .save-todo:hover,
+.modal-actions .close-todo:hover {
+    background: #1a56a0;
+}
+
+.modal-actions .cancel-todo {
+    background: #f0f0f0;
+}
+
+.modal-actions .cancel-todo:hover {
+    background: #e0e0e0;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .calendar-grid td {
+        height: 80px;
+        padding: 5px;
+    }
+    
+    .todo-item {
+        font-size: 11px;
+        padding: 3px 5px;
+    }
+    
+    .modal-content {
+        padding: 15px;
+    }
+}
+
+/* Scrollbar Styling */
+.todos-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.todos-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 2px;
+}
+
+.todos-container::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}

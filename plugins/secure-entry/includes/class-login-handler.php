@@ -43,25 +43,33 @@ class Enhanced_Login_Handler {
         $user = wp_signon($creds, is_ssl());
 
         if (is_wp_error($user)) {
+            $field = '';
+            if (in_array($user->get_error_code(), ['empty_username', 'invalid_username'])) {
+                $field = 'username';
+            } elseif (in_array($user->get_error_code(), ['empty_password', 'incorrect_password'])) {
+                $field = 'password';
+            }
+            
             wp_send_json_error(array(
-                'message' => $this->get_error_message($user->get_error_code())
+                'message' => $this->get_error_message($user->get_error_code()),
+                'field' => $field
             ));
         }
 
-        // Get the user's role
+        // Get all user roles in lowercase for comparison
         $user_data = get_userdata($user->ID);
-        $user_role = $user_data->roles[0] ?? '';
-
+        $user_roles = array_map('strtolower', $user_data->roles);
+        
         // Determine redirect URL based on role
-        $redirect_url = $this->get_redirect_url_by_role($user_role);
+        $redirect_url = $this->get_redirect_url_by_role($user_roles);
         
         // If a specific redirect was passed in the form, use that instead
-        if (!empty($data['redirect'])) {
-            $redirect_url = $data['redirect'];
+        if (!empty($data['redirect']) && filter_var($data['redirect'], FILTER_VALIDATE_URL)) {
+            $redirect_url = esc_url_raw($data['redirect']);
         }
 
         wp_send_json_success(array(
-            'redirect' => $redirect_url
+            'redirect' => esc_url_raw($redirect_url)
         ));
     }
 
@@ -88,13 +96,27 @@ class Enhanced_Login_Handler {
         return $error;
     }
 
-    private function get_redirect_url_by_role($role) {
-        $redirect_urls = array(
-            'administrator' => admin_url(),
-            'realtor' => site_url('/realtor-dashboard/'),
-            'client'  => site_url('/client-dashboard/')
-        );
+    private function get_redirect_url_by_role($roles) {
+        // Ensure roles array is properly formatted
+        if (!is_array($roles)) {
+            $roles = (array)$roles;
+        }
         
-        return $redirect_urls[$role] ?? home_url();
+        $roles = array_map('strtolower', $roles);
+        
+        $redirect_urls = apply_filters('enhanced_login_redirect_urls', [
+            'administrator' => admin_url(),
+            'realtor'      => home_url('/realtor-dashboard/'),
+            'client'       => home_url('/client-dashboard/'),
+            'subscriber'   => home_url('/my-account/')
+        ]);
+        
+        foreach ($roles as $role) {
+            if (isset($redirect_urls[$role])) {
+                return $redirect_urls[$role];
+            }
+        }
+        
+        return home_url();
     }
 }

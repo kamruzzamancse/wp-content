@@ -6,63 +6,75 @@
  * Version:        1.0.0
  */
 
-/**
- * Layout Adjustments
- * Note: Use !important sparingly and only when necessary to override parent theme styles
- */
-
-/* Main container width adjustment */
-.ast-container {
-    max-width: 1400px !important;
-    width: 100% !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-/* Header width adjustment */
-.ast-primary-header {
-    max-width: 100% !important;
-}
-
-/* Content area adjustment */
-.ast-separate-container .ast-article-single,
-.ast-separate-container .ast-article-inner {
-    max-width: 1400px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-}
-
-/* Full width template adjustment */
-.ast-page-builder-template .ast-container {
-    max-width: 100% !important;
-    padding-left: 40px !important;
-    padding-right: 40px !important;
-}
-
-/* Specific page adjustments (replace XX with actual page ID) */
+/* Full-Screen Layout Adjustments */
+.ast-container,
+.ast-separate-container .ast-article-single, 
+.ast-separate-container .ast-article-inner,
 .page-id-XX .ast-container,
 .postid-XX .ast-container {
-    max-width: 1400px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1440px) {
-    .ast-container {
-        max-width: 1200px !important;
-    }
+/* Header and Footer Full Width */
+.ast-primary-header,
+.ast-mobile-header,
+.site-footer {
+    max-width: 100% !important;
+    width: 100% !important;
 }
 
+/* Content Area Adjustments */
+.ast-site-content {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Full Width Content Containers */
+.ast-page-builder-template .site-content .ast-container,
+.ast-plain-container .site-content .ast-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+
+/* Main Content Area */
+#primary {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important; /* Add some padding for content */
+}
+
+/* Responsive Adjustments */
 @media (max-width: 1200px) {
-    .ast-container {
-        max-width: 100% !important;
-        padding-left: 30px !important;
-        padding-right: 30px !important;
+    #primary {
+        padding: 15px !important;
     }
 }
 
 @media (max-width: 768px) {
-    .ast-container {
-        padding-left: 20px !important;
-        padding-right: 20px !important;
+    #primary {
+        padding: 10px !important;
     }
+    
+    /* Optional: Stack elements on mobile */
+    .ast-row {
+        flex-direction: column;
+    }
+    
+    .ast-col-md-6,
+    .ast-col-sm-12 {
+        width: 100% !important;
+    }
+}
+
+/* Optional: Full-width elements */
+.full-width-element {
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
 }

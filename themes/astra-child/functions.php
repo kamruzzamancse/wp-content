@@ -14,6 +14,56 @@ function astra_child_style() {
 }
 add_action('wp_enqueue_scripts', 'astra_child_style');
 
+/**
+ * Enqueue Todo Calendar assets
+ */
+function astra_child_enqueue_todo_calendar() {
+    // CSS
+    wp_enqueue_style(
+        'todo-calendar-css',
+        get_stylesheet_directory_uri() . '/assets/css/todo-calendar.css',
+        array(),
+        filemtime(get_stylesheet_directory() . '/assets/css/todo-calendar.css')
+    );
+    
+    // JavaScript
+    wp_enqueue_script(
+        'todo-calendar-js',
+        get_stylesheet_directory_uri() . '/assets/js/todo-calendar.js',
+        array('jquery'),
+        filemtime(get_stylesheet_directory() . '/assets/js/todo-calendar.js'),
+        true
+    );
+    
+    // Localize script
+    wp_localize_script(
+        'todo-calendar-js',
+        'todoCalendarVars',
+        array(
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('todo_calendar_nonce'),
+            'i18n' => array(
+                'confirmDelete' => __('Are you sure you want to delete this todo?', 'astra-child'),
+                'saving' => __('Saving...', 'astra-child')
+            )
+        )
+    );
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_todo_calendar');
+
+/**
+ * Include Todo Calendar class
+ */
+require_once get_stylesheet_directory() . '/includes/class-todo-calendar.php';
+
+/**
+ * Initialize Todo Calendar
+ */
+function astra_child_init_todo_calendar() {
+    new Todo_Calendar();
+}
+add_action('init', 'astra_child_init_todo_calendar');
+
 // Conditionally Enqueue Dashboard Assets
 function mdk_enqueue_dashboard_assets() {
     global $post;
@@ -23,12 +73,12 @@ function mdk_enqueue_dashboard_assets() {
 
         if (in_array($post->post_name, $dashboard_slugs)) {
             // Dashboard CSS - Check if file exists first
-            $css_path = get_stylesheet_directory() . '/assets/dashboard.css';
+            $css_path = get_stylesheet_directory() . '/assets/css/dashboard.css';
             if (file_exists($css_path)) {
                 // Simplified version without filemtime
                 wp_enqueue_style(
                     'mdk-dashboard-style',
-                    get_stylesheet_directory_uri() . '/assets/dashboard.css',
+                    get_stylesheet_directory_uri() . '/assets/css/dashboard.css',
                     array(),
                     '1.0', // Static version number
                     'all'
@@ -36,11 +86,11 @@ function mdk_enqueue_dashboard_assets() {
             }
 
             // Dashboard JS - Check if file exists first
-            $js_path = get_stylesheet_directory() . '/assets/dashboard.js';
+            $js_path = get_stylesheet_directory() . '/assets/js/dashboard.js';
             if (file_exists($js_path)) {
                 wp_enqueue_script(
                     'mdk-dashboard-script',
-                    get_stylesheet_directory_uri() . '/assets/dashboard.js',
+                    get_stylesheet_directory_uri() . '/assets/js/dashboard.js',
                     array('jquery'),
                     filemtime($js_path),
                     true

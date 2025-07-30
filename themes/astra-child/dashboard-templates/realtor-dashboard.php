@@ -103,7 +103,7 @@ get_header();
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo esc_url(wp_logout_url()); ?>">
+                    <a href="<?php echo esc_url(wp_logout_url(home_url('/login/'))); ?>">
                         <span class="dashicons dashicons-migrate"></span>
                         <span>Logout</span>
                     </a>
@@ -118,19 +118,38 @@ get_header();
             switch($current_tab) {
                 case 'dashboard':
                     ?>
-                    <!-- Stats Cards -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Active Properties</h3>
-                            <p><?php echo esc_html($active_properties); ?></p>
+
+                    <div class="dashboard-top">
+                        <div class="dashboard-top-left">
+                            <!-- Stats Cards -->
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <h3>
+                                        <span class="dashicons dashicons-admin-home"></span>
+                                        Total Properties
+                                    </h3>
+                                    <p><?php echo esc_html($active_properties); ?></p>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>
+                                        <span class="dashicons dashicons-groups"></span>
+                                        Total Client
+                                    </h3>
+                                    <p><?php echo esc_html($tasks_sent); ?></p>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>
+                                        <span class="dashicons dashicons-media-document"></span>
+                                        Upload Document
+                                    </h3>
+                                    <h6 style="color: #ccc">(marketing, personal, etc)</h6>
+                                </div>
+                            </div>
                         </div>
-                        <div class="stat-card">
-                            <h3>Tasks Sent</h3>
-                            <p><?php echo esc_html($tasks_sent); ?></p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Awaiting Response</h3>
-                            <p><?php echo esc_html($awaiting_response); ?></p>
+                        <div class="dashboard-top-right">
+                            <div id="todo-calendar" class="todo-calendar">
+                                <?php echo do_shortcode('[todo_calendar]'); ?>
+                            </div>
                         </div>
                     </div>
 

@@ -1,0 +1,55 @@
+[30-Jul-2025 08:06:22 UTC] Automatic updates starting...
+[30-Jul-2025 08:06:24 UTC]   Automatic theme updates starting...
+[30-Jul-2025 08:06:24 UTC]   Automatic theme updates complete.
+[30-Jul-2025 08:06:24 UTC] Automatic updates complete.
+[30-Jul-2025 09:19:34 UTC] PHP Parse error:  syntax error, unexpected identifier "add_action", expecting "function" or "const" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 347
+[30-Jul-2025 09:22:05 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:22:05 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:22:06 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:22:06 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:22:06 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:22:06 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:22 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:22 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:22 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:22 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:22 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:22 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:24 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:24 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:24 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:24 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:24 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:24 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:25 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:25 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:25 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:25 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:25 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:25 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:26 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:26 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:26 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:26 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:27 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:27 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:27 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:27 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:25:27 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:25:27 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-childassets/css/todo-calendar.css in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 42
+[30-Jul-2025 09:26:19 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/assets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:26:20 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/assets/js/customer-calendar.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[30-Jul-2025 09:31:39 UTC] PHP Fatal error:  Uncaught TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Todo_Calendar does not have a method "get_todos" in C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php:324
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#1 C:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#2 C:\xampp\htdocs\mary\wp-admin\admin-ajax.php(192): do_action('wp_ajax_get_tod...')
+#3 {main}
+  thrown in C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php on line 324
+[30-Jul-2025 09:31:42 UTC] PHP Fatal error:  Uncaught TypeError: call_user_func_array(): Argument #1 ($callback) must be a valid callback, class Todo_Calendar does not have a method "get_todos" in C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php:324
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#1 C:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#2 C:\xampp\htdocs\mary\wp-admin\admin-ajax.php(192): do_action('wp_ajax_get_tod...')
+#3 {main}
+  thrown in C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php on line 324
