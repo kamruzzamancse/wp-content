@@ -66,6 +66,7 @@ class Todo_Calendar {
             
             $date = sanitize_text_field($_POST['date']);
             $raw_content = $_POST['content'] ?? '';
+            $replace_existing = isset($_POST['replace_existing']) ? (bool)$_POST['replace_existing'] : false;
             $user_id = get_current_user_id();
             
             // Validate inputs
@@ -85,9 +86,16 @@ class Todo_Calendar {
                 'modified' => current_time('timestamp')
             );
             
-            // Update todos
+            // Get and update todos
             $todos = get_user_meta($user_id, 'user_todos', true) ?: array();
-            $todos[$date][] = $content;
+            
+            if ($replace_existing) {
+                // Replace existing todo for this date
+                $todos[$date] = array($content);
+            } else {
+                // Add new todo (but we'll enforce one todo per day in display)
+                $todos[$date][] = $content;
+            }
             
             if (!update_user_meta($user_id, 'user_todos', $todos)) {
                 throw new Exception(__('Failed to save todo', 'astra-child'), 500);

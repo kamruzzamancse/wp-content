@@ -145,6 +145,60 @@ get_header();
                                     <h6 style="color: #ccc">(marketing, personal, etc)</h6>
                                 </div>
                             </div>
+                            <!-- Active Clients Section -->
+                            <div class="dashboard-section active-clients-section">
+                                <h2>Active Clients</h2>
+
+                                <table class="active-clients-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Client Name</th>
+                                            <th>Address</th>
+                                            <th>Closing Date</th>
+                                            <th>Notes</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Insurance</td>
+                                            <td>New York</td>
+                                            <td>22 July</td>
+                                            <td>Just a quick follow-up on documents.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance</td>
+                                            <td>New York</td>
+                                            <td>22 July</td>
+                                            <td>Just a quick follow-up on documents.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance</td>
+                                            <td>New York</td>
+                                            <td>22 July</td>
+                                            <td>Just a quick follow-up on documents.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance</td>
+                                            <td>New York</td>
+                                            <td>22 July</td>
+                                            <td>Just a quick follow-up on documents.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance</td>
+                                            <td>New York</td>
+                                            <td>22 July</td>
+                                            <td>Just a quick follow-up on documents.</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Insurance</td>
+                                            <td>New York</td>
+                                            <td>22 July</td>
+                                            <td>Just a quick follow-up on documents.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                         </div>
                         <div class="dashboard-top-right">
                             <div id="todo-calendar" class="todo-calendar">
@@ -153,48 +207,7 @@ get_header();
                         </div>
                     </div>
 
-                    <!-- Active Clients Section -->
-                    <div class="dashboard-section">
-                        <h2>Active Clients</h2>
-                        <?php if (!empty($active_clients)) : ?>
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Client Name</th>
-                                        <th>Address</th>
-                                        <th>Closing Date</th>
-                                        <th>Notes</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($active_clients as $client) : 
-                                        $client_data = array(
-                                            'address' => get_post_meta($client->ID, 'property_address', true),
-                                            'closing_date' => get_post_meta($client->ID, 'closing_date', true),
-                                            'notes' => get_post_meta($client->ID, 'realtor_notes', true),
-                                            'status' => get_post_meta($client->ID, 'client_status', true)
-                                        );
-                                        $client_data = array_map('esc_html', $client_data);
-                                    ?>
-                                        <tr>
-                                            <td><?php echo esc_html($client->post_title); ?></td>
-                                            <td><?php echo $client_data['address']; ?></td>
-                                            <td><?php echo $client_data['closing_date']; ?></td>
-                                            <td><?php echo $client_data['notes']; ?></td>
-                                            <td>
-                                                <span class="status-badge status-<?php echo sanitize_html_class(strtolower($client_data['status'])); ?>">
-                                                    <?php echo $client_data['status']; ?>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        <?php else : ?>
-                            <p class="no-data">No active clients found.</p>
-                        <?php endif; ?>
-                    </div>
+                    
                     <?php
                     break;
 
@@ -250,47 +263,85 @@ get_header();
 
             <!-- Task Creation Section (Shown on all tabs except settings) -->
             <?php if ($current_tab !== 'settings') : ?>
-            <div class="dashboard-section">
-                <h2>Create New Task</h2>
-                <form class="task-form" id="taskCreationForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="taskClient">Client</label>
-                            <select name="taskClient" id="taskClient" required>
-                                <option value="">Select Client</option>
-                                <?php if (!empty($active_clients)) : ?>
-                                    <?php foreach ($active_clients as $client) : ?>
-                                        <option value="<?php echo esc_attr($client->ID); ?>">
-                                            <?php echo esc_html($client->post_title); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </select>
+            <!-- Leads Section -->
+            <div class="dashboard-section leads-section">
+                <h2>Leads</h2>
+
+                <table class="leads-table">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Last Touch</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>John Smith</td>
+                            <td>20 July 25, 11pm</td>
+                            <td><span class="status-dot status-hot"></span> Hot</td>
+                            <td>Just a quick update about contract.</td>
+                        </tr>
+                        <tr>
+                            <td>John Smith</td>
+                            <td>20 July 25, 11pm</td>
+                            <td><span class="status-dot status-warm"></span> Warm</td>
+                            <td>Just a quick update about contract.</td>
+                        </tr>
+                        <tr>
+                            <td>John Smith</td>
+                            <td>20 July 25, 11pm</td>
+                            <td><span class="status-dot status-cold"></span> Cold</td>
+                            <td>Just a quick update about contract.</td>
+                        </tr>
+                        <tr>
+                            <td>John Smith</td>
+                            <td>20 July 25, 11pm</td>
+                            <td><span class="status-dot status-cold"></span> Cold</td>
+                            <td>Just a quick update about contract.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Lead Details Popup -->
+            <div class="lead-popup-overlay" id="leadPopupOverlay">
+                <div class="lead-popup">
+                    <button class="close-popup">&times;</button>
+                    <div class="popup-header">
+                        <h1 class="popup-heading">Leeds</h1>
+                        <h2 class="popup-client-name">John Smith</h2>
+                    </div>
+                    
+                    <div class="popup-grid">
+                        <div class="popup-column">
+                            <div class="popup-section">
+                                <span class="popup-label">Last Touch</span>
+                                <span class="popup-value">20 July 25, 11pm</span>
+                            </div>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="taskDeadline">Deadline</label>
-                            <input type="date" name="taskDeadline" id="taskDeadline" required>
+                        <div class="popup-column">
+                            <div class="popup-section">
+                                <span class="popup-label">Status</span>
+                                <div class="status-container">
+                                    <span class="status-dot status-hot"></span>
+                                    <span class="status-text">Hot</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="popup-fullwidth">
+                            <div class="popup-section">
+                                <span class="popup-label">Notes</span>
+                                <p class="popup-value">Just a quick update about contract.</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="taskTitle">Task Title</label>
-                        <input type="text" name="taskTitle" id="taskTitle" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="taskDescription">Description</label>
-                        <textarea name="taskDescription" id="taskDescription" rows="4" required></textarea>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="action-btn">
-                            <span class="dashicons dashicons-yes"></span> Create Task
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
+
             <?php endif; ?>
         </main>
     </div>

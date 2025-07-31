@@ -15,7 +15,7 @@
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
-    padding: 0 !important;
+    padding: 0 20px !important; /* Added horizontal padding */
 }
 
 /* Header and Footer Full Width */
@@ -24,11 +24,12 @@
 .site-footer {
     max-width: 100% !important;
     width: 100% !important;
+    padding: 0 20px !important; /* Added horizontal padding */
 }
 
 /* Content Area Adjustments */
 .ast-site-content {
-    padding: 0 !important;
+    padding: 0 20px !important; /* Added horizontal padding */
     margin: 0 !important;
 }
 
@@ -36,24 +37,44 @@
 .ast-page-builder-template .site-content .ast-container,
 .ast-plain-container .site-content .ast-container {
     max-width: 100% !important;
-    padding: 0 !important;
+    padding: 0 20px !important; /* Added horizontal padding */
 }
 
 /* Main Content Area */
 #primary {
     width: 100% !important;
     margin: 0 !important;
-    padding: 20px !important; /* Add some padding for content */
+    padding: 20px !important; /* Kept all-around padding */
 }
 
 /* Responsive Adjustments */
 @media (max-width: 1200px) {
+    #primary,
+    .ast-container,
+    .ast-primary-header,
+    .ast-mobile-header,
+    .site-footer,
+    .ast-site-content,
+    .ast-page-builder-template .site-content .ast-container,
+    .ast-plain-container .site-content .ast-container {
+        padding: 0 15px !important; /* Reduced padding on medium screens */
+    }
     #primary {
         padding: 15px !important;
     }
 }
 
 @media (max-width: 768px) {
+    #primary,
+    .ast-container,
+    .ast-primary-header,
+    .ast-mobile-header,
+    .site-footer,
+    .ast-site-content,
+    .ast-page-builder-template .site-content .ast-container,
+    .ast-plain-container .site-content .ast-container {
+        padding: 0 10px !important; /* Reduced padding on mobile */
+    }
     #primary {
         padding: 10px !important;
     }
@@ -69,12 +90,20 @@
     }
 }
 
-/* Optional: Full-width elements */
+/* Optional: Full-width elements (still 100% width but respects padding) */
 .full-width-element {
-    width: 100vw;
+    width: calc(100% - 40px); /* Accounts for 20px padding on each side */
+    max-width: 100%;
+    margin: 0 auto;
     position: relative;
-    left: 50%;
-    right: 50%;
-    margin-left: -50vw;
-    margin-right: -50vw;
+}
+
+/* Hide WordPress admin bar */
+#wpadminbar {
+    display: none !important;
+}
+
+/* Adjust html margin-top when admin bar is hidden */
+html {
+    margin-top: 0 !important;
 }

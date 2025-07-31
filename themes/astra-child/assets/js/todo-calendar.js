@@ -72,7 +72,7 @@ jQuery(document).ready(function($) {
                 <td data-date="${dateString}">
                     <div class="day-number">${day}</div>
                     <div class="todos-container"></div>
-                    <button class="add-todo">+</button>
+                    <button class="add-todo" data-date="${dateString}">+</button>
                 </td>
             `;
         },
@@ -108,17 +108,19 @@ jQuery(document).ready(function($) {
                 const $container = $cell.find('.todos-container');
                 const dateTodos = todos[date];
                 
-                dateTodos.forEach((todo, index) => {
+                // Only show the first todo (one task per day)
+                if (dateTodos.length > 0) {
+                    const todo = dateTodos[0];
                     const content = typeof todo === 'object' ? todo.display : todo;
                     const fullContent = typeof todo === 'object' ? todo.full : todo;
                     
                     $container.append(`
-                        <div class="todo-item" data-date="${date}" data-index="${index}">
+                        <div class="todo-item" data-date="${date}" data-index="0">
                             <span class="todo-content">${content}</span>
                             <button class="delete-todo">×</button>
                         </div>
                     `);
-                });
+                }
             });
         },
         
@@ -139,15 +141,30 @@ jQuery(document).ready(function($) {
         
         showAddModal: function(e) {
             e.preventDefault();
-            const date = $(e.currentTarget).closest('td').data('date');
+            e.stopPropagation();
+            
+            const $button = $(e.currentTarget);
+            const date = $button.data('date');
+            const $cell = $button.closest('td');
+            
+            // Position modal near the clicked cell
+            const cellPosition = $cell.offset();
+            this.$formModal.css({
+                'display': 'flex',
+                'position': 'absolute',
+                'top': cellPosition.top + 'px',
+                'left': cellPosition.left + 'px',
+                'transform': 'translate(0, 0)'
+            });
+            
             this.$todoDate.val(date);
             this.$todoContent.val('').focus();
-            this.$formModal.show();
         },
         
         handleSaveTodo: function(e) {
             e.preventDefault();
             const content = this.$todoContent.val().trim();
+            const date = this.$todoDate.val();
             
             if (!content) {
                 this.showError('Please enter a todo');
@@ -160,8 +177,9 @@ jQuery(document).ready(function($) {
                 data: {
                     action: 'todo_calendar_save',
                     nonce: todoCalendarVars.nonce,
-                    date: this.$todoDate.val(),
-                    content: content
+                    date: date,
+                    content: content,
+                    replace_existing: true // Flag to replace existing todo
                 },
                 beforeSend: () => {
                     this.$container.find('.save-todo').prop('disabled', true).text('Saving...');
@@ -200,7 +218,13 @@ jQuery(document).ready(function($) {
                 },
                 beforeSend: () => {
                     this.$viewModal.find('.todo-detail-content').html('Loading...');
-                    this.$viewModal.show();
+                    this.$viewModal.css({
+                        'display': 'flex',
+                        'position': 'fixed',
+                        'top': '50%',
+                        'left': '50%',
+                        'transform': 'translate(-50%, -50%)'
+                    }).show();
                 },
                 success: (response) => {
                     if (response.success) {
