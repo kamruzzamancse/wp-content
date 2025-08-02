@@ -14,6 +14,7 @@ function astra_child_style() {
 }
 add_action('wp_enqueue_scripts', 'astra_child_style');
 
+
 /**
  * Enqueue Todo Calendar assets
  */
@@ -55,6 +56,7 @@ add_action('wp_enqueue_scripts', 'astra_child_enqueue_todo_calendar');
  * Include Todo Calendar class
  */
 require_once get_stylesheet_directory() . '/includes/class-todo-calendar.php';
+//require_once get_stylesheet_directory() . '/includes/class-upload-document.php';
 
 /**
  * Initialize Todo Calendar

@@ -51,6 +51,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+
+// js for upload document
 jQuery(document).ready(function($) {
     // Get elements
     const uploadDocumentCard = $('#upload-document');
@@ -70,54 +72,91 @@ jQuery(document).ready(function($) {
         documentModal.css('display', 'none');
     });
     
-    // Close modal when clicking outside the modal content
+    // Close modal when clicking outside
     $(window).on('click', function(event) {
         if ($(event.target).is(documentModal)) {
             documentModal.css('display', 'none');
         }
     });
     
-    // Update file name display when file is selected
+    // Update file name display
     fileInput.on('change', function() {
         const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
         fileNameDisplay.text(fileName);
     });
     
-    // Handle form submission
+    // Handle form submission (front-end only)
     uploadForm.on('submit', function(e) {
         e.preventDefault();
         
-        // Collect form data
-        const formData = new FormData();
-        formData.append('title', $('#documentTitle').val());
-        formData.append('type', $('#documentType').val());
-        formData.append('dueDate', $('#dueDate').val());
+        // Show loading state
+        const uploadBtn = $('.upload-btn');
+        uploadBtn.prop('disabled', true).html('<span class="spinner"></span> Uploading...');
         
-        // Add file if selected
-        if (fileInput[0].files[0]) {
-            formData.append('file', fileInput[0].files[0]);
-        }
-        
-        // Basic validation
-        if (!formData.get('title') || !formData.get('type') || !formData.get('file')) {
-            alert('Please fill in all required fields and select a file');
-            return;
-        }
-        
-        // Here you would typically make an AJAX call to your backend
-        console.log('Form submitted:', {
-            title: formData.get('title'),
-            type: formData.get('type'),
-            dueDate: formData.get('dueDate'),
-            fileName: formData.get('file') ? formData.get('file').name : 'No file'
+        // Simulate upload delay
+        setTimeout(function() {
+            // Show success message
+            alert('Document uploaded successfully! (This is a front-end demo)');
+            
+            // Reset form
+            uploadForm[0].reset();
+            fileNameDisplay.text('No file chosen');
+            documentModal.css('display', 'none');
+            
+            // Reset button
+            uploadBtn.prop('disabled', false).text('Upload');
+        }, 1500);
+    });
+    
+    // Simple spinner styling (optional)
+    $('<style>.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-radius:50%;border-top-color:#fff;animation:spin 1s ease-in-out infinite;margin-right:8px;}@keyframes spin{to{transform:rotate(360deg);}}</style>').appendTo('head');
+});
+
+// ja for notification
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Mark all as read functionality
+    const markAllReadBtn = document.querySelector('.mark-all-read');
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function() {
+            document.querySelectorAll('.notification-card.unread').forEach(card => {
+                card.classList.remove('unread');
+                const dot = card.querySelector('.status-dot');
+                if (dot) dot.remove();
+            });
+            
+            // Here you would typically make an AJAX call to update server status
+            // Example:
+            /* fetch('/wp-admin/admin-ajax.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'action=mark_notifications_read'
+            }); */
         });
-        
-        // For demo purposes, we'll just show an alert and close the modal
-        alert('Document uploaded successfully!');
-        
-        // Reset form and close modal
-        uploadForm[0].reset();
-        fileNameDisplay.text('No file chosen');
-        documentModal.css('display', 'none');
+    }
+    
+    // Notification click handler (optional)
+    document.querySelectorAll('.notification-card').forEach(card => {
+        card.addEventListener('click', function() {
+            if (this.classList.contains('unread')) {
+                this.classList.remove('unread');
+                const dot = this.querySelector('.status-dot');
+                if (dot) dot.remove();
+                
+                // AJAX call to mark single notification as read
+                /* fetch('/wp-admin/admin-ajax.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'action=mark_notification_read&id=' + this.dataset.id
+                }); */
+            }
+            
+            // Add your custom click behavior here
+            // window.location.href = this.dataset.url;
+        });
     });
 });

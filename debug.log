@@ -71,3 +71,10 @@ Stack trace:
 [02-Aug-2025 08:50:50 UTC]   Automatic theme updates starting...
 [02-Aug-2025 08:50:50 UTC]   Automatic theme updates complete.
 [02-Aug-2025 08:50:50 UTC] Automatic updates complete.
+[02-Aug-2025 10:04:36 UTC] PHP Fatal error:  Uncaught Error: Call to undefined function get_realtor_notifications() in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php:338
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-includes\template-loader.php(106): include()
+#1 C:\xampp\htdocs\mary\wp-blog-header.php(19): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php on line 338

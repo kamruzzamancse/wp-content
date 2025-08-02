@@ -502,14 +502,14 @@
 /* Status Indicators */
 .status-dot {
     display: inline-block;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     margin-right: 8px;
     vertical-align: middle;
 }
 
-.status-hot {
+/* .status-hot {
     background-color: #e74c3c;
 }
 
@@ -519,7 +519,7 @@
 
 .status-cold {
     background-color: #f1c40f;
-}
+} */
 
 /* Popup Styles */
 .lead-popup-overlay {
@@ -643,12 +643,12 @@
 .document-modal {
     display: none;
     position: fixed;
-    z-index: 9999;
+    z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0,0,0,0.5);
     overflow: auto;
 }
 
@@ -659,7 +659,7 @@
     border-radius: 8px;
     width: 100%;
     max-width: 600px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
 .document-modal-header h2 {
@@ -669,27 +669,8 @@
     font-weight: 600;
 }
 
-.document-upload-form .form-row {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
 .document-upload-form .form-group {
-    flex: 1;
     margin-bottom: 20px;
-}
-
-.document-upload-form .full-width {
-    flex: 0 0 100%;
-}
-
-.document-upload-form .left-align {
-    text-align: left;
-}
-
-.document-upload-form .right-align {
-    text-align: right;
 }
 
 .document-upload-form label {
@@ -700,14 +681,20 @@
 }
 
 .document-upload-form input[type="text"],
+.document-upload-form input[type="date"],
 .document-upload-form select,
-.document-upload-form input[type="date"] {
+.document-upload-form textarea {
     width: 100%;
-    padding: 12px;
+    padding: 7px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
     box-sizing: border-box;
+}
+
+.document-upload-form textarea {
+    min-height: 100px;
+    resize: vertical;
 }
 
 .document-upload-form select {
@@ -718,6 +705,7 @@
     background-size: 16px;
 }
 
+/* File Upload Styling */
 .file-upload-wrapper {
     position: relative;
     margin-top: 5px;
@@ -758,9 +746,31 @@
     color: #666;
 }
 
+/* Form Layout */
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.left-align {
+    text-align: left;
+}
+
+.right-align {
+    text-align: right;
+}
+
+.center-align {
+    justify-content: center;
+}
+
+/* Form Actions */
 .form-actions {
     display: flex;
-    justify-content: flex-end;
     gap: 15px;
     margin-top: 30px;
 }
@@ -792,4 +802,183 @@
 
 .upload-btn:hover {
     background-color: #005a87;
+}
+
+/* Form Row with Left/Right Alignment */
+.form-row-duo {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-row-duo .form-group {
+    flex: 1;
+}
+
+.form-row-duo .left-align {
+    text-align: left;
+    margin-right: auto; /* Pushes right-align to the right */
+}
+
+.form-row-duo .right-align {
+    text-align: right;
+    margin-left: auto; /* Pushes left-align to the left */
+}
+
+/* Optional: Adjust input widths if needed */
+.form-row-duo .left-align input,
+.form-row-duo .right-align input {
+    width: 100%;
+}
+
+/* css for notification */
+
+/* Notifications Page */
+.notifications-page {
+    max-width: 800px;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.notifications-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.mark-all-read {
+    background: none;
+    border: none;
+    color: #007AFF;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.mark-all-read:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+
+.notifications-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.notification-card {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e5e5;
+    transition: background 0.2s ease;
+}
+
+.notification-card:last-child {
+    border-bottom: none;
+}
+
+.notification-card.unread {
+    background-color: #f8fafc;
+    border-left: 3px solid #007AFF;
+}
+
+.notification-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notification-message {
+    font-size: 15px;
+    line-height: 1.4;
+    color: #333;
+    flex-grow: 1;
+}
+
+.highlight {
+    color: #007AFF;
+    font-weight: 500;
+}
+
+.notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: 15px;
+}
+
+.time {
+    font-size: 13px;
+    color: #8e8e93;
+    white-space: nowrap;
+}
+
+/* .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+} */
+
+/* Responsive */
+@media (max-width: 768px) {
+    .notification-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .notification-meta {
+        margin-left: 0;
+        align-self: flex-end;
+    }
+}
+
+/* Notification bell icon before each message */
+.notification-icon-before {
+    margin-right: 12px;
+    color: #0073aa; /* WordPress admin blue */
+    display: flex;
+    align-items: center;
+}
+
+.notification-icon-before .dashicons-bell {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+/* Adjust message alignment */
+.notification-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.notification-message {
+    flex: 1;
+}
+
+/* For unread notifications */
+.notification-card.unread .notification-icon-before {
+    color: #d63638; /* WordPress admin red for unread */
+    position: relative;
+}
+
+.notification-card.unread .notification-icon-before::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 6px;
+    height: 6px;
+    background-color: #d63638;
+    border-radius: 50%;
 }

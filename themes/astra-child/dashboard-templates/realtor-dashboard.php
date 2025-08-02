@@ -41,9 +41,11 @@ get_header();
     <header class="dashboard-header">
         <img src="<?php echo esc_url(content_url('/uploads/2025/07/logo.png')); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Logo" class="site-logo">
         <div class="user-info">
-            <div class="notification-icon">
-                <span class="dashicons dashicons-bell"></span>
-            </div>
+            <a href="?tab=notifications">
+                <div class="notification-icon">
+                    <span class="dashicons dashicons-bell"></span>
+                </div>
+            </a>
             <div class="profile-pic">
                 <img src="<?php echo esc_url(get_avatar_url($current_user->ID)); ?>" alt="Profile Picture">
             </div>
@@ -149,54 +151,75 @@ get_header();
                             </div>
 
                             <!-- Document Upload Modal -->
-<div id="documentUploadModal" class="document-modal">
-    <div class="document-modal-content">
-        <div class="document-modal-header">
-            <h2>Upload document</h2>
-        </div>
-        
-        <form id="documentUploadForm" class="document-upload-form">
-            <div class="form-row">
-                <div class="form-group left-align">
-                    <label for="documentTitle">Document Title</label>
-                    <input type="text" id="documentTitle" name="documentTitle" required>
-                </div>
-                
-                <div class="form-group right-align">
-                    <label for="documentType">Document Type</label>
-                    <select id="documentType" name="documentType" required>
-                        <option value="">Select a type</option>
-                        <option value="task_list">Task list/Notes</option>
-                        <option value="note">Note</option>
-                        <option value="client">Add Client</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="form-group full-width">
-                <label for="documentFile">Document/File</label>
-                <div class="file-upload-wrapper">
-                    <input type="file" id="documentFile" name="documentFile" required>
-                    <label for="documentFile" class="file-upload-label">
-                        <span class="dashicons dashicons-upload"></span>
-                        <span>Choose file</span>
-                    </label>
-                    <span class="file-name">No file chosen</span>
-                </div>
-            </div>
-            
-            <div class="form-group left-align">
-                <label for="dueDate">Due Date</label>
-                <input type="date" id="dueDate" name="dueDate">
-            </div>
-            
-            <div class="form-actions">
-                <button type="button" class="cancel-btn">Cancel</button>
-                <button type="submit" class="upload-btn">Upload</button>
-            </div>
-        </form>
-    </div>
-</div>
+                            <div id="documentUploadModal" class="document-modal">
+                                <div class="document-modal-content">
+                                    <div class="document-modal-header">
+                                        <h2>Upload Document</h2>
+                                    </div>
+                                    
+                                    <form id="documentUploadForm" class="document-upload-form">
+                                        <!-- Document Title -->
+                                        <div class="form-row-duo">
+                                            <!-- Document Title (Left aligned) -->
+                                            <div class="form-group left-align">
+                                                <label for="documentTitle">Document Title</label>
+                                                <input type="text" id="documentTitle" name="documentTitle" required>
+                                            </div>
+                                            
+                                            <!-- Document Type (Right aligned) -->
+                                            <div class="form-group right-align">
+                                                <label for="documentType">Document Type</label>
+                                                <input type="text" id="documentType" name="documentType" required>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Task List/Notes (Textarea) -->
+                                        <div class="form-group">
+                                            <label for="taskNotes">Task list/Notes</label>
+                                            <textarea id="taskNotes" name="taskNotes" rows="4" placeholder="Add any notes or task details"></textarea>
+                                        </div>
+                                        
+                                        <!-- File Upload -->
+                                        <div class="form-group">
+                                            <label>Document/File</label>
+                                            <div class="file-upload-wrapper">
+                                                <input type="file" id="documentFile" name="documentFile" required>
+                                                <label for="documentFile" class="file-upload-label">
+                                                    <span class="dashicons dashicons-upload"></span>
+                                                    <span>Choose file</span>
+                                                </label>
+                                                <span class="file-name">No file chosen</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Client and Due Date Row -->
+                                        <div class="form-row">
+                                            <!-- Client Dropdown (Left aligned) -->
+                                            <div class="form-group left-align">
+                                                <label for="clientList">Client</label>
+                                                <select id="clientList" name="clientList">
+                                                    <option value="">Select a client</option>
+                                                    <option value="client1">John Smith</option>
+                                                    <option value="client2">Sarah Johnson</option>
+                                                    <option value="client3">Michael Brown</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <!-- Due Date (Right aligned) -->
+                                            <div class="form-group right-align">
+                                                <label for="dueDate">Due Date</label>
+                                                <input type="date" id="dueDate" name="dueDate">
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Form Actions (Centered) -->
+                                        <div class="form-actions center-align">
+                                            <button type="button" class="cancel-btn">Cancel</button>
+                                            <button type="submit" class="upload-btn">Upload</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
 
                             <!-- Active Clients Section -->
                             <div class="dashboard-section active-clients-section">
@@ -260,7 +283,6 @@ get_header();
                         </div>
                     </div>
 
-                    
                     <?php
                     break;
 
@@ -302,6 +324,91 @@ get_header();
                     echo '<div class="dashboard-section"><h2>Messages</h2><p>Your messages will be displayed here.</p></div>';
                     break;
 
+                case 'notifications':
+                    ?>
+                    <div class="notifications-page">
+                        <div class="notifications-header">
+                            <h2>Notifications</h2>
+                            <button class="mark-all-read">Mark all as read</button>
+                        </div>
+                        
+                        <div class="notifications-container">
+                            <div class="notification-card unread">
+                                <div class="notification-content">
+                                    <div class="notification-icon-before">
+                                        <span class="dashicons dashicons-bell"></span>
+                                    </div>
+                                    <div class="notification-message">
+                                        You have a new message from <span class="highlight">New Event</span>
+                                    </div>
+                                    <div class="notification-meta">
+                                        <span class="time">2 min ago</span>
+                                        <span class="status-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card unread">
+                                <div class="notification-content">
+                                    <div class="notification-icon-before">
+                                        <span class="dashicons dashicons-bell"></span>
+                                    </div>
+                                    <div class="notification-message">
+                                        Your listing at <span class="highlight">123 Main St</span> received an offer
+                                    </div>
+                                    <div class="notification-meta">
+                                        <span class="time">15 min ago</span>
+                                        <span class="status-dot"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="notification-content">
+                                    <div class="notification-icon-before">
+                                        <span class="dashicons dashicons-bell"></span>
+                                    </div>
+                                    <div class="notification-message">
+                                        Appointment confirmed with <span class="highlight">Sarah Johnson</span>
+                                    </div>
+                                    <div class="notification-meta">
+                                        <span class="time">1 hour ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="notification-content">
+                                    <div class="notification-icon-before">
+                                        <span class="dashicons dashicons-bell"></span>
+                                    </div>
+                                    <div class="notification-message">
+                                        Document signed by <span class="highlight">Michael Brown</span>
+                                    </div>
+                                    <div class="notification-meta">
+                                        <span class="time">3 hours ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="notification-card">
+                                <div class="notification-content">
+                                    <div class="notification-icon-before">
+                                        <span class="dashicons dashicons-bell"></span>
+                                    </div>
+                                    <div class="notification-message">
+                                        System maintenance scheduled for <span class="highlight">tonight at 2 AM</span>
+                                    </div>
+                                    <div class="notification-meta">
+                                        <span class="time">1 day ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php
+                    break;
+
                 case 'settings':
                     // Settings content would go here
                     echo '<div class="dashboard-section"><h2>Settings</h2><p>Settings form will be displayed here.</p></div>';
@@ -314,8 +421,8 @@ get_header();
             }
             ?>
 
-            <!-- Task Creation Section (Shown on all tabs except settings) -->
-            <?php if ($current_tab !== 'settings') : ?>
+            <!-- Task Creation Section (Shown on all tabs except settings and notifications) -->
+            <?php if ($current_tab !== 'settings' && $current_tab !== 'notifications') : ?>
             <!-- Leads Section -->
             <div class="dashboard-section leads-section">
                 <h2>Leads</h2>
