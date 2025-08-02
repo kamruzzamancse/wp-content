@@ -50,3 +50,74 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+jQuery(document).ready(function($) {
+    // Get elements
+    const uploadDocumentCard = $('#upload-document');
+    const documentModal = $('#documentUploadModal');
+    const cancelBtn = $('.cancel-btn');
+    const uploadForm = $('#documentUploadForm');
+    const fileInput = $('#documentFile');
+    const fileNameDisplay = $('.file-name');
+    
+    // Open modal when upload card is clicked
+    uploadDocumentCard.on('click', function() {
+        documentModal.css('display', 'block');
+    });
+    
+    // Close modal when cancel button is clicked
+    cancelBtn.on('click', function() {
+        documentModal.css('display', 'none');
+    });
+    
+    // Close modal when clicking outside the modal content
+    $(window).on('click', function(event) {
+        if ($(event.target).is(documentModal)) {
+            documentModal.css('display', 'none');
+        }
+    });
+    
+    // Update file name display when file is selected
+    fileInput.on('change', function() {
+        const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+        fileNameDisplay.text(fileName);
+    });
+    
+    // Handle form submission
+    uploadForm.on('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect form data
+        const formData = new FormData();
+        formData.append('title', $('#documentTitle').val());
+        formData.append('type', $('#documentType').val());
+        formData.append('dueDate', $('#dueDate').val());
+        
+        // Add file if selected
+        if (fileInput[0].files[0]) {
+            formData.append('file', fileInput[0].files[0]);
+        }
+        
+        // Basic validation
+        if (!formData.get('title') || !formData.get('type') || !formData.get('file')) {
+            alert('Please fill in all required fields and select a file');
+            return;
+        }
+        
+        // Here you would typically make an AJAX call to your backend
+        console.log('Form submitted:', {
+            title: formData.get('title'),
+            type: formData.get('type'),
+            dueDate: formData.get('dueDate'),
+            fileName: formData.get('file') ? formData.get('file').name : 'No file'
+        });
+        
+        // For demo purposes, we'll just show an alert and close the modal
+        alert('Document uploaded successfully!');
+        
+        // Reset form and close modal
+        uploadForm[0].reset();
+        fileNameDisplay.text('No file chosen');
+        documentModal.css('display', 'none');
+    });
+});

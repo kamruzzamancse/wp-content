@@ -39,7 +39,7 @@ get_header();
 <div class="dashboard-container">
     <!-- Header Section -->
     <header class="dashboard-header">
-        <img src="<?php echo esc_url(content_url('/uploads/' . date('Y/m') . '/logo.png')); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Logo" class="site-logo">
+        <img src="<?php echo esc_url(content_url('/uploads/2025/07/logo.png')); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Logo" class="site-logo">
         <div class="user-info">
             <div class="notification-icon">
                 <span class="dashicons dashicons-bell"></span>
@@ -137,14 +137,67 @@ get_header();
                                     </h3>
                                     <p><?php echo esc_html($tasks_sent); ?></p>
                                 </div>
-                                <div class="stat-card">
+                                <div class="stat-card" id="upload-document">
                                     <h3>
                                         <span class="dashicons dashicons-media-document"></span>
                                         Upload Document
                                     </h3>
-                                    <h6 style="color: #ccc">(marketing, personal, etc)</h6>
+                                    <div class="upload-icons">
+                                        <span class="dashicons dashicons-upload" title="Upload"></span>
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- Document Upload Modal -->
+<div id="documentUploadModal" class="document-modal">
+    <div class="document-modal-content">
+        <div class="document-modal-header">
+            <h2>Upload document</h2>
+        </div>
+        
+        <form id="documentUploadForm" class="document-upload-form">
+            <div class="form-row">
+                <div class="form-group left-align">
+                    <label for="documentTitle">Document Title</label>
+                    <input type="text" id="documentTitle" name="documentTitle" required>
+                </div>
+                
+                <div class="form-group right-align">
+                    <label for="documentType">Document Type</label>
+                    <select id="documentType" name="documentType" required>
+                        <option value="">Select a type</option>
+                        <option value="task_list">Task list/Notes</option>
+                        <option value="note">Note</option>
+                        <option value="client">Add Client</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label for="documentFile">Document/File</label>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="documentFile" name="documentFile" required>
+                    <label for="documentFile" class="file-upload-label">
+                        <span class="dashicons dashicons-upload"></span>
+                        <span>Choose file</span>
+                    </label>
+                    <span class="file-name">No file chosen</span>
+                </div>
+            </div>
+            
+            <div class="form-group left-align">
+                <label for="dueDate">Due Date</label>
+                <input type="date" id="dueDate" name="dueDate">
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="cancel-btn">Cancel</button>
+                <button type="submit" class="upload-btn">Upload</button>
+            </div>
+        </form>
+    </div>
+</div>
+
                             <!-- Active Clients Section -->
                             <div class="dashboard-section active-clients-section">
                                 <h2>Active Clients</h2>
