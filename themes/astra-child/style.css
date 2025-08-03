@@ -25,7 +25,14 @@
     max-width: 100% !important;
     width: 100% !important;
     padding: 0 20px !important; /* Added horizontal padding */
-    display: none;
+    /* display: none; */
+}
+
+/* css for show/hide header and footer */
+body.hide-header-footer .ast-primary-header,
+body.hide-header-footer .ast-mobile-header,
+body.hide-header-footer .site-footer {
+    display: none !important;
 }
 
 /* Content Area Adjustments */

@@ -39,7 +39,19 @@ get_header();
 <div class="dashboard-container">
     <!-- Header Section -->
     <header class="dashboard-header">
-        <img src="<?php echo esc_url(content_url('/uploads/2025/07/logo.png')); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Logo" class="site-logo">
+        <?php
+        // Determine dashboard URL based on user role
+        $dashboard_url = home_url('/');
+        if (current_user_can('realtor')) {
+            $dashboard_url = home_url('/realtor-dashboard');
+        } elseif (current_user_can('client')) {
+            $dashboard_url = home_url('/client-dashboard');
+        }
+        ?>
+        <a href="<?php echo esc_url($dashboard_url); ?>">
+            <img src="<?php echo esc_url(content_url('/uploads/2025/08/mary-logo.png')); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?> Logo" class="site-logo">
+        </a>
+
         <div class="user-info">
             <a href="?tab=notifications">
                 <div class="notification-icon">
@@ -149,14 +161,14 @@ get_header();
                                         <span class="dashicons dashicons-admin-home"></span>
                                         Total Properties
                                     </h3>
-                                    <p><?php echo esc_html($active_properties); ?></p>
+                                    <p>50</p>
                                 </div>
                                 <div class="stat-card">
                                     <h3>
                                         <span class="dashicons dashicons-groups"></span>
                                         Total Client
                                     </h3>
-                                    <p><?php echo esc_html($tasks_sent); ?></p>
+                                    <p>60</p>
                                 </div>
                                 <div class="stat-card" id="upload-document">
                                     <h3>
@@ -307,29 +319,63 @@ get_header();
 
                 case 'properties':
                     ?>
-                    <!-- Property Management Section -->
-                    <div class="dashboard-section">
-                        <div class="section-header">
-                            <h2>Property Management</h2>
-                            <button class="action-btn" id="uploadPropertyBtn">
-                                <span class="dashicons dashicons-upload"></span> Upload New Property
-                            </button>
-                        </div>
-                        
-                        <div class="property-upload-form" style="display:none;">
-                            <?php echo do_shortcode('[property_upload_form]'); ?>
-                        </div>
-                        
-                        <div class="property-grid">
-                            <?php 
-                            if (function_exists('realtor_properties_shortcode')) {
-                                echo realtor_properties_shortcode(array('user_id' => $user_id));
-                            } else {
-                                echo do_shortcode('[realtor_properties user_id="' . $user_id . '"]');
-                            }
-                            ?>
-                        </div>
+                    <div class="property-container">
+        <div class="property-list">
+            <!-- Property 1 -->
+            <div class="property-item">
+                <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
+                <div class="property-details">
+                    <h3 class="property-title">Lakeview Basic Apartment</h3>
+                    <div class="property-price">$1,200/month</div>
+                    <div class="property-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Downtown, New York</span>
                     </div>
+                    <div class="gallery">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic-8.png" alt="Gallery Image 1">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic-9.png" alt="Gallery Image 2">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic-9-1.png" alt="Gallery Image 3">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Property 2 -->
+            <div class="property-item">
+                <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image">
+                <div class="property-details">
+                    <h3 class="property-title">Lakeview Standard Apartment</h3>
+                    <div class="property-price">$1,800/month</div>
+                    <div class="property-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Midtown, New York</span>
+                    </div>
+                    <div class="gallery">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard-4.png" alt="Gallery Image 1">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard-5.png" alt="Gallery Image 2">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard-6.png" alt="Gallery Image 3">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Property 3 -->
+            <div class="property-item">
+                <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image">
+                <div class="property-details">
+                    <h3 class="property-title">Lakeview Premium Apartment</h3>
+                    <div class="property-price">$2,500/month</div>
+                    <div class="property-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Uptown, New York</span>
+                    </div>
+                    <div class="gallery">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium-1.png" alt="Gallery Image 1">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium-2.png" alt="Gallery Image 2">
+                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium-3.png" alt="Gallery Image 3">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
                     <?php
                     break;
 

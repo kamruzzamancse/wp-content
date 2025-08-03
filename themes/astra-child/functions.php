@@ -313,3 +313,15 @@ function mdk_add_user_roles() {
     ));
 }
 add_action('init', 'mdk_add_user_roles');
+
+// for header and foother disply/hide
+function add_user_role_body_class($classes) {
+    if (is_user_logged_in()) {
+        $user = wp_get_current_user();
+        if (in_array('realtor', $user->roles) || in_array('client', $user->roles)) {
+            $classes[] = 'hide-header-footer';
+        }
+    }
+    return $classes;
+}
+add_filter('body_class', 'add_user_role_body_class');
