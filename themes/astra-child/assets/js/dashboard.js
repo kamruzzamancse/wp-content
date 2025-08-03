@@ -160,3 +160,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// js for profile pic modal
+jQuery(document).ready(function($) {
+    // Open modal when clicking profile picture
+    $('.profile-pic').on('click', function(e) {
+        e.stopPropagation(); // Prevent event from reaching document
+        $('#profileModal').fadeIn(200);
+    });
+
+    // Close modal when clicking outside
+    $(document).on('click', function() {
+        $('#profileModal').fadeOut(200);
+    });
+
+    // Prevent modal close when clicking inside modal
+    $('#profileModal').on('click', function(e) {
+        e.stopPropagation();
+    });
+});

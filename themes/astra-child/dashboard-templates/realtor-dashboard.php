@@ -46,9 +46,28 @@ get_header();
                     <span class="dashicons dashicons-bell"></span>
                 </div>
             </a>
-            <div class="profile-pic">
-                <img src="<?php echo esc_url(get_avatar_url($current_user->ID)); ?>" alt="Profile Picture">
+
+            <div class="profile-header">
+                <div class="profile-pic">
+                    <img src="<?php echo esc_url(get_avatar_url($current_user->ID)); ?>" alt="Profile Picture">
+                </div>
             </div>
+
+            <!-- Profile Pic Modal -->
+            <div class="modal-overlay" id="profileModal">
+                <div class="modal">
+                    <img src="<?php echo esc_url(get_avatar_url($current_user->ID)); ?>" alt="Profile">
+                    <h3><?php echo esc_html($current_user->display_name); ?></h3>
+                    <p><?php echo esc_html($current_user->user_email); ?></p>
+
+                    <div class="modal-buttons">
+                        <button onclick="location.href='/profile'">View Profile</button>
+                        <button onclick="location.href='/edit-profile'">Edit Profile</button>
+                        <button onclick="location.href='<?php echo esc_url(wp_logout_url(home_url('/login/'))); ?>'">Log out</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="user-details">
                 <span class="user-name"><?php echo esc_html($current_user->display_name); ?></span>
                 <span class="user-role">

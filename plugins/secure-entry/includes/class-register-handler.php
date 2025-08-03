@@ -52,25 +52,11 @@ class Enhanced_Register_Handler {
 
             wp_new_user_notification($user_id, null, 'both');
 
-            $user = wp_signon([
-                'user_login'    => $data['username'],
-                'user_password' => $data['password'],
-                'remember'      => true
-            ], is_ssl());
-
-            if (is_wp_error($user)) {
-                wp_send_json_success([
-                    'message' => __('Registration successful. Please log in.', 'enhanced-login'),
-                    'redirect' => wp_login_url()
-                ]);
-            }
-
-            $redirect_url = $this->get_redirect_url_by_role($user->roles[0]);
-            if (!empty($data['redirect'])) {
-                $redirect_url = $data['redirect'];
-            }
-
-            wp_send_json_success(['redirect' => $redirect_url]);
+            // Always redirect to login page after successful registration
+            wp_send_json_success([
+                'message' => __('Registration successful. Please log in.', 'enhanced-login'),
+                'redirect' => home_url('/login/')
+            ]);
 
         } catch (Exception $e) {
             wp_send_json_error(['message' => $e->getMessage()]);
@@ -118,6 +104,7 @@ class Enhanced_Register_Handler {
         }
     }
 
+    // Keep this method as it might be used elsewhere
     private function get_redirect_url_by_role($role) {
         $urls = [
             'realtor' => site_url('/realtor-dashboard/'),
