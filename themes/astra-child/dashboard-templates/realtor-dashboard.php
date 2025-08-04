@@ -318,65 +318,7 @@ get_header();
                     break;
 
                 case 'properties':
-                    ?>
-                    <div class="property-container">
-        <div class="property-list">
-            <!-- Property 1 -->
-            <div class="property-item">
-                <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
-                <div class="property-details">
-                    <h3 class="property-title">Lakeview Basic Apartment</h3>
-                    <div class="property-price">$1,200/month</div>
-                    <div class="property-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Downtown, New York</span>
-                    </div>
-                    <div class="gallery">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic-8.png" alt="Gallery Image 1">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic-9.png" alt="Gallery Image 2">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic-9-1.png" alt="Gallery Image 3">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Property 2 -->
-            <div class="property-item">
-                <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image">
-                <div class="property-details">
-                    <h3 class="property-title">Lakeview Standard Apartment</h3>
-                    <div class="property-price">$1,800/month</div>
-                    <div class="property-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Midtown, New York</span>
-                    </div>
-                    <div class="gallery">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard-4.png" alt="Gallery Image 1">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard-5.png" alt="Gallery Image 2">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard-6.png" alt="Gallery Image 3">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Property 3 -->
-            <div class="property-item">
-                <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image">
-                <div class="property-details">
-                    <h3 class="property-title">Lakeview Premium Apartment</h3>
-                    <div class="property-price">$2,500/month</div>
-                    <div class="property-location">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Uptown, New York</span>
-                    </div>
-                    <div class="gallery">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium-1.png" alt="Gallery Image 1">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium-2.png" alt="Gallery Image 2">
-                        <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium-3.png" alt="Gallery Image 3">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-                    <?php
+                    include __DIR__ . '/realtor-properties.php';
                     break;
 
                 case 'address-book':
@@ -487,7 +429,7 @@ get_header();
             ?>
 
             <!-- Task Creation Section (Shown on all tabs except settings and notifications) -->
-            <?php if ($current_tab !== 'settings' && $current_tab !== 'notifications') : ?>
+            <?php if ($current_tab !== 'settings' && $current_tab !== 'notifications' && $current_tab !== 'properties') : ?>
             <!-- Leads Section -->
             <div class="dashboard-section leads-section">
                 <h2>Leads</h2>

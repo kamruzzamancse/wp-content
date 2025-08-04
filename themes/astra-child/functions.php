@@ -53,6 +53,20 @@ function astra_child_enqueue_todo_calendar() {
 add_action('wp_enqueue_scripts', 'astra_child_enqueue_todo_calendar');
 
 /**
+ * Enqueue Property Management CSS
+ */
+function astra_child_enqueue_property_management_css() {
+    wp_enqueue_style(
+        'property-management-css',
+        get_stylesheet_directory_uri() . '/assets/css/property-management.css',
+        array(),
+        filemtime(get_stylesheet_directory() . '/assets/css/property-management.css')
+    );
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_property_management_css');
+
+
+/**
  * Include Todo Calendar class
  */
 require_once get_stylesheet_directory() . '/includes/class-todo-calendar.php';
