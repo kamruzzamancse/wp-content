@@ -300,3 +300,170 @@ h1 {
 .action-btn:hover {
     text-decoration: underline;
 }
+
+/* css for searching */
+
+.no-results {
+    text-align: center;
+    padding: 20px;
+    font-size: 16px;
+    color: #666;
+    grid-column: 1 / -1; /* Works well with grid layouts */
+    width: 100%; /* For flex layouts */
+}
+
+/* Property Details Page Styles */
+
+.property-details-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.property-details-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.property-details-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0 auto 0 20px;
+    color: #2c3e50;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    color: #1a73e8;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.back-button:hover {
+    background-color: #f0f6ff;
+}
+
+.property-details-main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+.property-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.main-image-container {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+#property-main-image {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+    display: block;
+}
+
+.property-thumbnails {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.property-thumbnails img {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border: 1px solid #ddd;
+}
+
+.property-thumbnails img:hover {
+    transform: scale(1.05);
+    border-color: #1a73e8;
+}
+
+.property-info-section {
+    padding: 0 20px;
+}
+
+#property-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+#property-description {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+.property-details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+}
+
+.detail-label {
+    font-size: 14px;
+    color: #777;
+    font-weight: 500;
+}
+
+.detail-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .property-details-main {
+        grid-template-columns: 1fr;
+    }
+    
+    .property-hero {
+        order: 1;
+    }
+    
+    .property-info-section {
+        order: 2;
+    }
+}
+
+@media (max-width: 576px) {
+    .property-details-grid {
+        grid-template-columns: 1fr;
+    }
+}

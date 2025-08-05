@@ -1,3 +1,4 @@
+
 <div class="toolbar-container">
     <div class="left-section">
         <div class="tab">All Properties</div>
@@ -5,18 +6,20 @@
             <span class="search-icon">🔍</span>
             <input type="text" class="search-input" placeholder="Search: Property Name">
         </div>
+        <div class="sort-container">
+            <select class="sort-select">
+                <option value="">Sort by</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+                <option value="name-desc">Name: Z to A</option>
+                <option value="date-asc">Date: Oldest First</option>
+                <option value="date-desc">Date: Newest First</option>
+            </select>
+        </div>
     </div>
 
     <div class="right-section">
-        <div class="sort-container">
-            <span class="sort-label">Sort :</span>
-            <select class="sort-select">
-                <option>Price</option>
-                <option>Name</option>
-                <option>Date</option>
-            </select>
-        </div>
-
         <button class="action-button export-btn">Export</button>
         <button class="action-button add-task-btn">Add Task</button>
         <button class="action-button create-property-btn">Create Property</button>
@@ -34,7 +37,8 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Basic Apartment</h3>
-                <div class="property-price">$1,200</div>
+                <span class="property-date" style="display: none;">2025-08-15</span>
+                <div class="property-price">$1,100</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Downtown, New York</span>
@@ -56,7 +60,8 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Standard Apartment</h3>
-                <div class="property-price">$1,800</div>
+                <span class="property-date" style="display: none;">2025-07-20</span>
+                <div class="property-price">$1,600</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Midtown, New York</span>
@@ -73,7 +78,8 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Premium Apartment</h3>
-                <div class="property-price">$2,500</div>
+                <span class="property-date" style="display: none;">2025-08-01</span>
+                <div class="property-price">$2,900</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Uptown, New York</span>
@@ -91,7 +97,8 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Basic Apartment</h3>
-                <div class="property-price">$1,200</div>
+                <span class="property-date" style="display: none;">2025-05-15</span>
+                <div class="property-price">$1,100</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Downtown, New York</span>
@@ -112,7 +119,8 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Basic Apartment</h3>
-                <div class="property-price">$1,200</div>
+                <span class="property-date" style="display: none;">2025-06-14</span>
+                <div class="property-price">$1,800</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Downtown, New York</span>
@@ -134,6 +142,7 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Standard Apartment</h3>
+                <span class="property-date" style="display: none;">2025-05-19</span>
                 <div class="property-price">$1,800</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
@@ -151,6 +160,7 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Premium Apartment</h3>
+                <span class="property-date" style="display: none;">2025-02-15</span>
                 <div class="property-price">$2,500</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
@@ -169,7 +179,8 @@
             <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
             <div class="property-details">
                 <h3 class="property-title">Lakeview Basic Apartment</h3>
-                <div class="property-price">$1,200</div>
+                <span class="property-date" style="display: none;">2025-08-23</span>
+                <div class="property-price">$1,400</div>
                 <div class="property-location">
                     <i class="fas fa-map-marker-alt"></i>
                     <span>Downtown, New York</span>

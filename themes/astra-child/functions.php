@@ -14,7 +14,6 @@ function astra_child_style() {
 }
 add_action('wp_enqueue_scripts', 'astra_child_style');
 
-
 /**
  * Enqueue Todo Calendar assets
  */
@@ -64,6 +63,20 @@ function astra_child_enqueue_property_management_css() {
     );
 }
 add_action('wp_enqueue_scripts', 'astra_child_enqueue_property_management_css');
+
+/**
+ * Enqueue Property Management JavaScript
+ */
+function astra_child_enqueue_property_management_js() {
+    wp_enqueue_script(
+        'property-management-js',
+        get_stylesheet_directory_uri() . '/assets/js/property-management.js',
+        array(),
+        filemtime(get_stylesheet_directory() . '/assets/js/property-management.js'),
+        true
+    );
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_property_management_js');
 
 
 /**
