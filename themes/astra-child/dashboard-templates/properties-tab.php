@@ -1,4 +1,3 @@
-
 <div class="toolbar-container">
     <div class="left-section">
         <div class="tab">All Properties</div>

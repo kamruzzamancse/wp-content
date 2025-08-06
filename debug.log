@@ -118,3 +118,38 @@ Stack trace:
 [06-Aug-2025 06:17:21 UTC]   Automatic theme updates starting...
 [06-Aug-2025 06:17:21 UTC]   Automatic theme updates complete.
 [06-Aug-2025 06:17:21 UTC] Automatic updates complete.
+[06-Aug-2025 07:37:15 UTC] Automatic updates starting...
+[06-Aug-2025 07:37:15 UTC]   Automatic plugin updates starting...
+[06-Aug-2025 07:37:15 UTC]   Automatic plugin updates complete.
+[06-Aug-2025 07:37:15 UTC]   Automatic theme updates starting...
+[06-Aug-2025 07:37:15 UTC]   Automatic theme updates complete.
+[06-Aug-2025 07:37:15 UTC] Automatic updates complete.
+[06-Aug-2025 08:08:58 UTC] PHP Fatal error:  Uncaught ValueError: Path cannot be empty in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php:27
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-includes\template-loader.php(106): include()
+#1 C:\xampp\htdocs\mary\wp-blog-header.php(19): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php on line 27
+[06-Aug-2025 08:09:15 UTC] PHP Fatal error:  Uncaught ValueError: Path cannot be empty in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php:27
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-includes\template-loader.php(106): include()
+#1 C:\xampp\htdocs\mary\wp-blog-header.php(19): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php on line 27
+[06-Aug-2025 08:09:16 UTC] PHP Fatal error:  Uncaught ValueError: Path cannot be empty in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php:27
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-includes\template-loader.php(106): include()
+#1 C:\xampp\htdocs\mary\wp-blog-header.php(19): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#3 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\realtor-dashboard.php on line 27
+[06-Aug-2025 09:09:38 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988
+[06-Aug-2025 09:09:50 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988
+[06-Aug-2025 09:11:51 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988
+[06-Aug-2025 09:13:52 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988
+[06-Aug-2025 09:15:53 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988
+[06-Aug-2025 09:17:54 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988
+[06-Aug-2025 09:19:55 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988
+[06-Aug-2025 09:23:43 UTC] PHP Warning:  mysqli_real_connect(): (HY000/2002): No connection could be made because the target machine actively refused it in C:\xampp\htdocs\mary\wp-includes\class-wpdb.php on line 1988

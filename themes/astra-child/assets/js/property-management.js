@@ -205,7 +205,7 @@ document.querySelectorAll('.property-item').forEach(item => {
         };
         
         sessionStorage.setItem('currentProperty', JSON.stringify(propertyData));
-        window.location.href = '<?php echo home_url("/property-details"); ?>';
+        window.location.href = "/mary/property-details";
     });
 });
 
