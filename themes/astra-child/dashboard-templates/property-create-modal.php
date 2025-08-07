@@ -1,6 +1,6 @@
 <!-- Property Modal -->
 <div class="property-modal-overlay" id="propertyModal" style="display: none;">
-  <div class="modal">
+  <div class="property-modal">
     <h2>Create Property</h2>
 
     <div class="form-grid">
@@ -15,7 +15,6 @@
       <div class="form-group">
         <label>Facilities</label>
         <input type="text">
-        <button style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">Add Facilities</button>
       </div>
       <div class="form-group">
         <label>Price</label>

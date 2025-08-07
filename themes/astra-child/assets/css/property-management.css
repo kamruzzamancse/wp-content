@@ -577,7 +577,7 @@ h1 {
     z-index: 1000;
 }
 
-.modal {
+.property-modal {
     background: #fff;
     width: 650px;
     border-radius: 12px;
@@ -588,7 +588,7 @@ h1 {
     position: relative;
 }
 
-.modal h2 {
+.property-modal h2 {
     font-size: 24px;
     margin-bottom: 20px;
 }

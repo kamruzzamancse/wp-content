@@ -75,6 +75,5 @@ get_header();
 
 <?php 
 include locate_template('dashboard-templates/profile-modal.php');
-include locate_template('dashboard-templates/property-create-modal.php');
 get_footer(); 
 ?>

@@ -272,7 +272,7 @@ function changeImage(src) {
 
 // js for create property modal
 
-/* function openModal() {
+function openModal() {
     document.getElementById("propertyModal").style.display = "flex";
   }
 
@@ -284,5 +284,5 @@ function closeModal() {
 document.addEventListener('click', function (e) {
     const modal = document.getElementById('propertyModal');
     if (e.target === modal) closeModal();
-}); */
+});
 
