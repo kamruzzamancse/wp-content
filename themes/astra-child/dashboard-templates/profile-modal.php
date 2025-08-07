@@ -1,5 +1,5 @@
 <!-- Profile Modal -->
-<div class="modal-overlay" id="profileModal">
+<div class="profile-modal-overlay" id="profileModal">
     <div class="modal">
         <?php $current_user = wp_get_current_user(); ?>
         <img src="<?php echo esc_url(get_avatar_url($current_user->ID)); ?>" alt="Profile">

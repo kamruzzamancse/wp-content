@@ -264,3 +264,25 @@ function loadPropertyDetails() {
     }
 }
 
+// js for change image
+
+function changeImage(src) {
+    document.getElementById('mainPreview').src = src;
+}
+
+// js for create property modal
+
+/* function openModal() {
+    document.getElementById("propertyModal").style.display = "flex";
+  }
+
+function closeModal() {
+    document.getElementById("propertyModal").style.display = "none";
+}
+
+// Optional: Close modal on outside click
+document.addEventListener('click', function (e) {
+    const modal = document.getElementById('propertyModal');
+    if (e.target === modal) closeModal();
+}); */
+

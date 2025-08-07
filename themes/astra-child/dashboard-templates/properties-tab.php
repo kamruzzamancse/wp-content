@@ -21,7 +21,7 @@
     <div class="right-section">
         <button class="action-button export-btn">Export</button>
         <button class="action-button add-task-btn">Add Task</button>
-        <button class="action-button create-property-btn">Create Property</button>
+        <button class="action-button create-property-btn" onclick="openModal()">Create Property</button>
     </div>
 </div>
 
@@ -33,9 +33,9 @@
 
         <!-- Property Example -->
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Basic Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Basic Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-08-15</span>
                 <div class="property-price">$1,100</div>
                 <div class="property-location">
@@ -56,9 +56,9 @@
         <!-- For demonstration, we'll include 6 total -->
 
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Standard Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Standard Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-07-20</span>
                 <div class="property-price">$1,600</div>
                 <div class="property-location">
@@ -74,9 +74,9 @@
         </div>
 
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Premium Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Premium Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-08-01</span>
                 <div class="property-price">$2,900</div>
                 <div class="property-location">
@@ -93,9 +93,9 @@
 
         <!-- 4th Property to complete 1 full row -->
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Basic Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Basic Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-05-15</span>
                 <div class="property-price">$1,100</div>
                 <div class="property-location">
@@ -115,9 +115,9 @@
 
         <!-- Property Example -->
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Basic Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Basic Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-06-14</span>
                 <div class="property-price">$1,800</div>
                 <div class="property-location">
@@ -138,9 +138,9 @@
         <!-- For demonstration, we'll include 6 total -->
 
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-standard.png" alt="Lakeview Standard" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Standard Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Standard Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-05-19</span>
                 <div class="property-price">$1,800</div>
                 <div class="property-location">
@@ -156,9 +156,9 @@
         </div>
 
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-premium.png" alt="Lakeview Premium" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Premium Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Premium Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-02-15</span>
                 <div class="property-price">$2,500</div>
                 <div class="property-location">
@@ -175,9 +175,9 @@
 
         <!-- 4th Property to complete 1 full row -->
         <div class="property-item">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image">
+            <a href="?tab=property-details"><img src="http://localhost/mary/wp-content/uploads/2025/08/lakeview-basic.png" alt="Lakeview Basic" class="main-image"></a>
             <div class="property-details">
-                <h3 class="property-title">Lakeview Basic Apartment</h3>
+                <a href="?tab=property-details"><h3 class="property-title">Lakeview Basic Apartment</h3></a>
                 <span class="property-date" style="display: none;">2025-08-23</span>
                 <div class="property-price">$1,400</div>
                 <div class="property-location">
@@ -284,4 +284,90 @@
         </div>
     </div>
 
+</div>
+
+<!-- Property Modal -->
+<div class="property-modal-overlay" id="propertyModal" style="display: none;">
+  <div class="modal">
+    <h2>Create Property</h2>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Property Name</label>
+        <input type="text">
+      </div>
+      <div class="form-group">
+        <label>Type</label>
+        <input type="text">
+      </div>
+      <div class="form-group">
+        <label>Facilities</label>
+        <input type="text">
+        <button style="margin-top: 5px; padding: 5px 10px; font-size: 12px;">Add Facilities</button>
+      </div>
+      <div class="form-group">
+        <label>Price</label>
+        <input type="text">
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-top: 15px;">
+      <div class="form-group">
+        <label>Description</label>
+        <textarea rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label style="visibility: hidden;">Upload</label>
+        <div class="upload-box">
+          <label for="imageUpload">Drop file or browse<br><small>Format: .jpeg, .png & Max file size: 25 MB</small></label>
+          <input type="file" id="imageUpload" accept="image/*">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Add Task</div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Document Title</label>
+        <input type="text">
+      </div>
+      <div class="form-group">
+        <label>Document Type</label>
+        <input type="text">
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-top: 15px;">
+      <label>Task list/ Notes</label>
+      <textarea rows="4" placeholder="Note"></textarea>
+    </div>
+
+    <div class="form-group" style="margin-top: 15px;">
+      <div class="upload-box">
+        <label for="docUpload">Document/ File Upload<br><small>Format: .jpeg, .png & Max file size: 25 MB</small></label>
+        <input type="file" id="docUpload" accept=".png, .jpg, .jpeg">
+      </div>
+    </div>
+
+    <div class="form-grid" style="margin-top: 15px;">
+      <div class="form-group">
+        <label>Add Client</label>
+        <select>
+          <option>Select Client</option>
+          <option>Client A</option>
+          <option>Client B</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Due Date</label>
+        <input type="date">
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="save-btn">Save</button>
+    </div>
+  </div>
 </div>

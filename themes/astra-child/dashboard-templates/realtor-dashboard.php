@@ -40,10 +40,6 @@ get_header();
                     include locate_template('dashboard-templates/properties-tab.php');
                     break;
                     
-                case 'notifications':
-                    include locate_template('dashboard-templates/notifications-tab.php');
-                    break;
-                    
                 case 'address-book':
                     echo '<div class="dashboard-section"><h2>Address Book</h2></div>';
                     break;
@@ -55,13 +51,21 @@ get_header();
                 case 'settings':
                     echo '<div class="dashboard-section"><h2>Settings</h2></div>';
                     break;
+
+                case 'notifications':
+                    include locate_template('dashboard-templates/notifications-tab.php');
+                    break;
+
+                case 'property-details':
+                    include locate_template('dashboard-templates/property-details.php');
+                    break;
                     
                 default:
                     wp_redirect(add_query_arg('tab', 'dashboard'));
                     exit;
             }
             
-            if (!in_array($current_tab, ['settings', 'notifications', 'properties'])) {
+            if (!in_array($current_tab, ['settings', 'notifications', 'properties', 'property-details'])) {
                 include locate_template('dashboard-templates/leads-section.php');
             }
             ?>
@@ -71,5 +75,6 @@ get_header();
 
 <?php 
 include locate_template('dashboard-templates/profile-modal.php');
+include locate_template('dashboard-templates/property-create-modal.php');
 get_footer(); 
 ?>

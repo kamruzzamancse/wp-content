@@ -60,6 +60,9 @@
     list-style: none;
     padding: 0;
     margin: 0;
+    position: sticky;
+    top: 100px;
+    z-index: 1000;
 }
 
 .sidebar-menu li {
@@ -997,6 +1000,7 @@
 /* css for profile pic and modal */
 
 /* ===== Profile Picture Styles ===== */
+
 .profile-header {
   position: relative;
   display: inline-block;
@@ -1021,11 +1025,12 @@
 }
 
 /* ===== Modal Styles ===== */
-.modal-overlay {
+
+.profile-modal-overlay {
   display: none;
-  position: absolute;
-  top: 70px; /* Modal appears 40px above profile pic */
-  right: 0;
+  position: fixed;
+  top: 70px;        /* Distance from the top */
+  right: 20px;      /* Distance from the right edge */
   z-index: 1000;
 }
 
