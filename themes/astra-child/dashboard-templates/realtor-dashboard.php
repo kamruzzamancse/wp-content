@@ -41,7 +41,7 @@ get_header();
                     break;
                     
                 case 'address-book':
-                    echo '<div class="dashboard-section"><h2>Address Book</h2></div>';
+                    include locate_template('dashboard-templates/address-book-tab.php');
                     break;
                     
                 case 'messages':
@@ -65,7 +65,7 @@ get_header();
                     exit;
             }
             
-            if (!in_array($current_tab, ['settings', 'notifications', 'properties', 'property-details'])) {
+            if (!in_array($current_tab, ['settings', 'notifications', 'properties', 'property-details', 'address-book'])) {
                 include locate_template('dashboard-templates/leads-section.php');
             }
             ?>

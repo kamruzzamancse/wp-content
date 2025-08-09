@@ -21,7 +21,7 @@
     <div class="right-section">
         <button class="action-button export-btn">Export</button>
         <button class="action-button add-task-btn">Add Task</button>
-        <button class="action-button create-property-btn" onclick="openModal()">Create Property</button>
+        <button class="action-button create-property-btn" onclick="openCreateModal()">Create Property</button>
     </div>
 </div>
 

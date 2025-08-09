@@ -65,6 +65,20 @@ function astra_child_enqueue_property_management_css() {
 add_action('wp_enqueue_scripts', 'astra_child_enqueue_property_management_css');
 
 /**
+ * Enqueue Address Book CSS
+ */
+function astra_child_enqueue_address_book_css() {
+    wp_enqueue_style(
+        'address-book-css',
+        get_stylesheet_directory_uri() . '/assets/css/address-book.css',
+        array(),
+        filemtime(get_stylesheet_directory() . '/assets/css/address-book.css')
+    );
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_address_book_css');
+
+
+/**
  * Enqueue Property Management JavaScript
  */
 function astra_child_enqueue_property_management_js() {
@@ -78,6 +92,19 @@ function astra_child_enqueue_property_management_js() {
 }
 add_action('wp_enqueue_scripts', 'astra_child_enqueue_property_management_js');
 
+/**
+ * Enqueue Address Book JavaScript
+ */
+function astra_child_enqueue_address_book_js() {
+    wp_enqueue_script(
+        'address-book-js',
+        get_stylesheet_directory_uri() . '/assets/js/address-book.js',
+        array(), // Dependencies can go here, e.g., array('jquery')
+        filemtime(get_stylesheet_directory() . '/assets/js/address-book.js'),
+        true // Load in footer
+    );
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_address_book_js');
 
 /**
  * Include Todo Calendar class

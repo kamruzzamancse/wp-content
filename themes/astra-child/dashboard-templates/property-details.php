@@ -7,7 +7,7 @@
 <div class="container">
     <div class="left-column">
         <div class="top-controls">
-            <button class="btn btn-edit">Edit</button>
+            <button class="btn btn-edit" onclick="openEditModal()">Edit</button>
             <button class="btn btn-delete">Delete</button>
         </div>
         <div class="image-gallery-container">
@@ -67,3 +67,5 @@
         </div>
     </div>
 </div>
+
+<?php include locate_template('dashboard-templates/property-edit-modal.php'); ?>

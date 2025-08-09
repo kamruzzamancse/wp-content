@@ -270,19 +270,33 @@ function changeImage(src) {
     document.getElementById('mainPreview').src = src;
 }
 
-// js for create property modal
 
-function openModal() {
-    document.getElementById("propertyModal").style.display = "flex";
-  }
-
-function closeModal() {
-    document.getElementById("propertyModal").style.display = "none";
+// Create Property Modal
+function openCreateModal() {
+    document.getElementById("propertyCreateModal").style.display = "flex";
 }
 
-// Optional: Close modal on outside click
+function closeCreateModal() {
+    document.getElementById("propertyCreateModal").style.display = "none";
+}
+
+// Edit Property Modal
+function openEditModal() {
+    document.getElementById("propertyEditModal").style.display = "flex";
+}
+
+function closeEditModal() {
+    document.getElementById("propertyEditModal").style.display = "none";
+}
+
+// Close modal when clicking outside
 document.addEventListener('click', function (e) {
-    const modal = document.getElementById('propertyModal');
-    if (e.target === modal) closeModal();
+    const modalCreate = document.getElementById('propertyCreateModal');
+    const modalEdit = document.getElementById('propertyEditModal');
+
+    if (e.target === modalCreate) closeCreateModal();
+    if (e.target === modalEdit) closeEditModal();
 });
+
+
 

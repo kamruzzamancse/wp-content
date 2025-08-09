@@ -328,7 +328,6 @@ h1 {
 /* css for Property Details Page */
 
 .container {
-    display: flex;
     gap: 20px;
     flex-wrap: wrap;
 }

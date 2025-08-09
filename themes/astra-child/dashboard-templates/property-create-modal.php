@@ -1,5 +1,5 @@
 <!-- Property Modal -->
-<div class="property-modal-overlay" id="propertyModal" style="display: none;">
+<div class="property-modal-overlay" id="propertyCreateModal" style="display: none;">
   <div class="property-modal">
     <h2>Create Property</h2>
 
@@ -77,7 +77,7 @@
     </div>
 
     <div class="modal-footer">
-      <button class="cancel-btn" onclick="closeModal()">Cancel</button>
+      <button class="cancel-btn" onclick="closeCreateModal()">Cancel</button>
       <button class="save-btn">Save</button>
     </div>
   </div>
