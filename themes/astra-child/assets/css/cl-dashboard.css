@@ -1,0 +1,49 @@
+/* Dashboard Base Styles */
+
+.ast-single-post .entry-content a, .ast-comment-content a:not(.ast-comment-edit-reply-wrap a) {
+    text-decoration: none!important;
+}
+
+.entry-content[data-ast-blocks-layout] > * {
+    max-width: 100%!important;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.entry-content ul {
+    padding: revert;
+    margin: revert;
+    padding-left: 0!important;
+}
+
+#primary {
+    padding: 0!important;
+}
+
+.ast-no-thumbnail {
+    display: none;
+}
+
+.dashboard-sidebar {
+    background: #1F5597;
+    padding: 0!important;
+}
+
+.sidebar-menu li.active {
+    background: rgba(255, 255, 255, 0.1);
+    border-left-color: #3498db;
+    font-weight: 500;
+}
+
+.cl-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    margin-bottom: 10px;
+}
+
+.cl-header-arrow {
+    font-size: 24px;
+}

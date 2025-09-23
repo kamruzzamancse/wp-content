@@ -1,0 +1,426 @@
+/* ------------------------- */
+/* Global Reset & Fonts */
+/* ------------------------- */
+.enhanced-login-form *, 
+.form-container * {
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+.company-name {
+    text-align: center;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    margin-top: -20px;
+}
+.company-tagline {
+    font-size: 14px;
+    font-weight: 500;
+    color: #f0f0f0;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
+}
+/* ------------------------- */
+/* Container & Background */
+/* ------------------------- */
+.enhanced-login-form, 
+.form-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+/* Base background */
+.enhanced-login-form::before, 
+.form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background: linear-gradient(135deg, #2c3e50, #4a6fa5, #7e8ba3, #b8c6db);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+}
+.enhanced-login-form::after, 
+.form-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.25); /* semi-transparent overlay */
+    z-index: -1;
+}
+/* ------------------------- */
+/* Form Container (Glass Effect) */
+/* ------------------------- */
+#enhanced-login {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    width: 100%;
+    padding: 35px 30px;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.2); /* semi-opaque glass */
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+/* ------------------------- */
+/* Form Header */
+/* ------------------------- */
+.form-header h2 {
+    color: #fff;
+    text-align: center;
+    font-size: 28px!important;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+/* ------------------------- */
+/* Form Groups */
+/* ------------------------- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+}
+.form-group label {
+    font-size: 13px;
+    color: #fff;
+    margin-bottom: 5px;
+}
+.form-group input {
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #000;
+    font-size: 14px;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
+    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+}
+.form-group input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+.form-group input:focus {
+    outline: none;
+    background: rgba(255,255,255,0.25);
+    border: 1px solid #000;
+    box-shadow: inset 0 1px 5px rgba(255,255,255,0.5);
+}
+/* ------------------------- */
+/* Password Fields with Toggle */
+/* ------------------------- */
+.password-field {
+    position: relative;
+}
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #fff;
+}
+/* ------------------------- */
+/* Remember Me Checkbox */
+/* ------------------------- */
+.remember-me {
+    flex-direction: row;
+    align-items: center;
+    font-size: 13px;
+    color: #fff;
+    margin-top: 15px;
+}
+.remember-me input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: #fff;
+    width: 16px;
+    height: 16px;
+}
+/* ------------------------- */
+/* Buttons */
+/* ------------------------- */
+button[type="submit"] {
+    background: #fff;
+    color: #000;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+button[type="submit"]:hover {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+    box-shadow: 0 0 10px rgba(255,255,255,0.6);
+}
+/* ------------------------- */
+/* Links */
+/* ------------------------- */
+.form-links {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.form-links a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.form-links a:hover {
+    color: #ffcc00;
+}
+/* ------------------------- */
+/* Message Container */
+/* ------------------------- */
+.enhanced-login-message {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #fff;
+    text-align: center;
+}
+.enhanced-login-message.error { color: #ff4d4d; }
+.enhanced-login-message.success { color: #4dff4d; }
+/* Logo Styling */
+/* ------------------------- */
+/* Animations */
+/* ------------------------- */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+/* css for registration form */
+
+/* ------------------------- */
+/* Global Reset & Fonts */
+/* ------------------------- */
+.enhanced-register-form *, 
+.form-container * {
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+/* ------------------------- */
+/* Container & Background */
+/* ------------------------- */
+.form-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+.form-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #2c3e50, #4a6fa5, #7e8ba3, #b8c6db);
+    background-size: 400% 400%;
+    animation: gradientAnimation 15s ease infinite;
+    z-index: -2;
+}
+.form-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.25); /* semi-transparent overlay */
+    z-index: -1;
+}
+/* ------------------------- */
+/* Form Container (Glass Effect) */
+/* ------------------------- */
+.enhanced-register-form {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    width: 100%;
+    padding: 35px 30px;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.2); /* semi-opaque glass */
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.3);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+/* ------------------------- */
+/* Form Header */
+/* ------------------------- */
+.form-header h2 {
+    color: #fff;
+    text-align: center;
+    font-size: 24px;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+.form-header p {
+    color: #fff;
+    font-size: 13px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+/* ------------------------- */
+/* Form Groups */
+/* ------------------------- */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-top: 15px;
+}
+.form-group label {
+    font-size: 13px;
+    color: #fff;
+    margin-bottom: 5px;
+}
+.form-group input,
+.form-group select {
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #000;
+    font-size: 14px;
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3);
+    transition: background 0.3s, border 0.3s, box-shadow 0.3s;
+}
+.form-group input::placeholder {
+    color: rgba(255,255,255,0.7);
+}
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    background: rgba(255,255,255,0.25);
+    border: 1px solid #000;
+    box-shadow: inset 0 1px 5px rgba(255,255,255,0.5);
+}
+/* ------------------------- */
+/* Name fields */
+/* ------------------------- */
+.name-fields {
+    display: flex;
+    gap: 10px;
+}
+.name-fields .form-group {
+    flex: 1;
+}
+/* ------------------------- */
+/* Password Fields with Toggle */
+/* ------------------------- */
+.password-field {
+    position: relative;
+}
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #fff;
+}
+/* ------------------------- */
+/* Password Strength Meter */
+/* ------------------------- */
+.password-strength-meter {
+    height: 5px;
+    border-radius: 5px;
+    background: rgba(255,255,255,0.2);
+    margin-top: 5px;
+}
+.password-strength-meter[data-strength="0"] { background-color: rgba(255,255,255,0.2); }
+.password-strength-meter[data-strength="1"] { background-color: #ff4d4d; }
+.password-strength-meter[data-strength="2"] { background-color: #ffb84d; }
+.password-strength-meter[data-strength="3"] { background-color: #ffff4d; }
+.password-strength-meter[data-strength="4"] { background-color: #4dff4d; }
+/* ------------------------- */
+/* Buttons */
+/* ------------------------- */
+button[type="submit"] {
+    background: #fff;
+    color: #000;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+button[type="submit"]:hover {
+    background: transparent;
+    color: #fff;
+    border: 1px solid #fff;
+    box-shadow: 0 0 10px rgba(255,255,255,0.6);
+}
+/* ------------------------- */
+/* Navigation Links */
+/* ------------------------- */
+.form-navigation {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.form-navigation a {
+    text-decoration: none;
+    color: #fff;
+    font-weight: 500;
+    transition: color 0.3s;
+}
+.form-navigation a:hover {
+    color: #ffcc00;
+}
+/* ------------------------- */
+/* Message Container */
+/* ------------------------- */
+.enhanced-register-message {
+    margin-top: 15px;
+    font-size: 13px;
+    color: #fff;
+    text-align: center;
+}
+.enhanced-register-message.error { color: #ff4d4d; }
+.enhanced-register-message.success { color: #4dff4d; }
+
+/* ------------------------- */
+/* Animations */
+/* ------------------------- */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}

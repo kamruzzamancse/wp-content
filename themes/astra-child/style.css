@@ -1,0 +1,226 @@
+/**
+ * Theme Name:     Astra Child
+ * Author:         Brainstorm Force
+ * Template:       astra
+ * Text Domain:    astra-child
+ * Version:        1.0.0
+ */
+
+/* Full-Screen Layout Adjustments */
+.ast-container,
+.ast-separate-container .ast-article-single, 
+.ast-separate-container .ast-article-inner,
+.page-id-XX .ast-container,
+.postid-XX .ast-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 20px !important; /* Added horizontal padding */
+}
+
+/* Header and Footer Full Width */
+.ast-primary-header,
+.ast-mobile-header,
+.site-footer {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 20px !important; /* Added horizontal padding */
+    /* display: none; */
+}
+
+.site-footer {
+    display: none!important;
+}
+
+/* css for show/hide header and footer */
+body.hide-header-footer .ast-primary-header,
+body.hide-header-footer .ast-mobile-header,
+body.hide-header-footer .site-footer {
+    display: none !important;
+}
+
+.ast-primary-header-bar {
+    display: none!important;
+}
+
+/* Content Area Adjustments */
+.ast-site-content {
+    padding: 0 20px !important; /* Added horizontal padding */
+    margin: 0 !important;
+}
+
+/* Full Width Content Containers */
+.ast-page-builder-template .site-content .ast-container,
+.ast-plain-container .site-content .ast-container {
+    max-width: 100% !important;
+    padding: 0 0 !important; /* Added horizontal padding */
+}
+
+/* Main Content Area */
+#primary {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important; /* Kept all-around padding */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    #primary,
+    .ast-container,
+    .ast-primary-header,
+    .ast-mobile-header,
+    .site-footer,
+    .ast-site-content,
+    .ast-page-builder-template .site-content .ast-container,
+    .ast-plain-container .site-content .ast-container {
+        padding: 0 15px !important; /* Reduced padding on medium screens */
+    }
+    #primary {
+        padding: 15px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #primary,
+    .ast-container,
+    .ast-primary-header,
+    .ast-mobile-header,
+    .site-footer,
+    .ast-site-content,
+    .ast-page-builder-template .site-content .ast-container,
+    .ast-plain-container .site-content .ast-container {
+        padding: 0 10px !important; /* Reduced padding on mobile */
+    }
+    #primary {
+        padding: 10px !important;
+    }
+    
+    /* Optional: Stack elements on mobile */
+    .ast-row {
+        flex-direction: column;
+    }
+    
+    .ast-col-md-6,
+    .ast-col-sm-12 {
+        width: 100% !important;
+    }
+}
+
+/* Optional: Full-width elements (still 100% width but respects padding) */
+.full-width-element {
+    width: calc(100% - 40px); /* Accounts for 20px padding on each side */
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Hide WordPress admin bar */
+#wpadminbar {
+    display: none !important;
+}
+
+/* Adjust html margin-top when admin bar is hidden */
+html {
+    margin-top: 0 !important;
+}
+
+.simcal-nav h3 {
+    color: #FFF!important;
+}
+
+.simcal-calendar-grid {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.simcal-calendar-grid thead tr:first-child th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.simcal-calendar-grid thead tr:first-child th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* css for property upload image */
+
+.pt-property-item {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.pt-main-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 0;
+    transition: opacity 0.3s ease;
+    display: block;
+}
+
+.pt-property-details {
+    padding: 10px;
+}
+
+.pt-property-title {
+    font-size: 16px;
+    margin: 0 0 5px;
+}
+
+.pt-property-price {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.pt-property-location {
+    font-size: 14px;
+    color: #555;
+}
+
+.pt-upload-icon {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    cursor: pointer;
+    background-color: #0073aa;  /* WordPress blue */
+    border: 2px solid #fff;     /* White border */
+    border-radius: 50%;
+    width: 40px;                /* Bigger circle */
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-size: 18px;            /* Bigger icon */
+    color: #fff;                /* White icon */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.pt-upload-icon:hover {
+    background-color: #005177; /* Darker on hover */
+    transform: scale(1.1);
+}
+
+.property-image-input {
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    position: absolute;
+    z-index: -1;
+}
+
+
+
+
+
+
+
+
