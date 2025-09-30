@@ -7,12 +7,40 @@
 /**
  * Load parent + child theme styles
  */
+
 function astra_child_enqueue_theme_styles() {
     wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
     wp_enqueue_style('child-style', get_stylesheet_directory_uri() . '/style.css', ['parent-style']);
     wp_enqueue_style('dashicons');
 }
 add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
+
+// Include profile update functionality
+require_once get_stylesheet_directory() . '/includes/rt-profile-update.php';
+
+// Enqueue profile scripts
+function rt_enqueue_profile_scripts() {
+    // Check if we're on the realtor dashboard or settings pages
+    if (isset($_GET['tab']) && ($_GET['tab'] === 'rt-settings-pi-edit' || $_GET['tab'] === 'rt-settings-pi')) {
+        // Enqueue the JavaScript file from root directory
+        wp_enqueue_script(
+            'rt-profile-script',
+            get_stylesheet_directory_uri() . '/assets/js/rt-profile-update.js',
+            array('jquery'),
+            '1.0',
+            true
+        );
+
+        // Localize script with AJAX parameters - CREATE FRESH NONCE
+        wp_localize_script('rt-profile-script', 'profile_ajax', array(
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_profile_nonce'),
+        ));
+        
+        error_log('RT Profile Script Enqueued with Nonce: ' . wp_create_nonce('rt_profile_nonce'));
+    }
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_profile_scripts');
 
 /**
  * Enqueue general child theme assets (CSS + JS)

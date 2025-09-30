@@ -28,3 +28,424 @@ Stack trace:
 #4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
 #5 {main}
   thrown in C:\xampp\htdocs\mary\wp-content\themes\astra\functions.php on line 40
+[28-Sep-2025 09:26:42 UTC] PHP Deprecated:  Function print_emoji_styles is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_emoji_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[28-Sep-2025 09:26:42 UTC] PHP Deprecated:  Function wp_admin_bar_header is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_admin_bar_header_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[28-Sep-2025 09:27:04 UTC] PHP Deprecated:  Function print_emoji_styles is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_emoji_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[28-Sep-2025 09:27:04 UTC] PHP Deprecated:  Function wp_admin_bar_header is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_admin_bar_header_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[28-Sep-2025 09:27:12 UTC] PHP Deprecated:  Function print_emoji_styles is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_emoji_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[28-Sep-2025 09:27:12 UTC] PHP Deprecated:  Function wp_admin_bar_header is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_admin_bar_header_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[28-Sep-2025 09:27:18 UTC] PHP Deprecated:  Function print_emoji_styles is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_emoji_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[28-Sep-2025 09:27:18 UTC] PHP Deprecated:  Function wp_admin_bar_header is <strong>deprecated</strong> since version 6.4.0! Use wp_enqueue_admin_bar_header_styles instead. in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[29-Sep-2025 09:02:55 UTC] Cron reschedule event error for hook: better_messages_send_notifications, Error code: could_not_set, Error message: The cron event list could not be saved., Data: {"schedule":"bp_better_messages_notifications","args":[],"interval":900}
+[29-Sep-2025 09:13:11 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:13:11 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:13:24 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:13:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:13:37 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:13:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:04 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:04 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:17 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:17 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:30 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:30 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:43 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:43 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:56 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:14:56 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:09 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:09 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:22 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:22 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:35 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:35 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:48 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:15:48 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:01 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:01 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:14 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:28 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:28 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:41 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:41 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:54 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:16:54 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:07 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:07 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:20 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:20 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:33 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:33 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:46 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:46 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:59 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:17:59 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:12 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:12 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:25 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:25 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:38 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:38 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:51 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:18:51 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:04 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:04 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:17 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:17 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:30 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:30 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:43 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:43 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:56 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:19:56 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:09 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:09 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:22 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:22 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:35 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:35 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:48 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:20:48 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:21:01 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:21:01 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:21:14 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[29-Sep-2025 09:21:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:15
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 15
+[30-Sep-2025 05:40:34 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:40:39 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:41:36 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:56:16 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:56:22 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:56:23 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:56:51 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:58:45 UTC] RT Profile Script Enqueued
+[30-Sep-2025 05:59:19 UTC] RT Profile Script Enqueued
+[30-Sep-2025 06:01:02 UTC] RT Profile Script Enqueued
+[30-Sep-2025 06:03:03 UTC] RT Profile Script Enqueued
+[30-Sep-2025 06:55:16 UTC] PHP Parse error:  syntax error, unexpected token ";", expecting ")" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 28
+[30-Sep-2025 06:55:29 UTC] PHP Parse error:  syntax error, unexpected token ";", expecting ")" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 28
+[30-Sep-2025 06:55:42 UTC] PHP Parse error:  syntax error, unexpected token ";", expecting ")" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 28
+[30-Sep-2025 06:55:55 UTC] PHP Parse error:  syntax error, unexpected token ";", expecting ")" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 28
+[30-Sep-2025 06:56:08 UTC] PHP Fatal error:  Cannot redeclare rt_enqueue_profile_scripts() (previously declared in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:24) in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 49
+[30-Sep-2025 06:56:10 UTC] PHP Fatal error:  Cannot redeclare rt_enqueue_profile_scripts() (previously declared in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:24) in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 49
+[30-Sep-2025 06:56:10 UTC] PHP Notice:  Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>astra-child</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[30-Sep-2025 06:56:10 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\xampp\htdocs\mary\wp-includes\class-wp-recovery-mode-email-service.php on line 367
+[30-Sep-2025 06:56:10 UTC] PHP Warning:  Trying to access array offset on value of type bool in C:\xampp\htdocs\mary\wp-includes\class-wp-recovery-mode-email-service.php on line 368
+[30-Sep-2025 06:56:37 UTC] RT Profile Script Enqueued with Nonce: f15e5c7b11
+[30-Sep-2025 06:56:39 UTC] Load Profile Data: Nonce verification failed
+[30-Sep-2025 06:56:45 UTC] Save Profile Data: Starting nonce verification
+[30-Sep-2025 06:56:45 UTC] Save Profile Data: POST nonce = cd060f2ab0
+[30-Sep-2025 06:56:45 UTC] Save Profile Data: Nonce verification failed
+[30-Sep-2025 06:56:45 UTC] Save Profile Data: Expected nonce = f15e5c7b11
+[30-Sep-2025 06:56:53 UTC] Save Profile Data: Starting nonce verification
+[30-Sep-2025 06:56:53 UTC] Save Profile Data: POST nonce = cd060f2ab0
+[30-Sep-2025 06:56:53 UTC] Save Profile Data: Nonce verification failed
+[30-Sep-2025 06:56:53 UTC] Save Profile Data: Expected nonce = f15e5c7b11
+[30-Sep-2025 07:00:15 UTC] RT Profile Script Enqueued with Nonce: f15e5c7b11
+[30-Sep-2025 07:00:17 UTC] Load Profile: Nonce verification failed. Received: cd060f2ab0
+[30-Sep-2025 07:00:19 UTC] Save Profile: Nonce verification failed. Received: cd060f2ab0
+[30-Sep-2025 07:00:24 UTC] Save Profile: Nonce verification failed. Received: cd060f2ab0
+[30-Sep-2025 07:00:26 UTC] Save Profile: Nonce verification failed. Received: cd060f2ab0
+[30-Sep-2025 07:00:32 UTC] RT Profile Script Enqueued with Nonce: f15e5c7b11
+[30-Sep-2025 07:00:33 UTC] Load Profile: Nonce verification failed. Received: cd060f2ab0
+[30-Sep-2025 07:00:37 UTC] RT Profile Script Enqueued with Nonce: f15e5c7b11
+[30-Sep-2025 07:00:38 UTC] Load Profile: Nonce verification failed. Received: cd060f2ab0
+[30-Sep-2025 07:00:47 UTC] Save Profile: Nonce verification failed. Received: cd060f2ab0
+[30-Sep-2025 08:57:00 UTC] RT Profile Script Enqueued with Nonce: f15e5c7b11
+[30-Sep-2025 08:57:03 UTC] Load Profile: Nonce verification failed. Received: cd060f2ab0

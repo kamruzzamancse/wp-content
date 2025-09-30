@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.9.8
+Stable tag: 2.9.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -65,6 +65,7 @@ https://www.youtube.com/watch?v=jMHx97QsXj8
 * [WP Job Manager](https://www.wordplus.org/wpjobmanager)
 * [ProfileGrid](https://www.wordplus.org/profilegrid)
 * [UsersWP](https://www.better-messages.com/docs/integrations/userswp/)
+* [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/)
 * [OneSignal](https://www.better-messages.com/docs/integrations/onesignal/)
 * [Crocoblock JetEngine Profile Builder](https://www.better-messages.com/docs/integrations/jet-engine/)
 * [WP User Manager](https://www.better-messages.com/docs/integrations/wp-user-manager/)
@@ -169,16 +170,27 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.9.0 - 2.9.8 =
+= 2.9.0 - 2.9.13 =
+* Added integration with [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/) for push notifications
+* Minor improvements for fullscreen pwa mode
+* Added better_messages_attachments_random_file_name filter to allow developers to disable random file name generation for uploaded files
+* Added thread_id_created_at_index database index to messages table to improve performance in some cases
 * Added Android Mobile App (WebSocket version only)
-* Search results on New Conversation screen does not have height limit anymore and contains more results if available
+* Fixed issue with file upload in AI Chat Bots conversations in some cases
+* Search results on New Conversation screen does not have height limit anymore at desktop devices and contains more results if available
 * Added new option which allows to send private message to user from message context menu in group conversations
 * Added option to enable possibility to send replies to own messages
 * Added New capability `bm_can_administrate`. This capability can be assigned to any user or role (via the User Role Editor plugin or similar) to grant moderator privileges. Users with this capability can view all conversations and messages on the site, as well as delete messages and entire conversations.
 * Fix for scrolling broken in some cases in FluentCommunity at mobile devices
 * Added Mobile App Splash Screen Background Color setting
 * Added Mobile App Login logo height setting
+* Fixed missed translations for Mobile App
 * Minor fixes for functionality related to pasting links and screen snapshots from clipboard
+* Removed request aborted error displaying in some cases
+* Fixed admin settings does not save correctly in some cases because of conflict with other plugins
+* Ensure that users with bm_can_administrate capability can not be blocked by regular users
+* Fixed mini chats not working properly in some cases
+* Updated 3rd party libraries to latest versions
 * Other minor bugfixes and improvements
 
 = 2.8.0 - 2.8.16 =

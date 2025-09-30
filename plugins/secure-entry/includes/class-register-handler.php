@@ -37,24 +37,46 @@ class Enhanced_Register_Handler {
                 throw new Exception(implode('<br>', $errors));
             }
 
+            // Create WordPress user
             $user_id = wp_insert_user([
                 'user_login' => $data['username'],
                 'user_email' => $data['email'],
                 'user_pass'  => $data['password'],
                 'first_name' => $data['first_name'],
                 'last_name'  => $data['last_name'],
-                'role'       => in_array($data['role'], ['realtor', 'client']) ? $data['role'] : 'client'
+                'role'       => 'realtor', // force 'realtor' role for this registration
             ]);
 
             if (is_wp_error($user_id)) {
                 throw new Exception($this->get_error_message($user_id->get_error_code()));
             }
 
+            // Insert default row in wp_realtors table
+            global $wpdb;
+            $table = $wpdb->prefix . 'realtors';
+
+            $existing = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM $table WHERE user_id = %d",
+                $user_id
+            ));
+
+            if (!$existing) {
+                $wpdb->insert($table, [
+                    'user_id'       => $user_id,
+                    'full_name'     => $data['first_name'] . ' ' . $data['last_name'],
+                    'phone'         => $data['phone'] ?? '',
+                    'agency_name'   => $data['agency_name'] ?? '',
+                    'license_number'=> $data['license_number'] ?? '',
+                    'rating_avg'    => 0,
+                    'created_at'    => current_time('mysql')
+                ]);
+            }
+
             wp_new_user_notification($user_id, null, 'both');
 
-            // Always redirect to login page after successful registration
+            // Return success response
             wp_send_json_success([
-                'message' => __('Registration successful. Please log in.', 'enhanced-login'),
+                'message'  => __('Registration successful. Please log in.', 'enhanced-login'),
                 'redirect' => home_url('/login/')
             ]);
 
@@ -89,7 +111,7 @@ class Enhanced_Register_Handler {
             $errors[] = __('Password is required.', 'enhanced-login');
         } elseif (strlen($data['password']) < 6) {
             $errors[] = __('Password must be at least 6 characters.', 'enhanced-login');
-        } elseif ($data['password'] !== $data['confirm_password']) {
+        } elseif ($data['password'] !== ($data['confirm_password'] ?? '')) {
             $errors[] = __('Passwords do not match.', 'enhanced-login');
         }
 
@@ -104,14 +126,17 @@ class Enhanced_Register_Handler {
         }
     }
 
-    // Keep this method as it might be used elsewhere
+    // Keep method for redirect if needed later
     private function get_redirect_url_by_role($role) {
         $urls = [
             'administrator' => home_url('/am/admin-dashboard/'),
-            'admin'         => home_url('/am/admin-dashboard/'), // Add this
+            'admin'         => home_url('/am/admin-dashboard/'),
             'realtor'       => home_url('/rt/realtor-dashboard/'),
             'client'        => home_url('/cl/client-dashboard/')
         ];
         return $urls[$role] ?? home_url();
     }
 }
+
+// Initialize the handler
+Enhanced_Register_Handler::get_instance();
