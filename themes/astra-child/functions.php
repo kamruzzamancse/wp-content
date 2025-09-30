@@ -18,26 +18,31 @@ add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
 // Include profile update functionality
 require_once get_stylesheet_directory() . '/includes/rt-profile-update.php';
 
-// Enqueue profile scripts
+/**
+ * Enqueue profile scripts (only on realtor dashboard/settings pages)
+ */
 function rt_enqueue_profile_scripts() {
-    // Check if we're on the realtor dashboard or settings pages
-    if (isset($_GET['tab']) && ($_GET['tab'] === 'rt-settings-pi-edit' || $_GET['tab'] === 'rt-settings-pi')) {
-        // Enqueue the JavaScript file from root directory
+    if ( isset($_GET['tab']) && in_array($_GET['tab'], [ 'rt-settings-pi-edit', 'rt-settings-pi' ], true ) ) {
+        
         wp_enqueue_script(
             'rt-profile-script',
             get_stylesheet_directory_uri() . '/assets/js/rt-profile-update.js',
             array('jquery'),
-            '1.0',
+            filemtime( get_stylesheet_directory() . '/assets/js/rt-profile-update.js' ),
             true
         );
 
-        // Localize script with AJAX parameters - CREATE FRESH NONCE
+        // Create nonce only once
+        $nonce = wp_create_nonce('rt_profile_nonce');
+
+        // Pass same nonce to JS
         wp_localize_script('rt-profile-script', 'profile_ajax', array(
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('rt_profile_nonce'),
+            'nonce'    => $nonce,
         ));
-        
-        error_log('RT Profile Script Enqueued with Nonce: ' . wp_create_nonce('rt_profile_nonce'));
+
+        // Optional debug (remove in production)
+        error_log('RT Profile Script Enqueued with Nonce: ' . $nonce);
     }
 }
 add_action('wp_enqueue_scripts', 'rt_enqueue_profile_scripts');
@@ -345,49 +350,6 @@ function mdk_deactivate() {
     flush_rewrite_rules();
 }
 register_deactivation_hook(__FILE__, 'mdk_deactivate');
-
-/* ===========================
-   Profile Updating Section
-   =========================== */
-
-// Enqueue scripts and styles
-function enqueue_profile_scripts() {
-    wp_enqueue_script('profile-ajax', get_template_directory_uri() . '/js/profile-ajax.js', array('jquery'), null, true);
-    wp_localize_script('profile-ajax', 'profile_ajax', array(
-        'ajax_url' => admin_url('admin-ajax.php'),
-        'nonce' => wp_create_nonce('profile_ajax_nonce')
-    ));
-}
-add_action('wp_enqueue_scripts', 'enqueue_profile_scripts');
-
-// Handle profile data loading
-function load_profile_data() {
-    if (!wp_verify_nonce($_POST['nonce'], 'profile_ajax_nonce')) {
-        wp_die('Security check failed');
-    }
-    
-    $user_id = get_current_user_id();
-    if ($user_id == 0) {
-        wp_send_json_error('User not logged in');
-    }
-    
-    $user_info = get_userdata($user_id);
-    $broker_number = get_user_meta($user_id, 'broker_number', true);
-    $company_name = get_user_meta($user_id, 'company_name', true);
-    $profile_picture = get_user_meta($user_id, 'profile_picture', true);
-    $default_picture = get_template_directory_uri() . '/images/default-avatar.jpg';
-    
-    $response = array(
-        'full_name' => $user_info->display_name,
-        'email' => $user_info->user_email,
-        'broker_number' => $broker_number,
-        'company_name' => $company_name,
-        'profile_picture' => $profile_picture ? $profile_picture : $default_picture
-    );
-    
-    wp_send_json_success($response);
-}
-add_action('wp_ajax_load_profile_data', 'load_profile_data');
 
 // Handle profile data saving
 function save_profile_data() {

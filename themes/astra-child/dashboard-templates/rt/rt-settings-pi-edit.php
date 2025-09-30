@@ -7,49 +7,54 @@ global $wpdb;
 $table_name = $wpdb->prefix . 'realtors';
 $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
 
-if (!$table_exists) {
-    echo '<div class="error notice"><p>Realtors database table not found. Please ensure the Real Estate DB Manager plugin is activated.</p></div>';
-}
-
 // Get current user data
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
 
-// Get realtor data from database
-$realtor_data = [];
-if ($table_exists) {
-    $realtor_data = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM $table_name WHERE user_id = %d", 
-        $user_id
-    ), ARRAY_A);
-}
+// Default values from wp_users table
+$full_name = $current_user->display_name;
+$email     = $current_user->user_email;
 
-// If no realtor data exists, create initial entry
-if (!$realtor_data && $table_exists) {
-    $wpdb->insert($table_name, [
-        'user_id'   => $user_id,
-        'full_name' => $current_user->display_name,
-        'created_at'=> current_time('mysql'),
-    ]);
-    $realtor_data = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM $table_name WHERE user_id = %d", 
-        $user_id
-    ), ARRAY_A);
+// Get realtor data from wp_realtors table if exists
+$phone = $agency_name = $license_number = '';
+$rating_avg = 0;
+
+if ( $table_exists ) {
+    $realtor_data = $wpdb->get_row(
+        $wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id),
+        ARRAY_A
+    );
+
+    // If no record exists, create one
+    if ( ! $realtor_data ) {
+        $wpdb->insert(
+            $table_name,
+            [
+                'user_id'    => $user_id,
+                'full_name'  => $full_name,
+                'created_at' => current_time('mysql'),
+            ]
+        );
+        $realtor_data = $wpdb->get_row(
+            $wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id),
+            ARRAY_A
+        );
+    }
+
+    // If record found, override values
+    if ( $realtor_data ) {
+        $phone          = $realtor_data['phone'] ?? '';
+        $agency_name    = $realtor_data['agency_name'] ?? '';
+        $license_number = $realtor_data['license_number'] ?? '';
+        $rating_avg     = $realtor_data['rating_avg'] ?? 0;
+    }
 }
 
 // Get profile picture
 $profile_picture = get_user_meta($user_id, 'profile_picture', true);
-$upload_dir = wp_upload_dir();
-$default_avatar = $upload_dir['baseurl'] . '/2025/08/client-photo.jpg';
-$avatar_src = $profile_picture ?: $default_avatar;
-
-// Prepare form values
-$full_name = $realtor_data['full_name'] ?? $current_user->display_name;
-$email = $current_user->user_email;
-$phone = $realtor_data['phone'] ?? '';
-$agency_name = $realtor_data['agency_name'] ?? '';
-$license_number = $realtor_data['license_number'] ?? '';
-$rating_avg = $realtor_data['rating_avg'] ?? 0;
+$upload_dir      = wp_upload_dir();
+$default_avatar  = $upload_dir['baseurl'] . '/2025/08/client-photo.jpg';
+$avatar_src      = $profile_picture ?: $default_avatar;
 ?>
 
 <div class="back-link">
@@ -77,8 +82,13 @@ $rating_avg = $realtor_data['rating_avg'] ?? 0;
         </div>
       </div>
       <div class="rpe-profile-info">
-        <h1 class="rpe-profile-name" id="profile-display-name"><?php echo esc_html($full_name); ?></h1>
-        <span class="rpe-profile-role">Realtor</span>
+          <h1 class="rpe-profile-name" id="profile-display-name"><?php echo esc_html( $full_name ); ?></h1>
+          <span class="rpe-profile-role">
+              <?php 
+                $role = !empty($current_user->roles) ? $current_user->roles[0] : 'User';
+                echo esc_html( ucfirst($role) );
+              ?>
+          </span>
       </div>
     </div>
   </div>
@@ -120,6 +130,7 @@ $rating_avg = $realtor_data['rating_avg'] ?? 0;
     </div>
   </form>
 </div>
+
 
 <style>
 /* ===== Back Link Styles ===== */

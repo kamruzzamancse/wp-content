@@ -37,6 +37,9 @@ class Enhanced_Register_Handler {
                 throw new Exception(implode('<br>', $errors));
             }
 
+            // Determine role: only allow 'realtor' or 'client'
+            $role = isset($data['role']) && in_array($data['role'], ['realtor', 'client']) ? $data['role'] : 'realtor';
+
             // Create WordPress user
             $user_id = wp_insert_user([
                 'user_login' => $data['username'],
@@ -44,32 +47,34 @@ class Enhanced_Register_Handler {
                 'user_pass'  => $data['password'],
                 'first_name' => $data['first_name'],
                 'last_name'  => $data['last_name'],
-                'role'       => 'realtor', // force 'realtor' role for this registration
+                'role'       => $role,
             ]);
 
             if (is_wp_error($user_id)) {
                 throw new Exception($this->get_error_message($user_id->get_error_code()));
             }
 
-            // Insert default row in wp_realtors table
-            global $wpdb;
-            $table = $wpdb->prefix . 'realtors';
+            // Insert default row in wp_realtors table only if role is realtor
+            if ($role === 'realtor') {
+                global $wpdb;
+                $table = $wpdb->prefix . 'realtors';
 
-            $existing = $wpdb->get_var($wpdb->prepare(
-                "SELECT COUNT(*) FROM $table WHERE user_id = %d",
-                $user_id
-            ));
+                $existing = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COUNT(*) FROM $table WHERE user_id = %d",
+                    $user_id
+                ));
 
-            if (!$existing) {
-                $wpdb->insert($table, [
-                    'user_id'       => $user_id,
-                    'full_name'     => $data['first_name'] . ' ' . $data['last_name'],
-                    'phone'         => $data['phone'] ?? '',
-                    'agency_name'   => $data['agency_name'] ?? '',
-                    'license_number'=> $data['license_number'] ?? '',
-                    'rating_avg'    => 0,
-                    'created_at'    => current_time('mysql')
-                ]);
+                if (!$existing) {
+                    $wpdb->insert($table, [
+                        'user_id'       => $user_id,
+                        'full_name'     => $data['first_name'] . ' ' . $data['last_name'],
+                        'phone'         => $data['phone'] ?? '',
+                        'agency_name'   => $data['agency_name'] ?? '',
+                        'license_number'=> $data['license_number'] ?? '',
+                        'rating_avg'    => 0,
+                        'created_at'    => current_time('mysql')
+                    ]);
+                }
             }
 
             wp_new_user_notification($user_id, null, 'both');
@@ -115,6 +120,11 @@ class Enhanced_Register_Handler {
             $errors[] = __('Passwords do not match.', 'enhanced-login');
         }
 
+        // Role validation
+        if (empty($data['role']) || !in_array($data['role'], ['realtor', 'client'])) {
+            $errors[] = __('Invalid role selected.', 'enhanced-login');
+        }
+
         return $errors;
     }
 
@@ -126,7 +136,7 @@ class Enhanced_Register_Handler {
         }
     }
 
-    // Keep method for redirect if needed later
+    // Redirect URL helper by role
     private function get_redirect_url_by_role($role) {
         $urls = [
             'administrator' => home_url('/am/admin-dashboard/'),
