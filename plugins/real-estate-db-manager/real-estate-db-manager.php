@@ -38,10 +38,12 @@ function redbm_create_tables() {
         client_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NOT NULL,
         full_name VARCHAR(255) NOT NULL,
-        email VARCHAR(100) NOT NULL,
+        email VARCHAR(255) NOT NULL,
         phone VARCHAR(50),
         budget DECIMAL(12,2),
         preferred_location VARCHAR(255),
+        note TEXT,
+        status VARCHAR(50),
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (client_id)
     ) $charset_collate;";

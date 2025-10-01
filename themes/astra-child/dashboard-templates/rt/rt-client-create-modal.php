@@ -33,13 +33,13 @@
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_phone">Phone Number:</label>
+                            <label class="create-detail-label-realtor-client" for="create_realtor_client_phone">Phone:</label>
                             <input class="create-detail-value-realtor-client" type="text" id="create_realtor_client_phone" name="realtor_client_phone" placeholder="Enter phone number">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_address">Address:</label>
-                            <input class="create-detail-value-realtor-client" type="text" id="create_realtor_client_address" name="realtor_client_address" placeholder="Enter address">
+                            <label class="create-detail-label-realtor-client" for="create_realtor_client_preferred_location">Preferred Location:</label>
+                            <input class="create-detail-value-realtor-client" type="text" id="create_realtor_client_preferred_location" name="preferred_location" placeholder="Enter preferred location">
                         </div>
 
                         <div class="create-detail-row-realtor-client">

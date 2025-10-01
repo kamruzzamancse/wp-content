@@ -308,14 +308,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Form submission
-    const createForm = document.getElementById('createRealtorClientForm');
+    /* const createForm = document.getElementById('createRealtorClientForm');
     if(createForm){
         createForm.addEventListener('submit', function(e) {
             e.preventDefault();
             alert('Client created successfully! (This is a demo)');
             createModal.style.display = 'none';
         });
-    }
+    } */
 });
 </script>
 

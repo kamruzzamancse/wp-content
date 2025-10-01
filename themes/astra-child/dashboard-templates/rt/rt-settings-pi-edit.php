@@ -1,48 +1,35 @@
-<?php 
-// Ensure WordPress context
-if ( ! defined( 'ABSPATH' ) ) exit;
+<?php
+if (!defined('ABSPATH')) exit;
 
-// Check if realtors table exists
 global $wpdb;
-$table_name = $wpdb->prefix . 'realtors';
-$table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
-
-// Get current user data
+$table = $wpdb->prefix . 'realtors';
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
 
-// Default values from wp_users table
+// Check if table exists
+$table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") === $table;
+
+// Default values
 $full_name = $current_user->display_name;
 $email     = $current_user->user_email;
-
-// Get realtor data from wp_realtors table if exists
 $phone = $agency_name = $license_number = '';
 $rating_avg = 0;
 
-if ( $table_exists ) {
-    $realtor_data = $wpdb->get_row(
-        $wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id),
-        ARRAY_A
-    );
+// Fetch existing realtor data
+if ($table_exists) {
+    $realtor_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE user_id = %d", $user_id), ARRAY_A);
 
-    // If no record exists, create one
-    if ( ! $realtor_data ) {
-        $wpdb->insert(
-            $table_name,
-            [
-                'user_id'    => $user_id,
-                'full_name'  => $full_name,
-                'created_at' => current_time('mysql'),
-            ]
-        );
-        $realtor_data = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id),
-            ARRAY_A
-        );
+    // Create row if not exists
+    if (!$realtor_data) {
+        $wpdb->insert($table, [
+            'user_id'    => $user_id,
+            'full_name'  => $full_name,
+            'created_at' => current_time('mysql'),
+        ]);
+        $realtor_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE user_id = %d", $user_id), ARRAY_A);
     }
 
-    // If record found, override values
-    if ( $realtor_data ) {
+    if ($realtor_data) {
         $phone          = $realtor_data['phone'] ?? '';
         $agency_name    = $realtor_data['agency_name'] ?? '';
         $license_number = $realtor_data['license_number'] ?? '';
@@ -50,7 +37,7 @@ if ( $table_exists ) {
     }
 }
 
-// Get profile picture
+// Profile picture
 $profile_picture = get_user_meta($user_id, 'profile_picture', true);
 $upload_dir      = wp_upload_dir();
 $default_avatar  = $upload_dir['baseurl'] . '/2025/08/client-photo.jpg';
@@ -71,24 +58,14 @@ $avatar_src      = $profile_picture ?: $default_avatar;
     <div class="rpe-header-content">
       <div class="piv-profile-pic-container">
         <div class="piv-profile-pic-wrapper">
-          <img class="realtor-avatar" id="profile-avatar" src="<?php echo esc_url( $avatar_src ); ?>" alt="Realtor Profile Pic">
-          <label for="profile-pic-upload" class="piv-edit-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-            </svg>
-          </label>
+          <img class="realtor-avatar" id="profile-avatar" src="<?php echo esc_url($avatar_src); ?>" alt="Realtor Profile Pic">
+          <label for="profile-pic-upload" class="piv-edit-icon">Edit</label>
           <input type="file" id="profile-pic-upload" accept="image/*" style="display: none;">
         </div>
       </div>
       <div class="rpe-profile-info">
-          <h1 class="rpe-profile-name" id="profile-display-name"><?php echo esc_html( $full_name ); ?></h1>
-          <span class="rpe-profile-role">
-              <?php 
-                $role = !empty($current_user->roles) ? $current_user->roles[0] : 'User';
-                echo esc_html( ucfirst($role) );
-              ?>
-          </span>
+        <h1 class="rpe-profile-name" id="profile-display-name"><?php echo esc_html($full_name); ?></h1>
+        <span class="rpe-profile-role"><?php echo esc_html(!empty($current_user->roles) ? ucfirst($current_user->roles[0]) : 'User'); ?></span>
       </div>
     </div>
   </div>

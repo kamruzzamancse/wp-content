@@ -1,7 +1,6 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-// Get current user data
 $current_user = wp_get_current_user();
 $user_id = $current_user->ID;
 
@@ -15,13 +14,15 @@ global $wpdb;
 $table_name = $wpdb->prefix . 'clients';
 $client_data = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table_name WHERE user_id = %d", $user_id), ARRAY_A);
 
-$full_name           = $client_data['full_name'] ?? $current_user->display_name;
-$email               = $client_data['email'] ?? $current_user->user_email;
-$phone               = $client_data['phone'] ?? '';
-$budget              = $client_data['budget'] ?? '';
-$preferred_location  = $client_data['preferred_location'] ?? '';
+// Always get full name and email from wp_users
+$full_name = $current_user->display_name;
+$email     = $current_user->user_email;
 
-// Get user role for display
+// Client-specific fields (always show, even if empty)
+$phone              = $client_data['phone'] ?? '';
+$budget             = $client_data['budget'] ?? '';
+$preferred_location = $client_data['preferred_location'] ?? '';
+
 $user_roles = $current_user->roles;
 $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
 ?>
@@ -40,7 +41,7 @@ $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
     <div class="rpe-header-content">
       <div class="piv-profile-pic-container">
         <div class="piv-profile-pic-wrapper">
-          <img class="realtor-avatar" id="profile-avatar" src="<?php echo esc_url($profile_picture); ?>" alt="Client Profile Pic">
+          <img class="client-avatar" id="profile-avatar" src="<?php echo esc_url($profile_picture); ?>" alt="Client Profile Pic">
           <label for="profile-pic-upload" class="piv-edit-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
@@ -58,29 +59,36 @@ $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
   </div>
 
   <form class="rpe-profile-form" id="profile-form">
+    <!-- Full Name -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Full name</label>
-      <input type="text" class="rpe-form-input" id="full-name" name="full_name" value="<?php echo esc_attr($full_name); ?>">
+      <input type="text" class="rpe-form-input" id="full-name" name="full_name"
+            value="<?php echo esc_attr($full_name); ?>" readonly>
     </div>
 
+    <!-- Email -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Email</label>
-      <input type="email" class="rpe-form-input" id="email" name="email" value="<?php echo esc_attr($email); ?>" disabled>
+      <input type="email" class="rpe-form-input" id="email" name="email"
+            value="<?php echo esc_attr($email); ?>" readonly>
     </div>
 
+    <!-- Phone -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Phone</label>
-      <input type="text" class="rpe-form-input" id="phone" name="phone" value="<?php echo esc_attr($phone); ?>">
+      <input type="text" class="rpe-form-input" name="phone" value="<?php echo esc_attr($phone); ?>">
     </div>
 
+    <!-- Budget -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Budget</label>
-      <input type="number" step="0.01" class="rpe-form-input" id="budget" name="budget" value="<?php echo esc_attr($budget); ?>">
+      <input type="number" step="0.01" class="rpe-form-input" name="budget" value="<?php echo esc_attr($budget); ?>">
     </div>
 
+    <!-- Preferred Location -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Preferred Location</label>
-      <input type="text" class="rpe-form-input" id="preferred-location" name="preferred_location" value="<?php echo esc_attr($preferred_location); ?>">
+      <input type="text" class="rpe-form-input" name="preferred_location" value="<?php echo esc_attr($preferred_location); ?>">
     </div>
 
     <div class="rpe-form-actions">
@@ -89,66 +97,6 @@ $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
     </div>
   </form>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function showNotice(message, type) {
-        const notice = document.getElementById('profile-notice');
-        notice.textContent = message;
-        notice.className = `profile-notice ${type}`;
-        notice.style.display = 'block';
-        setTimeout(() => notice.style.display = 'none', 5000);
-    }
-
-    function saveProfileData(formData) {
-        formData.append('action', 'save_client_profile_data');
-        formData.append('nonce', '<?php echo wp_create_nonce("profile_ajax_nonce"); ?>');
-
-        fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
-            method: 'POST',
-            body: formData
-        })
-        .then(res => res.json())
-        .then(res => {
-            if(res.success) showNotice('Profile updated successfully', 'success');
-            else showNotice('Error saving profile: ' + res.data, 'error');
-        })
-        .catch(() => showNotice('Error saving profile', 'error'));
-    }
-
-    document.getElementById('profile-pic-upload').addEventListener('change', function(e) {
-        if(e.target.files[0]) {
-            const formData = new FormData();
-            formData.append('action', 'upload_profile_picture');
-            formData.append('nonce', '<?php echo wp_create_nonce("profile_ajax_nonce"); ?>');
-            formData.append('profile_picture', e.target.files[0]);
-
-            fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(res => {
-                if(res.success) {
-                    document.getElementById('profile-avatar').src = res.data.url;
-                    showNotice('Profile picture updated successfully', 'success');
-                } else showNotice('Error uploading picture: ' + res.data, 'error');
-            })
-            .catch(() => showNotice('Error uploading picture', 'error'));
-        }
-    });
-
-    document.getElementById('profile-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const formData = new FormData(this);
-        saveProfileData(formData);
-    });
-
-    document.querySelector('.rpe-cancel-button').addEventListener('click', function() {
-        window.location.href = '?tab=cl-settings-pi';
-    });
-});
-</script>
 
 
 <style>
