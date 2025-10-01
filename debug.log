@@ -500,3 +500,19 @@ Stack trace:
 [30-Sep-2025 10:05:34 UTC] Save Profile: Nonce verification passed
 [30-Sep-2025 10:05:38 UTC] RT Profile Script Enqueued with Nonce: c8d1103628
 [30-Sep-2025 10:18:43 UTC] RT Profile Script Enqueued with Nonce: 54e5708f02
+[30-Sep-2025 11:21:59 UTC] PHP Fatal error:  Cannot redeclare create_rentcast_properties_table() (previously declared in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:543) in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rentcast-properties.php on line 7
+[30-Sep-2025 11:34:14 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/rt-profile-update.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 19
+[30-Sep-2025 11:34:14 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/rt-profile-update.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:19
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(104): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-admin\admin-ajax.php(22): require_once('C:\\xampp\\htdocs...')
+#4 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 19
+[30-Sep-2025 11:39:15 UTC] PHP Warning:  filemtime(): stat failed for C:\xampp\htdocs\mary/wp-content/themes/astra-child/assets/js/rt-client-profile.js in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 60
+[30-Sep-2025 11:42:39 UTC] RT Profile Script Enqueued with Nonce: 4dcc1731e1
+[30-Sep-2025 11:43:39 UTC] RT Profile Script Enqueued with Nonce: 4dcc1731e1
+[30-Sep-2025 11:43:53 UTC] Save Profile: Nonce verification passed
+[30-Sep-2025 11:44:43 UTC] Save Profile: Nonce verification passed
+[30-Sep-2025 11:47:48 UTC] RT Profile Script Enqueued with Nonce: 4dcc1731e1

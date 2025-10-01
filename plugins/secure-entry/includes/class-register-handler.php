@@ -54,32 +54,39 @@ class Enhanced_Register_Handler {
                 throw new Exception($this->get_error_message($user_id->get_error_code()));
             }
 
-            // Insert default row in wp_realtors table only if role is realtor
+            global $wpdb;
+
             if ($role === 'realtor') {
-                global $wpdb;
                 $table = $wpdb->prefix . 'realtors';
-
-                $existing = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COUNT(*) FROM $table WHERE user_id = %d",
-                    $user_id
-                ));
-
+                $existing = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE user_id = %d", $user_id));
                 if (!$existing) {
                     $wpdb->insert($table, [
-                        'user_id'       => $user_id,
-                        'full_name'     => $data['first_name'] . ' ' . $data['last_name'],
-                        'phone'         => $data['phone'] ?? '',
-                        'agency_name'   => $data['agency_name'] ?? '',
-                        'license_number'=> $data['license_number'] ?? '',
-                        'rating_avg'    => 0,
-                        'created_at'    => current_time('mysql')
+                        'user_id'        => $user_id,
+                        'full_name'      => $data['first_name'] . ' ' . $data['last_name'],
+                        'phone'          => $data['phone'] ?? '',
+                        'agency_name'    => $data['agency_name'] ?? '',
+                        'license_number' => $data['license_number'] ?? '',
+                        'rating_avg'     => 0,
+                        'created_at'     => current_time('mysql')
+                    ]);
+                }
+            } else { // client
+                $table = $wpdb->prefix . 'clients';
+                $existing = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE user_id = %d", $user_id));
+                if (!$existing) {
+                    $wpdb->insert($table, [
+                        'user_id'            => $user_id,
+                        'full_name'          => $data['first_name'] . ' ' . $data['last_name'],
+                        'phone'              => $data['phone'] ?? '',
+                        'budget'             => $data['budget'] ?? '',
+                        'preferred_location' => $data['preferred_location'] ?? '',
+                        'created_at'         => current_time('mysql')
                     ]);
                 }
             }
 
             wp_new_user_notification($user_id, null, 'both');
 
-            // Return success response
             wp_send_json_success([
                 'message'  => __('Registration successful. Please log in.', 'enhanced-login'),
                 'redirect' => home_url('/login/')
@@ -93,7 +100,6 @@ class Enhanced_Register_Handler {
     private function validate_registration_data($data) {
         $errors = [];
 
-        // Username validation
         if (empty($data['username'])) {
             $errors[] = __('Username is required.', 'enhanced-login');
         } elseif (username_exists($data['username'])) {
@@ -102,7 +108,6 @@ class Enhanced_Register_Handler {
             $errors[] = __('Invalid username.', 'enhanced-login');
         }
 
-        // Email validation
         if (empty($data['email'])) {
             $errors[] = __('Email is required.', 'enhanced-login');
         } elseif (!is_email($data['email'])) {
@@ -111,7 +116,6 @@ class Enhanced_Register_Handler {
             $errors[] = __('Email already exists.', 'enhanced-login');
         }
 
-        // Password validation
         if (empty($data['password'])) {
             $errors[] = __('Password is required.', 'enhanced-login');
         } elseif (strlen($data['password']) < 6) {
@@ -120,7 +124,6 @@ class Enhanced_Register_Handler {
             $errors[] = __('Passwords do not match.', 'enhanced-login');
         }
 
-        // Role validation
         if (empty($data['role']) || !in_array($data['role'], ['realtor', 'client'])) {
             $errors[] = __('Invalid role selected.', 'enhanced-login');
         }
@@ -136,7 +139,6 @@ class Enhanced_Register_Handler {
         }
     }
 
-    // Redirect URL helper by role
     private function get_redirect_url_by_role($role) {
         $urls = [
             'administrator' => home_url('/am/admin-dashboard/'),

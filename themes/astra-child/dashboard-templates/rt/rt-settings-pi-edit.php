@@ -100,6 +100,11 @@ $avatar_src      = $profile_picture ?: $default_avatar;
     </div>
 
     <div class="rpe-form-section">
+      <label class="rpe-form-label">Email</label>
+      <input type="email" class="rpe-form-input" id="email" value="<?php echo esc_attr($email); ?>" disabled>
+    </div>
+
+    <div class="rpe-form-section">
       <label class="rpe-form-label">Phone</label>
       <input type="text" class="rpe-form-input" id="phone" name="phone" value="<?php echo esc_attr($phone); ?>">
     </div>
@@ -117,11 +122,6 @@ $avatar_src      = $profile_picture ?: $default_avatar;
     <div class="rpe-form-section">
       <label class="rpe-form-label">Rating (Avg)</label>
       <input type="number" step="0.1" min="0" max="5" class="rpe-form-input" id="rating-avg" name="rating_avg" value="<?php echo esc_attr($rating_avg); ?>">
-    </div>
-
-    <div class="rpe-form-section">
-      <label class="rpe-form-label">Email</label>
-      <input type="email" class="rpe-form-input" id="email" value="<?php echo esc_attr($email); ?>" disabled>
     </div>
 
     <div class="rpe-form-actions">
