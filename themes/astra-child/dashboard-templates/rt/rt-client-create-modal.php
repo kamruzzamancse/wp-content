@@ -1,14 +1,12 @@
-<!-- Realtor - Client Create Modal -->
 <div id="rmRealtorClientCreateModal" class="modal-overlay-realtor-client" style="display:none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
     <div class="modal-content-realtor-client">
-
         <div class="realtor-client-create-container">
             <div class="create-header-realtor-client">
                 <h2>Create New Client</h2>
                 <span id="closeRealtorClientCreateModal" class="close-button-realtor-client">&times;</span>
             </div>
 
-            <form id="createRealtorClientForm" method="POST" enctype="multipart/form-data" novalidate>
+            <form id="createRealtorClientForm" method="POST" enctype="multipart/form-data">
                 <div class="create-content-realtor-client">
                     <div class="create-pic-container-realtor-client">
                         <label for="create_realtor_client_profile_picture" title="Click to upload profile picture">
@@ -21,42 +19,39 @@
                     </div>
 
                     <div class="create-details-realtor-client">
-
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_full_name">Full Name:</label>
-                            <input class="create-detail-value-realtor-client" type="text" id="create_realtor_client_full_name" name="realtor_client_full_name" required placeholder="Enter full name">
+                            <label for="create_realtor_client_full_name">Full Name: *</label>
+                            <input type="text" id="create_realtor_client_full_name" name="realtor_client_full_name" required placeholder="Enter full name">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_email">Email:</label>
-                            <input class="create-detail-value-realtor-client" type="email" id="create_realtor_client_email" name="realtor_client_email" required placeholder="Enter email address">
+                            <label for="create_realtor_client_email">Email: *</label>
+                            <input type="email" id="create_realtor_client_email" name="realtor_client_email" required placeholder="Enter email address">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_phone">Phone:</label>
-                            <input class="create-detail-value-realtor-client" type="text" id="create_realtor_client_phone" name="realtor_client_phone" placeholder="Enter phone number">
+                            <label for="create_realtor_client_phone">Phone:</label>
+                            <input type="text" id="create_realtor_client_phone" name="realtor_client_phone" placeholder="Enter phone number">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_preferred_location">Preferred Location:</label>
-                            <input class="create-detail-value-realtor-client" type="text" id="create_realtor_client_preferred_location" name="preferred_location" placeholder="Enter preferred location">
+                            <label for="create_realtor_client_preferred_location">Preferred Location:</label>
+                            <input type="text" id="create_realtor_client_preferred_location" name="preferred_location" placeholder="Enter preferred location">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_note">Note:</label>
-                            <textarea class="create-detail-value-realtor-client" id="create_realtor_client_note" name="realtor_client_note" rows="4" placeholder="Enter note"></textarea>
+                            <label for="create_realtor_client_note">Note:</label>
+                            <textarea id="create_realtor_client_note" name="realtor_client_note" rows="4" placeholder="Enter note"></textarea>
                         </div>
 
-                        <!-- New dropdown for Lead / Active -->
                         <div class="create-detail-row-realtor-client">
-                            <label class="create-detail-label-realtor-client" for="create_realtor_client_status">Status:</label>
-                            <select class="create-detail-value-realtor-client" id="create_realtor_client_status" name="realtor_client_status" required>
+                            <label for="create_realtor_client_status">Status: *</label>
+                            <select id="create_realtor_client_status" name="realtor_client_status" required>
                                 <option value="" disabled selected>Select Status</option>
                                 <option value="lead">Lead</option>
                                 <option value="active">Active</option>
                             </select>
                         </div>
-
                     </div>
                 </div>
 
@@ -65,9 +60,40 @@
                 </div>
             </form>
         </div>
-
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const createModal = document.getElementById('rmRealtorClientCreateModal');
+        const addContactBtn = document.querySelector('.ab-btn-create');
+        const closeBtn = document.getElementById('closeRealtorClientCreateModal');
+
+        // Open modal
+        if(addContactBtn && createModal){
+            addContactBtn.addEventListener('click', () => createModal.style.display='flex');
+        }
+
+        // Close modal
+        if(closeBtn && createModal){
+            closeBtn.addEventListener('click', () => createModal.style.display='none');
+            createModal.addEventListener('click', e => { if(e.target === createModal) createModal.style.display='none'; });
+        }
+
+        // Image preview
+        const profileInput = document.getElementById('create_realtor_client_profile_picture');
+        if(profileInput){
+            profileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if(file){
+                    const reader = new FileReader();
+                    reader.onload = e => document.getElementById('createRealtorClientPreviewAvatar').src = e.target.result;
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
 
 <style>
 /* Modal overlay and centering */

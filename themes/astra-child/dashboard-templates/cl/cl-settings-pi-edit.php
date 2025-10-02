@@ -22,6 +22,12 @@ $email     = $current_user->user_email;
 $phone              = $client_data['phone'] ?? '';
 $budget             = $client_data['budget'] ?? '';
 $preferred_location = $client_data['preferred_location'] ?? '';
+$client_profile_pic = $client_data['profile_picture'] ?? '';
+
+// Use profile picture from clients table if available, otherwise from user meta
+if (!empty($client_profile_pic)) {
+    $profile_picture = $client_profile_pic;
+}
 
 $user_roles = $current_user->roles;
 $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
@@ -59,36 +65,38 @@ $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
   </div>
 
   <form class="rpe-profile-form" id="profile-form">
-    <!-- Full Name -->
+    <!-- Full Name (Readonly) -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Full name</label>
       <input type="text" class="rpe-form-input" id="full-name" name="full_name"
-            value="<?php echo esc_attr($full_name); ?>" readonly>
+            value="<?php echo esc_attr($full_name); ?>" readonly 
+            style="background-color: #f8f9fa; cursor: not-allowed;">
     </div>
 
-    <!-- Email -->
+    <!-- Email (Readonly) -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Email</label>
       <input type="email" class="rpe-form-input" id="email" name="email"
-            value="<?php echo esc_attr($email); ?>" readonly>
+            value="<?php echo esc_attr($email); ?>" readonly
+            style="background-color: #f8f9fa; cursor: not-allowed;">
     </div>
 
     <!-- Phone -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Phone</label>
-      <input type="text" class="rpe-form-input" name="phone" value="<?php echo esc_attr($phone); ?>">
+      <input type="text" class="rpe-form-input" name="phone" value="<?php echo esc_attr($phone); ?>" placeholder="Enter your phone number">
     </div>
 
     <!-- Budget -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Budget</label>
-      <input type="number" step="0.01" class="rpe-form-input" name="budget" value="<?php echo esc_attr($budget); ?>">
+      <input type="number" step="0.01" class="rpe-form-input" name="budget" value="<?php echo esc_attr($budget); ?>" placeholder="Enter your budget">
     </div>
 
     <!-- Preferred Location -->
     <div class="rpe-form-section">
       <label class="rpe-form-label">Preferred Location</label>
-      <input type="text" class="rpe-form-input" name="preferred_location" value="<?php echo esc_attr($preferred_location); ?>">
+      <input type="text" class="rpe-form-input" name="preferred_location" value="<?php echo esc_attr($preferred_location); ?>" placeholder="Enter preferred location">
     </div>
 
     <div class="rpe-form-actions">
@@ -97,7 +105,6 @@ $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
     </div>
   </form>
 </div>
-
 
 <style>
   /* Back Link Styles */

@@ -36,7 +36,7 @@ function redbm_create_tables() {
     // Clients table
     $tables[] = "CREATE TABLE {$wpdb->prefix}clients (
         client_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-        user_id BIGINT(20) UNSIGNED NOT NULL,
+        user_id BIGINT(20) UNSIGNED NULL,
         full_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
         phone VARCHAR(50),
@@ -44,7 +44,11 @@ function redbm_create_tables() {
         preferred_location VARCHAR(255),
         note TEXT,
         status VARCHAR(50),
+        profile_picture VARCHAR(500) NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        deleted_at DATETIME NULL DEFAULT NULL,
+        created_by BIGINT(20) UNSIGNED NULL,
+        deleted_by BIGINT(20) UNSIGNED NULL,
         PRIMARY KEY (client_id)
     ) $charset_collate;";
 

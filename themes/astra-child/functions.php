@@ -22,13 +22,16 @@ add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
 // ======================
 require_once get_stylesheet_directory() . '/includes/rt-realtor-profile.php';
 require_once get_stylesheet_directory() . '/includes/cl-client-profile.php';
+require_once get_stylesheet_directory() . '/includes/cl-client-create.php';
 require_once get_stylesheet_directory() . '/includes/rentcast-properties.php';
 
 // ======================
-// Enqueue profile scripts conditionally
+// Enqueue profile & client create scripts conditionally
 // ======================
 function mdk_enqueue_profile_scripts() {
+
     if (isset($_GET['tab'])) {
+
         // Realtor profile pages
         if (in_array($_GET['tab'], ['rt-settings-pi-edit','rt-settings-pi'], true)) {
             wp_enqueue_script(
@@ -58,7 +61,24 @@ function mdk_enqueue_profile_scripts() {
                 'nonce'    => wp_create_nonce('cl_profile_nonce'),
             ]);
         }
+
+        // Enqueue scripts for address book tab
+        if (isset($_GET['tab']) && in_array($_GET['tab'], ['rt-tab-address-book'], true)) {
+            wp_enqueue_script(
+                'cl-client-create-script',
+                get_stylesheet_directory_uri() . '/assets/js/rt-client-create.js',
+                ['jquery'],
+                filemtime(get_stylesheet_directory() . '/assets/js/rt-client-create.js'),
+                true
+            );
+            wp_localize_script('cl-client-create-script', 'cl_client_create_ajax', [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('cl_client_create_nonce'),
+            ]);
+        }
+
     }
+
 }
 add_action('wp_enqueue_scripts', 'mdk_enqueue_profile_scripts');
 

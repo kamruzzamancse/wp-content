@@ -39,8 +39,8 @@
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_address">Address:</label>
-                            <input class="edit-detail-value-realtor-client" type="text" id="edit_realtor_client_address" name="realtor_client_address" placeholder="Enter address">
+                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_preferred_location">Preferred Location:</label>
+                            <input class="edit-detail-value-realtor-client" type="text" id="edit_realtor_client_preferred_location" name="preferred_location" placeholder="Enter preferred location">
                         </div>
 
                         <div class="edit-detail-row-realtor-client">

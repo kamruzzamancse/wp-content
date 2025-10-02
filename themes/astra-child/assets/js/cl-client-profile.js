@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ======================
-    // Upload profile picture
+    // Upload profile picture (Updates both user meta and clients table)
     // ======================
     const profilePicInput = document.getElementById('profile-pic-upload');
     profilePicInput?.addEventListener('change', function(e) {
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ======================
-    // Save client profile (with email)
+    // Save client profile (Updates both wp_users and wp_clients tables)
     // ======================
     const profileForm = document.getElementById('profile-form');
     profileForm?.addEventListener('submit', function(e) {
@@ -45,41 +45,28 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('action', 'save_cl_profile_data');
         formData.append('nonce', cl_profile_ajax.nonce);
 
+        // Show loading state
+        const submitBtn = profileForm.querySelector('.rpe-save-button');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Saving...';
+        submitBtn.disabled = true;
+
         fetch(cl_profile_ajax.ajax_url, { method: 'POST', body: formData })
             .then(res => res.json())
             .then(res => {
                 if(res.success) {
                     showNotice('Profile updated successfully', 'success');
+                    // Update displayed name immediately
+                    document.getElementById('profile-display-name').textContent = document.getElementById('full-name').value;
                 } else {
                     showNotice('Error saving profile: ' + (res.data || res.message), 'error');
                 }
             })
-            .catch(() => showNotice('Error saving profile', 'error'));
-    });
-
-    // ======================
-    // Create Realtor Client Form Submit
-    // ======================
-    const createForm = document.getElementById('createRealtorClientForm');
-    createForm?.addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        const formData = new FormData(createForm);
-        formData.append('action', 'save_rt_client_data');
-        formData.append('nonce', cl_profile_ajax.nonce);
-
-        fetch(cl_profile_ajax.ajax_url, { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(res => {
-                if(res.success) {
-                    showNotice('Client created successfully!', 'success');
-                    createForm.reset();
-                    document.getElementById('rmRealtorClientCreateModal').style.display = 'none';
-                } else {
-                    showNotice('Error creating client: ' + (res.data || res.message), 'error');
-                }
-            })
-            .catch(() => showNotice('Error creating client', 'error'));
+            .catch(() => showNotice('Error saving profile', 'error'))
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
     });
 
     // ======================
