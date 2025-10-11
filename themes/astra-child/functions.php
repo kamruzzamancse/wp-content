@@ -1,14 +1,13 @@
 <?php
 /**
  * Astra Child Theme Functions
- * Fully updated & cleaned version
+ * Updated with proper client edit AJAX enqueue
  */
 
-// Exit if accessed directly
-if (!defined('ABSPATH')) exit;
+if (!defined('ABSPATH')) exit; // Prevent direct access
 
 // ======================
-// Enqueue parent & child theme styles
+// Enqueue Parent + Child Styles
 // ======================
 function astra_child_enqueue_theme_styles() {
     wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
@@ -18,81 +17,101 @@ function astra_child_enqueue_theme_styles() {
 add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
 
 // ======================
-// Include required files
+// Include Required Files
 // ======================
-require_once get_stylesheet_directory() . '/includes/rt-realtor-profile.php';
 require_once get_stylesheet_directory() . '/includes/cl-client-profile.php';
-require_once get_stylesheet_directory() . '/includes/cl-client-create.php';
-require_once get_stylesheet_directory() . '/includes/cl-client-edit.php';
+require_once get_stylesheet_directory() . '/includes/rt-realtor-profile.php';
+require_once get_stylesheet_directory() . '/includes/rt-client-create.php';
+require_once get_stylesheet_directory() . '/includes/rt-client-edit.php';
+require_once get_stylesheet_directory() . '/includes/rt-client-delete.php';
 require_once get_stylesheet_directory() . '/includes/rentcast-properties.php';
 
-
 // ======================
-// Enqueue profile & client create scripts conditionally
+// Conditional Script Enqueues
 // ======================
 function mdk_enqueue_profile_scripts() {
 
-    if (isset($_GET['tab'])) {
+    if (!isset($_GET['tab'])) return;
 
-        // Realtor profile pages
-        if (in_array($_GET['tab'], ['rt-settings-pi-edit','rt-settings-pi'], true)) {
-            wp_enqueue_script(
-                'rt-profile-script',
-                get_stylesheet_directory_uri() . '/assets/js/rt-realtor-profile.js',
-                ['jquery'],
-                filemtime(get_stylesheet_directory() . '/assets/js/rt-realtor-profile.js'),
-                true
-            );
-            wp_localize_script('rt-profile-script', 'rt_profile_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('rt_profile_nonce'),
-            ]);
-        }
+    $tab = sanitize_text_field($_GET['tab']);
 
-        // Client profile pages
-        if (in_array($_GET['tab'], ['cl-settings-pi','cl-settings-pi-edit'], true)) {
-            wp_enqueue_script(
-                'cl-profile-script',
-                get_stylesheet_directory_uri() . '/assets/js/cl-client-profile.js',
-                ['jquery'],
-                filemtime(get_stylesheet_directory() . '/assets/js/cl-client-profile.js'),
-                true
-            );
-            wp_localize_script('cl-profile-script', 'cl_profile_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('cl_profile_nonce'),
-            ]);
-        }
+    // ------------------------------
+    // Realtor Profile (View/Edit)
+    // ------------------------------
+    if (in_array($tab, ['rt-settings-pi', 'rt-settings-pi-edit'], true)) {
+        wp_enqueue_script(
+            'rt-profile-script',
+            get_stylesheet_directory_uri() . '/assets/js/rt-realtor-profile.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-realtor-profile.js'),
+            true
+        );
+        wp_localize_script('rt-profile-script', 'rt_profile_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_profile_nonce'),
+        ]);
+    }
 
-        if (isset($_GET['tab']) && in_array($_GET['tab'], ['rt-tab-address-book'], true)) {
+    // ------------------------------
+    // Client Profile (View/Edit)
+    // ------------------------------
+    if (in_array($tab, ['cl-settings-pi', 'cl-settings-pi-edit'], true)) {
+        wp_enqueue_script(
+            'cl-profile-script',
+            get_stylesheet_directory_uri() . '/assets/js/cl-client-profile.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/cl-client-profile.js'),
+            true
+        );
+        wp_localize_script('cl-profile-script', 'cl_profile_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('cl_profile_nonce'),
+        ]);
+    }
 
-            // Create client script
-            wp_enqueue_script(
-                'cl-client-create-script',
-                get_stylesheet_directory_uri() . '/assets/js/rt-client-create.js',
-                ['jquery'],
-                filemtime(get_stylesheet_directory() . '/assets/js/rt-client-create.js'),
-                true
-            );
-            wp_localize_script('cl-client-create-script', 'cl_client_create_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('cl_client_create_nonce'),
-            ]);
+    // ------------------------------
+    // Address Book Page (Create + Edit + Delete Clients)
+    // ------------------------------
+    if ($tab === 'rt-tab-address-book') {
 
-            // Edit client script
-            wp_enqueue_script(
-                'cl-client-edit-script',
-                get_stylesheet_directory_uri() . '/assets/js/rt-client-edit.js',
-                ['jquery'],
-                filemtime(get_stylesheet_directory() . '/assets/js/rt-client-edit.js'),
-                true
-            );
-            wp_localize_script('cl-client-edit-script', 'cl_client_edit_ajax', [
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce'    => wp_create_nonce('cl_client_edit_nonce'),
-            ]);
-        }
+        // Client Create Script
+        wp_enqueue_script(
+            'cl-client-create-script',
+            get_stylesheet_directory_uri() . '/assets/js/rt-client-create.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-client-create.js'),
+            true
+        );
+        wp_localize_script('cl-client-create-script', 'cl_client_create_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('cl_client_create_nonce'),
+        ]);
 
+        // Client Edit Script
+        wp_enqueue_script(
+            'cl-client-edit-script',
+            get_stylesheet_directory_uri() . '/assets/js/rt-client-edit.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-client-edit.js'),
+            true
+        );
+        wp_localize_script('cl-client-edit-script', 'cl_client_edit_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('cl_client_edit_nonce'),
+        ]);
+
+        // Client Delete Script
+        /* wp_enqueue_script(
+            'cl-client-delete-script',
+            get_stylesheet_directory_uri() . '/assets/js/rt-client-delete.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-client-delete.js'),
+            true
+        );
+        wp_localize_script('cl-client-delete-script', 'cl_client_delete_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('cl_client_delete_nonce'),
+        ]); */
     }
 
 }

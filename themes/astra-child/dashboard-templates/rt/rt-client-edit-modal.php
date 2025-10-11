@@ -1,14 +1,14 @@
-<!-- Realtor - Client Edit Modal -->
-<div id="rmRealtorClientEditModal" class="modal-overlay-realtor-client-edit">
-    <div class="modal-content-realtor-client-edit">
-
+<div id="rmRealtorClientEditModal" class="modal-overlay-realtor-client" style="display:none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999;">
+    <div class="modal-content-realtor-client">
         <div class="realtor-client-edit-container">
             <div class="edit-header-realtor-client">
                 <h2>Edit Client</h2>
-                <span id="closeRealtorClientEditModal" class="close-button-realtor-client-edit">&times;</span>
+                <span id="closeRealtorClientEditModal" class="close-button-realtor-client">&times;</span>
             </div>
 
-            <form id="editRealtorClientForm" method="POST" enctype="multipart/form-data" novalidate>
+            <form id="editRealtorClientForm" method="POST" enctype="multipart/form-data">
+                <input type="hidden" id="edit_realtor_client_id" name="realtor_client_id">
+                
                 <div class="edit-content-realtor-client">
                     <div class="edit-pic-container-realtor-client">
                         <label for="edit_realtor_client_profile_picture" title="Click to upload profile picture">
@@ -21,43 +21,34 @@
                     </div>
 
                     <div class="edit-details-realtor-client">
-                        <input type="hidden" name="realtor_client_id" id="edit_realtor_client_id">
-
                         <div class="edit-detail-row-realtor-client">
-                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_full_name">Full Name:</label>
-                            <input class="edit-detail-value-realtor-client" type="text" id="edit_realtor_client_full_name" name="realtor_client_full_name" required placeholder="Enter full name">
+                            <label for="edit_realtor_client_full_name">Full Name: *</label>
+                            <input type="text" id="edit_realtor_client_full_name" name="realtor_client_full_name" required>
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_email">Email:</label>
-                            <input class="edit-detail-value-realtor-client" type="email" id="edit_realtor_client_email" name="realtor_client_email" required placeholder="Enter email address">
+                            <label for="edit_realtor_client_email">Email: *</label>
+                            <input type="email" id="edit_realtor_client_email" name="realtor_client_email" required>
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_phone">Phone Number:</label>
-                            <input class="edit-detail-value-realtor-client" type="text" id="edit_realtor_client_phone" name="realtor_client_phone" placeholder="Enter phone number">
+                            <label for="edit_realtor_client_phone">Phone:</label>
+                            <input type="text" id="edit_realtor_client_phone" name="realtor_client_phone">
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_preferred_location">Preferred Location:</label>
-                            <input class="edit-detail-value-realtor-client" type="text" id="edit_realtor_client_preferred_location" name="preferred_location" placeholder="Enter preferred location">
+                            <label for="edit_realtor_client_notes">Notes:</label>
+                            <textarea id="edit_realtor_client_notes" name="realtor_client_note" rows="4"></textarea>
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_note">Note:</label>
-                            <textarea class="edit-detail-value-realtor-client" id="edit_realtor_client_note" name="realtor_client_note" rows="4" placeholder="Enter note"></textarea>
-                        </div>
-
-                        <!-- New dropdown for Lead / Active -->
-                        <div class="edit-detail-row-realtor-client">
-                            <label class="edit-detail-label-realtor-client" for="edit_realtor_client_status">Status:</label>
-                            <select class="edit-detail-value-realtor-client" id="edit_realtor_client_status" name="realtor_client_status" required>
-                                <option value="" disabled selected>Select Status</option>
+                            <label for="edit_realtor_client_status">Status: *</label>
+                            <select id="edit_realtor_client_status" name="realtor_client_status" required>
+                                <option value="" disabled>Select Status</option>
                                 <option value="lead">Lead</option>
                                 <option value="active">Active</option>
                             </select>
                         </div>
-
                     </div>
                 </div>
 
@@ -66,9 +57,9 @@
                 </div>
             </form>
         </div>
-
     </div>
 </div>
+
 
 <style>
 .modal-overlay-realtor-client-edit {

@@ -107,3 +107,101 @@ Stack trace:
 #72 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
 #73 {main}
   thrown in C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\CurlFactory.php on line 191
+[11-Oct-2025 04:13:11 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\cl-client-profile.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:13:11 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:23
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:13:24 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\cl-client-profile.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:13:24 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:23
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:13:37 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\cl-client-profile.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:13:37 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:23
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:13:50 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\cl-client-profile.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:13:50 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:23
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:14:03 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:14:03 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:23
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:14:16 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:14:16 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-profile.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:23
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 23
+[11-Oct-2025 04:14:29 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-create.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 24
+[11-Oct-2025 04:14:29 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-create.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:24
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 24
+[11-Oct-2025 04:14:42 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-create.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 24
+[11-Oct-2025 04:14:42 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/cl-client-create.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:24
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 24
+[11-Oct-2025 04:27:37 UTC] PHP Warning:  Undefined array key "preferred_location" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-client-edit.php on line 43
+[11-Oct-2025 04:27:57 UTC] PHP Warning:  Undefined array key "preferred_location" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-client-edit.php on line 43
+[11-Oct-2025 05:14:20 UTC] PHP Warning:  require_once(C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/rt-client-delete.php): Failed to open stream: No such file or directory in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 26
+[11-Oct-2025 05:14:20 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'C:\xampp\htdocs\mary/wp-content/themes/astra-child/includes/rt-client-delete.php' (include_path='C:\xampp\php\PEAR') in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php:26
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-settings.php(695): include()
+#1 C:\xampp\htdocs\mary\wp-config.php(105): require_once('C:\\xampp\\htdocs...')
+#2 C:\xampp\htdocs\mary\wp-load.php(50): require_once('C:\\xampp\\htdocs...')
+#3 C:\xampp\htdocs\mary\wp-blog-header.php(13): require_once('C:\\xampp\\htdocs...')
+#4 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#5 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\themes\astra-child\functions.php on line 26
+[11-Oct-2025 05:45:36 UTC] PHP Notice:  Function wpdb::prepare was called <strong>incorrectly</strong>. The query argument of wpdb::prepare() must have a placeholder. Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 3.9.0.) in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[11-Oct-2025 06:09:21 UTC] PHP Warning:  Undefined array key "preferred_location" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-client-edit.php on line 43
+[11-Oct-2025 06:09:34 UTC] PHP Warning:  Undefined array key "preferred_location" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-client-edit.php on line 43
+[11-Oct-2025 06:22:58 UTC] PHP Warning:  Undefined array key "preferred_location" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-client-edit.php on line 43
+[11-Oct-2025 06:23:07 UTC] PHP Warning:  Undefined array key "preferred_location" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-client-edit.php on line 43
+[11-Oct-2025 06:24:50 UTC] PHP Warning:  Undefined array key "preferred_location" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-client-edit.php on line 43

@@ -23,6 +23,7 @@
             </div>
         </div>
     </div>
+
     <table>
         <thead>
             <tr>
@@ -39,29 +40,31 @@
             <?php
             global $wpdb;
 
-            $clients = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}clients ORDER BY created_at DESC", ARRAY_A);
+            $clients = $wpdb->get_results(
+                "SELECT * FROM {$wpdb->prefix}clients WHERE deleted_at IS NULL ORDER BY created_at DESC",
+                ARRAY_A
+            );
 
-            if ($clients && !empty($clients)) :
-                foreach($clients as $client):
-                    // Use client's profile picture from clients table, fallback to user meta or default
-                    if (!empty($client['profile_picture'])) {
-                        $profile_pic = $client['profile_picture'];
-                    } else {
-                        // Fallback to user meta
-                        $profile_pic = $wpdb->get_var($wpdb->prepare(
-                            "SELECT meta_value FROM {$wpdb->prefix}usermeta WHERE user_id = %d AND meta_key = %s LIMIT 1",
-                            $client['user_id'],
-                            'profile_picture'
-                        ));
-                        
-                        // Final fallback
-                        if (empty($profile_pic)) {
-                            $profile_pic = 'https://www.pngkey.com/png/full/114-1149847_avatar-profile-png.png';
-                        }
+            if ($clients):
+                foreach ($clients as $client):
+
+                    // Profile picture logic
+                    $profile_pic = !empty($client['profile_picture'])
+                        ? $client['profile_picture']
+                        : $wpdb->get_var(
+                            $wpdb->prepare(
+                                "SELECT meta_value FROM {$wpdb->prefix}usermeta WHERE user_id = %d AND meta_key = %s LIMIT 1",
+                                $client['user_id'],
+                                'profile_picture'
+                            )
+                        );
+
+                    if (empty($profile_pic)) {
+                        $profile_pic = 'https://www.pngkey.com/png/full/114-1149847_avatar-profile-png.png';
                     }
             ?>
             <tr class="client-row" data-client-id="<?php echo intval($client['client_id']); ?>">
-                <td class="ab-sl-column" data-label=" ">
+                <td class="ab-sl-column" data-label=" " >
                     <img src="<?php echo esc_url($profile_pic); ?>" 
                         alt="Profile Pic" class="profile-pic" 
                         style="border-radius:50%; width:40px; height:40px; object-fit:cover;">
@@ -76,7 +79,7 @@
                 <td class="ab-actions-column" data-label="Actions">
                     <div class="ab-action-icons">
                         <span class="ab-action-icon ab-editClientDetails" title="Edit">✏️</span>
-                        <span class="ab-action-icon" title="Delete">🗑️</span>
+                        <span class="ab-action-icon ab-deleteClient" title="Delete">🗑️</span>
                     </div>
                 </td>
             </tr>
@@ -84,19 +87,70 @@
                 endforeach;
             else:
             ?>
-                <tr>
-                    <td colspan="6" style="text-align:center; padding:15px;">No Clients Found</td>
-                </tr>
+            <tr>
+                <td colspan="7" style="text-align:center; padding:15px;">No Clients Found</td>
+            </tr>
             <?php endif; ?>
         </tbody>
     </table>
 </div>
 
 <?php 
+    // Include modals for create/edit/details
     include locate_template('dashboard-templates/rt/rt-client-details-modal.php');
     include locate_template('dashboard-templates/rt/rt-client-create-modal.php');
     include locate_template('dashboard-templates/rt/rt-client-edit-modal.php');
 ?>
+
+<!-- Add JS object for delete AJAX -->
+<script>
+const cl_client_delete_ajax = {
+    ajax_url: '<?php echo admin_url("admin-ajax.php"); ?>',
+    nonce: '<?php echo wp_create_nonce("cl_client_delete_nonce"); ?>'
+};
+</script>
+
+<!-- Delete client -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.ab-deleteClient').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const row = this.closest('tr');
+            const clientId = row.dataset.clientId;
+            if (!clientId) return;
+
+            if (!confirm('Are you sure you want to delete this client?')) return;
+
+            // Disable button while processing
+            btn.textContent = 'Deleting...';
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('action', 'delete_realtor_client_ajax');
+            formData.append('nonce', cl_client_delete_ajax.nonce);
+            formData.append('client_id', clientId);
+
+            fetch(cl_client_delete_ajax.ajax_url, { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Client deleted successfully!');
+                        row.remove();
+                    } else {
+                        alert('Error: ' + data.data);
+                        btn.textContent = '🗑️';
+                        btn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    alert('Network error: ' + err.message);
+                    btn.textContent = '🗑️';
+                    btn.disabled = false;
+                });
+        });
+    });
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -207,64 +261,109 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const editModal = document.getElementById('rmRealtorClientEditModal');
+    const closeEditBtn = document.getElementById('closeRealtorClientEditModal');
+    const form = document.getElementById('editRealtorClientForm');
 
-    // Open Edit Modal on Edit icon click
+    // Open edit modal on edit button click
     document.querySelectorAll('.ab-editClientDetails').forEach(btn => {
         btn.addEventListener('click', function() {
-            const row = btn.closest('tr');
+            const clientId = this.closest('tr').dataset.clientId;
+            if (!clientId) return;
 
-            // Get values from table row
-            const fullName = row.querySelector('.client-name-text')?.textContent.trim() || '';
-            const email    = row.querySelector('td[data-label="Email"]')?.textContent.trim() || '';
-            const phone    = row.querySelector('td[data-label="Phone Number"]')?.textContent.trim() || '';
-            const notes    = row.querySelector('td[data-label="Notes"]')?.textContent.trim() || '';
-            const profile  = row.querySelector('td.ab-sl-column img')?.src || '';
+            // Show modal
+            editModal.style.display = 'flex';
 
-            // Show the Realtor Edit Modal
-            const editModal = document.getElementById('rmRealtorClientEditModal');
-            if(editModal){
-                editModal.style.display = 'flex';
-
-                // Populate modal fields
-                editModal.querySelector('#edit_realtor_client_full_name').value = fullName;
-                editModal.querySelector('#edit_realtor_client_email').value = email;
-                editModal.querySelector('#edit_realtor_client_phone').value = phone;
-                editModal.querySelector('#edit_realtor_client_notes').value = notes;
-
-                // Optional: profile picture preview
-                const profileImg = editModal.querySelector('#editRealtorClientPreviewAvatar');
-                if(profileImg) profileImg.src = profile;
-            }
+            // Fetch client data via AJAX
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    action: 'fetch_realtor_client_ajax',
+                    nonce: '<?php echo wp_create_nonce('cl_client_edit_nonce'); ?>',
+                    client_id: clientId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const client = data.data;
+                    document.getElementById('edit_realtor_client_id').value = client.client_id;
+                    document.getElementById('edit_realtor_client_full_name').value = client.full_name;
+                    document.getElementById('edit_realtor_client_email').value = client.email;
+                    document.getElementById('edit_realtor_client_phone').value = client.phone;
+                    document.getElementById('edit_realtor_client_notes').value = client.note;
+                    document.getElementById('edit_realtor_client_status').value = client.status;
+                    document.getElementById('editRealtorClientPreviewAvatar').src = client.profile_picture || "<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
+                } else {
+                    alert('Failed to fetch client data');
+                    editModal.style.display = 'none';
+                }
+            })
+            .catch(err => {
+                alert('Network error. Please try again.');
+                editModal.style.display = 'none';
+            });
         });
     });
 
-    // Close modal on close button click
-    const closeEditBtn = document.getElementById('closeRealtorClientEditModal');
-    if(closeEditBtn){
-        closeEditBtn.addEventListener('click', function() {
-            document.getElementById('rmRealtorClientEditModal').style.display = 'none';
+    // Close modal
+    if (closeEditBtn) {
+        closeEditBtn.addEventListener('click', () => editModal.style.display = 'none');
+        editModal.addEventListener('click', e => {
+            if (e.target === editModal) editModal.style.display = 'none';
         });
     }
 
-    // Close modal on clicking outside modal content
-    const editModal = document.getElementById('rmRealtorClientEditModal');
-    if(editModal){
-        editModal.addEventListener('click', function(e) {
-            if(e.target === editModal) editModal.style.display = 'none';
+    // Image preview functionality
+    const profileInput = document.getElementById('edit_realtor_client_profile_picture');
+    if (profileInput) {
+        profileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('editRealtorClientPreviewAvatar').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
         });
     }
 
-    // Handle form submission (AJAX or demo alert)
-    const editForm = document.getElementById('editRealtorClientForm');
-    if(editForm){
-        editForm.addEventListener('submit', function(e) {
+    // Form submission (Update client)
+    if (form) {
+        form.addEventListener('submit', function(e) {
             e.preventDefault();
-            // You can replace this alert with AJAX call to update wp_clients
-            alert('Client details updated successfully! (Demo)');
-            editModal.style.display = 'none';
+            const formData = new FormData(form);
+            formData.append('action', 'update_realtor_client_ajax');
+            formData.append('nonce', '<?php echo wp_create_nonce('cl_client_edit_nonce'); ?>');
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Updating...';
+            submitBtn.disabled = true;
+
+            fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Client updated successfully!');
+                    form.reset();
+                    editModal.style.display = 'none';
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    alert('Error: ' + data.data);
+                }
+            })
+            .catch(err => alert('Network error. Please try again.'))
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
         });
     }
-
 });
 </script>
 
@@ -274,13 +373,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const clientDetailsModal = document.getElementById('clientDetailsModal');
     const closeClientDetailsModalBtn = document.getElementById('closeClientDetailsModal');
 
-    // Open modal when clicking the "View" icon
-//     document.querySelectorAll('.ab-viewClientDetails').forEach(btn => {
-//         btn.addEventListener('click', function(e){
-//             e.stopPropagation();
-//             if(clientDetailsModal) clientDetailsModal.style.display = 'flex';
-//         });
-//     });
 	document.querySelectorAll('.client-name-text').forEach(span => {
 		span.addEventListener('click', function(e){
 			e.stopPropagation();
@@ -288,17 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
 			if (clientDetailsModal) clientDetailsModal.style.display = 'flex';
 		});
 	});
-
-
-    // Also open modal when clicking the client name text
-    document.querySelectorAll('.client-name-text').forEach(span => {
-        span.addEventListener('click', function(e){
-            e.stopPropagation();
-            const row = this.closest('tr');
-            const viewButton = row.querySelector('.ab-viewClientDetails');
-            if(viewButton) viewButton.click();
-        });
-    });
 
     // Close modal
     if(closeClientDetailsModalBtn){
@@ -314,20 +395,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Delete functionality for Address Book
-    document.querySelectorAll('.ab-actions-column .ab-action-icon[title="Delete"]').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const row = btn.closest('tr');
-            if (confirm("Are you sure you want to delete this client?")) {
-                row.remove();
-            }
-        });
-    });
 });
 </script>
 
