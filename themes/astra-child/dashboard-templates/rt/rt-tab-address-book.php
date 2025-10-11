@@ -31,6 +31,7 @@
                 <th class="email">Email</th>
                 <th class="phone-number">Phone Number</th>
                 <th class="notes">Notes</th>
+                <th class="Status">Status</th>
                 <th class="ab-actions-column">Actions</th>
             </tr>
         </thead>
@@ -55,7 +56,7 @@
                         
                         // Final fallback
                         if (empty($profile_pic)) {
-                            $profile_pic = "https://i.pravatar.cc/40?img=" . rand(1,70);
+                            $profile_pic = 'https://www.pngkey.com/png/full/114-1149847_avatar-profile-png.png';
                         }
                     }
             ?>
@@ -71,6 +72,7 @@
                 <td data-label="Email"><?php echo esc_html($client['email']); ?></td>
                 <td data-label="Phone Number"><?php echo esc_html($client['phone']); ?></td>
                 <td data-label="Notes"><?php echo esc_html($client['note']); ?></td>
+                <td data-label="Status"><?php echo esc_html($client['status']); ?></td>
                 <td class="ab-actions-column" data-label="Actions">
                     <div class="ab-action-icons">
                         <span class="ab-action-icon ab-editClientDetails" title="Edit">✏️</span>
@@ -329,27 +331,28 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-
 <style>
 /* ==== Table & Modal CSS ==== */
-table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px; background: #fff; table-layout: fixed; }
-.ab-sl-column { width: 50px; text-align: center; }
-.ab-actions-column { width: 50px; }
-.client-name { width: 15%; min-width: 150px; font-size: 14px; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; font-size: 14px; background: #fff; table-layout: auto; }
+.ab-sl-column, .ab-actions-column, .Status { 
+    width: 100px; 
+    min-width: 100px; 
+    max-width: 100px; 
+    text-align: center; /* ✅ Center aligned content */
+}
+.client-name { min-width: 150px; font-size: 14px; font-weight: 600; }
 .client-name-text { cursor: pointer; color: #0073aa; text-decoration: underline; }
 .client-name-text:hover { color: #0056b3; }
-.email { width: 15%; min-width: 150px; }
-.phone-number { width: 15%; min-width: 150px; }
-.notes { width: 40%; min-width: 330px; }
+.email, .phone-number, .notes { /* flexible width based on content */ min-width: 120px; }
 thead th { text-align: left; padding: 10px; border-bottom: 2px solid #ddd; font-weight: 600; }
 tbody td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 tbody td:hover::after { content: attr(title); position: absolute; left: 0; top: 100%; background: #333; color: #fff; padding: 6px 10px; border-radius: 4px; white-space: normal; min-width: 200px; max-width: 400px; z-index: 1000; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-.ab-action-icons { display: flex; gap: 8px; }
+
+/* Action icons */
+.ab-action-icons { display: flex; gap: 8px; justify-content: center; /* ✅ Center the icons */ }
 .ab-action-icon { cursor: pointer; font-size: 16px; transition: transform 0.2s; }
 .ab-action-icon:hover { transform: scale(1.2); }
 tbody tr.client-row:hover { background-color: #f5f5f5; }
-tbody tr.client-row .ab-actions-column { cursor: default; }
-tbody tr.client-row .ab-actions-column:hover { background-color: transparent; }
 
 /* Modal & Form */
 .modal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
@@ -370,7 +373,7 @@ input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
   table:not(.client-details) td { display: flex; flex-direction: column; width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid #eee; max-width: none !important; white-space: normal; overflow: visible; text-overflow: unset; }
   table:not(.client-details) td:last-child { border-bottom: none; }
   table:not(.client-details) td::before { content: attr(data-label); font-weight: 600; color: #333; margin-bottom: 4px; }
-  table:not(.client-details) .ab-actions-column { flex-direction: row; justify-content: space-between; align-items: center; padding: 8px 0; }
+  table:not(.client-details) .ab-actions-column { flex-direction: row; justify-content: center; align-items: center; padding: 8px 0; }
   table:not(.client-details) .ab-actions-column::before { content: attr(data-label); font-weight: 600; color: #333; margin-bottom: 0; margin-right: 0; }
   table:not(.client-details) .ab-action-icons { gap: 10px; }
   table:not(.client-details) td:hover::after { display: none; }
@@ -385,22 +388,11 @@ table {
 }
 
 /* Optional: Match the top header row */
-table thead th:first-child {
-    border-top-left-radius: 10px;
-}
-table thead th:last-child {
-    border-top-right-radius: 10px;
-}
-.modal button:last-child {
-    color: #fff!important;
-}
+table thead th:first-child { border-top-left-radius: 10px; }
+table thead th:last-child { border-top-right-radius: 10px; }
+.modal button:last-child { color: #fff!important; }
 /* Submit button */
-.ab-btn {
-  background-color: #007bff;
-  color: #fff!important;
-}
+.ab-btn { background-color: #007bff; color: #fff!important; }
+.ab-btn:hover { background-color: #0056b3; }
 
-.ab-btn:hover {
-  background-color: #0056b3;
-}
 </style>
