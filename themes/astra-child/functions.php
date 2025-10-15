@@ -24,6 +24,7 @@ require_once get_stylesheet_directory() . '/includes/rt-realtor-profile.php';
 require_once get_stylesheet_directory() . '/includes/rt-client-create.php';
 require_once get_stylesheet_directory() . '/includes/rt-client-edit.php';
 require_once get_stylesheet_directory() . '/includes/rt-client-delete.php';
+require_once get_stylesheet_directory() . '/includes/rt-leads-to-client.php';
 require_once get_stylesheet_directory() . '/includes/rentcast-properties.php';
 
 // ======================
