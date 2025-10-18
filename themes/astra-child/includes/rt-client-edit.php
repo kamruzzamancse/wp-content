@@ -11,8 +11,13 @@ function fetch_realtor_client_ajax() {
     global $wpdb;
     $client_id = intval($_POST['client_id']);
 
+    // Fetch all relevant fields including lead_status
     $client = $wpdb->get_row(
-        $wpdb->prepare("SELECT * FROM {$wpdb->prefix}clients WHERE client_id = %d", $client_id),
+        $wpdb->prepare("
+            SELECT client_id, full_name, email, phone, note, status, lead_status, profile_picture
+            FROM {$wpdb->prefix}clients 
+            WHERE client_id = %d
+        ", $client_id),
         ARRAY_A
     );
 
@@ -44,7 +49,12 @@ function update_realtor_client_ajax() {
     $note = sanitize_textarea_field($_POST['realtor_client_note']);
     $status = sanitize_text_field($_POST['realtor_client_status']);
 
-    // Handle optional image upload
+    // Only capture lead_status if editing a lead
+    $lead_status = isset($_POST['realtor_lead_status'])
+        ? sanitize_text_field($_POST['realtor_lead_status'])
+        : null;
+
+    // Handle image upload
     $profile_picture = '';
     if (!empty($_FILES['realtor_client_profile_picture']['name'])) {
         require_once(ABSPATH . 'wp-admin/includes/file.php');
@@ -62,6 +72,10 @@ function update_realtor_client_ajax() {
         'note' => $note,
         'status' => $status,
     ];
+
+    if ($lead_status && strtolower($status) === 'lead') {
+        $update_data['lead_status'] = $lead_status;
+    }
 
     if ($profile_picture) {
         $update_data['profile_picture'] = $profile_picture;

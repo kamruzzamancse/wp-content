@@ -1,3 +1,42 @@
+<!-- Document Types Management -->
+<div class="cld-doc-types-section">
+    <div class="cld-doc-types-header">
+        <h3>Document Types</h3>
+        <button id="addDocTypeBtn" class="btn-primary">+ Add Type</button>
+    </div>
+
+    <table class="doc-types-table">
+        <thead>
+            <tr>
+                <th style="width:50px;">#</th>
+                <th>Type Name</th>
+                <th>Slug</th>
+                <th style="width:120px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            global $wpdb;
+            $doc_types = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}document_types WHERE deleted_at IS NULL ORDER BY created_at DESC");
+            if($doc_types):
+                foreach($doc_types as $index => $type): ?>
+                    <tr data-id="<?php echo esc_attr($type->id); ?>">
+                        <td><?php echo $index + 1; ?></td>
+                        <td><?php echo esc_html($type->type_name); ?></td>
+                        <td><?php echo esc_html($type->slug); ?></td>
+                        <td>
+                            <span class="edit-doc-type" title="Edit">✏️</span>
+                            <span class="delete-doc-type" title="Delete">🗑️</span>
+                        </td>
+                    </tr>
+                <?php endforeach;
+            else: ?>
+                <tr><td colspan="4" style="text-align:center;">No Document Types Found</td></tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
+
 <div class="cld-task-section">
     <div class="cld-task-header">
         <h2 class="header-title">Documents</h2>
@@ -46,9 +85,42 @@
         </table>
     </div>
 </div>
+
 <?php 
     include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
+    include locate_template('dashboard-templates/rt/rt-document-type-modal.php');
 ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Open Document Type modal on button click
+    const addDocTypeBtn = document.getElementById('addDocTypeBtn');
+    if(addDocTypeBtn) {
+        addDocTypeBtn.addEventListener('click', function() {
+            const modal = document.getElementById('cl-add-doc-type-modal'); // make sure your modal has this ID
+            if(modal) modal.classList.add('show');
+        });
+    }
+
+    // Close modal logic (reuse same class as other modals)
+    const closeButtons = document.querySelectorAll('.clup-close-btn, .clup-cancel');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.clup-modal-overlay');
+            if(modal) modal.classList.remove('show');
+        });
+    });
+
+    // Click outside modal to close
+    const modals = document.querySelectorAll('.clup-modal-overlay');
+    modals.forEach(modal => {
+        modal.addEventListener('click', e => {
+            if(e.target === modal) modal.classList.remove('show');
+        });
+    });
+});
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // ===============================
@@ -458,6 +530,160 @@ document.addEventListener('DOMContentLoaded', function() {
         font-size: 16px;
         margin: 0 3px;
     }
+}
+</style>
+
+<style>
+.cld-doc-types-section {
+    background: #fff;              /* match Documents section background */
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-width: 700px;             /* max width */
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Header */
+.cld-doc-types-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Table */
+.doc-types-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ddd;
+    border-radius: 10px 10px 0 0; /* top-left and top-right radius like Documents table */
+    overflow: hidden;
+}
+
+/* Table headers */
+.doc-types-table th, .doc-types-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd; /* bottom border */
+    text-align: left;
+    font-size: 14px;
+}
+
+/* Header styling */
+.doc-types-table th {
+    background: #2271b1;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Rounded corners for first and last headers */
+.doc-types-table th:first-child {
+    border-top-left-radius: 10px;
+}
+.doc-types-table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Bottom border for last row */
+.doc-types-table tr:last-child td {
+    border-bottom: 1px solid #ddd;
+}
+
+/* Action buttons */
+.edit-doc-type, .delete-doc-type {
+    cursor: pointer;
+    margin-right: 5px;
+}
+.edit-doc-type:hover { color: #ffb400; }
+.delete-doc-type:hover { color: #e63946; }
+
+/* ===============================
+   Responsive - Mobile View
+================================= */
+@media (max-width: 768px) {
+    .doc-types-table {
+        border: none;
+        border-radius: 0;
+    }
+
+    .doc-types-table thead {
+        display: none; /* hide headers */
+    }
+
+    .doc-types-table, 
+    .doc-types-table tbody, 
+    .doc-types-table tr, 
+    .doc-types-table td {
+        display: block;
+        width: 100% !important;
+    }
+
+    .doc-types-table tr {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    .doc-types-table td {
+        padding: 10px 10px 10px 45%;
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        min-height: 20px;
+        box-sizing: border-box;
+    }
+
+    .doc-types-table td:last-child {
+        border-bottom: none;
+    }
+
+    .doc-types-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 40%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Actions cell special handling */
+    .doc-types-table td[data-label="Actions"] {
+        padding: 10px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .doc-types-table td[data-label="Actions"]::before {
+        display: none;
+    }
+
+    .edit-doc-type, .delete-doc-type {
+        font-size: 16px;
+        margin: 0 5px 0 0;
+    }
+}
+
+/* ===============================
+   Keep your existing .btn-primary intact
+================================= */
+.btn-primary {
+    padding-top: 10px;
+    padding-right: 20px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    color: #FFF!important;
 }
 
 </style>

@@ -54,53 +54,79 @@
 
         <!-- Leads Section -->
         <div class="dashboard-section leads-section">
-          <div class="leads-header">
-              <h1 class="header-title">Leads</h1>
-              <button id="addLeadBtn" class="btn-primary">+ Add Lead</button>
-          </div>
+            <div class="leads-header">
+                <h1 class="header-title">Leads</h1>
+                <button id="addLeadBtn" class="btn-primary">+ Add Lead</button>
+            </div>
 
-          <table class="leads-table">
-              <thead>
-                  <tr>
-                      <th>Client Name</th>
-                      <th>Last Touch</th>
-                      <th>Status</th>
-                      <th>Notes</th>
-                      <th style="width:140px">Actions</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <?php
-                  global $wpdb;
+            <table class="leads-table">
+                <thead>
+                    <tr>
+                        <th>Client Name</th>
+                        <th>Last Touch</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th style="width:140px">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    global $wpdb;
 
-                  // Fetch leads (status may be blank)
-                  $leads = $wpdb->get_results("
-                      SELECT client_id, full_name, note
-                      FROM {$wpdb->prefix}clients
-                      WHERE (deleted_at IS NULL OR deleted_at = '' OR deleted_at = '0000-00-00 00:00:00')
-                      AND (LOWER(status) = 'lead' OR status IS NULL OR status = '') 
-                      ORDER BY created_at DESC
-                  ");
+                    // Fetch leads (status may be blank)
+                    $leads = $wpdb->get_results("
+                        SELECT client_id, full_name, note, lead_status
+                        FROM {$wpdb->prefix}clients
+                        WHERE (deleted_at IS NULL OR deleted_at = '' OR deleted_at = '0000-00-00 00:00:00')
+                        AND (LOWER(status) = 'lead' OR status IS NULL OR status = '') 
+                        ORDER BY created_at DESC
+                    ");
 
-                  if ($leads) :
-                      foreach ($leads as $lead) : ?>
-                          <tr data-client-id="<?php echo esc_attr($lead->client_id); ?>">
-                              <td data-label="Client Name"><?php echo esc_html($lead->full_name); ?></td>
-                              <td data-label="Last Touch">—</td>
-                              <td data-label="Status"><span class="status-dot"></span>—</td>
-                              <td data-label="Notes"><?php echo esc_html($lead->note ?: '—'); ?></td>
-                              <td data-label="Actions" class="action-cell">
-                                  <span class="edit-lead-btn" title="Edit">✏️</span>
-                                  <span class="convert-lead-btn" title="Convert to Client">🔄</span>
-                                  <span class="delete-lead-btn" title="Delete">🗑️</span>
-                              </td>
-                          </tr>
-                      <?php endforeach;
-                  else : ?>
-                      <tr><td colspan="5" style="text-align:center;">No Leads Found</td></tr>
-                  <?php endif; ?>
-              </tbody>
-          </table>
+                    if ($leads) :
+                        foreach ($leads as $lead) :
+                            // Normalize lead_status value
+                            $lead_status = strtolower($lead->lead_status ?: 'cold');
+                            $status_label = ucfirst($lead_status);
+
+                            // Assign color class (matches your existing .status-dot structure)
+                            $status_color = '';
+                            switch ($lead_status) {
+                                case 'hot':
+                                    $status_color = 'background-color:#ff4d4d;'; // red
+                                    break;
+                                case 'warm':
+                                    $status_color = 'background-color:#ffc107;'; // yellow
+                                    break;
+                                case 'cold':
+                                default:
+                                    $status_color = 'background-color:#4caf50;'; // green
+                                    break;
+                            }
+                        ?>
+                            <tr data-client-id="<?php echo esc_attr($lead->client_id); ?>">
+                                <td data-label="Client Name"><?php echo esc_html($lead->full_name); ?></td>
+                                <td data-label="Last Touch">—</td>
+
+                                <!-- Lead Status Column (dynamic color + label) -->
+                                <td data-label="Status">
+                                    <span class="status-dot" style="<?php echo esc_attr($status_color); ?>"></span>
+                                    <?php echo esc_html($status_label); ?>
+                                </td>
+
+                                <td data-label="Notes"><?php echo esc_html($lead->note ?: '—'); ?></td>
+                                <td data-label="Actions" class="action-cell">
+                                    <span class="edit-lead-btn" title="Edit">✏️</span>
+                                    <span class="convert-lead-btn" title="Convert to Client">🔄</span>
+                                    <span class="delete-lead-btn" title="Delete">🗑️</span>
+                                </td>
+                            </tr>
+                        <?php
+                        endforeach;
+                    else : ?>
+                        <tr><td colspan="5" style="text-align:center;">No Leads Found</td></tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
     </div>
@@ -248,7 +274,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- EDIT CLIENT / LEAD -->
 <script>
 // EDIT CLIENT / LEAD MODAL + AJAX
 document.addEventListener('DOMContentLoaded', function() {
@@ -284,6 +309,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('edit_realtor_client_notes').value = client.note;
                     document.getElementById('edit_realtor_client_status').value = client.status;
                     document.getElementById('editRealtorClientPreviewAvatar').src = client.profile_picture || "<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
+
+                    // === Show Lead Status dropdown only for leads ===
+                    const leadStatusRow = document.getElementById('leadStatusRow');
+                    const leadStatusSelect = document.getElementById('edit_realtor_lead_status');
+
+                    if (client.status === 'lead') {
+                        leadStatusRow.style.display = 'flex';
+                        // Set current lead_status value if exists, else default to 'cold'
+                        if (client.lead_status) {
+                            leadStatusSelect.value = client.lead_status;
+                        } else {
+                            leadStatusSelect.value = 'cold';
+                        }
+                    } else {
+                        leadStatusRow.style.display = 'none';
+                    }
                 } else {
                     alert('Failed to fetch client data');
                     editModal.style.display = 'none';
@@ -478,7 +519,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 </script>
-
 
 <style>
 /* Primary button (Add & Save Lead) */
@@ -692,5 +732,36 @@ document.addEventListener('DOMContentLoaded', function() {
 .active-clients-table td:last-child {
     width: 100px;
     text-align: center;
+}
+</style>
+
+<style>
+/* Lead Status Display */
+.lead-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.lead-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Color Coding */
+.lead-hot .lead-status-dot {
+  background-color: #ff4d4d; /* red */
+}
+
+.lead-warm .lead-status-dot {
+  background-color: #ffc107; /* yellow */
+}
+
+.lead-cold .lead-status-dot {
+  background-color: #4caf50; /* green */
 }
 </style>

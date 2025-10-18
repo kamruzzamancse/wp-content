@@ -44,6 +44,7 @@ function redbm_create_tables() {
         preferred_location VARCHAR(255),
         note TEXT,
         status VARCHAR(50),
+        lead_status ENUM('hot', 'warm', 'cold') DEFAULT 'cold',
         profile_picture VARCHAR(500) NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         created_by BIGINT(20) UNSIGNED NULL,
@@ -96,6 +97,20 @@ function redbm_create_tables() {
         KEY client_id (client_id),
         KEY realtor_id (realtor_id),
         KEY property_id (property_id)
+    ) $charset_collate;";
+
+    // Document Types Table
+    $tables[] = "CREATE TABLE {$wpdb->prefix}document_types (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        type_name VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_by BIGINT(20) UNSIGNED NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        updated_by BIGINT(20) UNSIGNED NULL,
+        deleted_at DATETIME NULL DEFAULT NULL,
+        deleted_by BIGINT(20) UNSIGNED NULL,
+        PRIMARY KEY (id)
     ) $charset_collate;";
 
     // Run queries

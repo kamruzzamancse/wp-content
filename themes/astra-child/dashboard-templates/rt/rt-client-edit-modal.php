@@ -49,6 +49,17 @@
                                 <option value="active">Active</option>
                             </select>
                         </div>
+
+                        <!-- Lead Status Dropdown (hidden by default) -->
+                        <div class="edit-detail-row-realtor-client" id="leadStatusRow" style="display:none;">
+                            <label for="edit_realtor_lead_status">Lead Status:</label>
+                            <select id="edit_realtor_lead_status" name="realtor_lead_status">
+                                <option value="hot">Hot</option>
+                                <option value="warm">Warm</option>
+                                <option value="cold" selected>Cold</option>
+                            </select>
+                        </div>
+
                     </div>
                 </div>
 
@@ -59,7 +70,6 @@
         </div>
     </div>
 </div>
-
 
 <style>
 .modal-overlay-realtor-client-edit {

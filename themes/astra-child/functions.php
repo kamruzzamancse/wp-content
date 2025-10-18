@@ -25,6 +25,7 @@ require_once get_stylesheet_directory() . '/includes/rt-client-create.php';
 require_once get_stylesheet_directory() . '/includes/rt-client-edit.php';
 require_once get_stylesheet_directory() . '/includes/rt-client-delete.php';
 require_once get_stylesheet_directory() . '/includes/rt-leads-to-client.php';
+require_once get_stylesheet_directory() . '/includes/rt-document-type.php';
 require_once get_stylesheet_directory() . '/includes/rentcast-properties.php';
 
 // ======================
@@ -101,18 +102,19 @@ function mdk_enqueue_profile_scripts() {
             'nonce'    => wp_create_nonce('cl_client_edit_nonce'),
         ]);
 
-        // Client Delete Script
-        /* wp_enqueue_script(
-            'cl-client-delete-script',
-            get_stylesheet_directory_uri() . '/assets/js/rt-client-delete.js',
+        // document type create
+        wp_enqueue_script(
+            'rt-document-type-create-script',
+            get_stylesheet_directory_uri() . '/assets/js/rt-document-type-create.js',
             ['jquery'],
-            filemtime(get_stylesheet_directory() . '/assets/js/rt-client-delete.js'),
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-document-type-create.js'),
             true
         );
-        wp_localize_script('cl-client-delete-script', 'cl_client_delete_ajax', [
+        wp_localize_script('rt-document-type-create-script', 'rt_doc_type_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('cl_client_delete_nonce'),
-        ]); */
+            'nonce'    => wp_create_nonce('rt_doc_type_nonce'),
+        ]);
+
     }
 
 }
