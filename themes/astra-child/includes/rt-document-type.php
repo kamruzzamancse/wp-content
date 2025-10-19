@@ -12,33 +12,21 @@ function rt_add_document_type_callback() {
     $table = $wpdb->prefix . 'document_types';
 
     $type_name = sanitize_text_field($_POST['type_name'] ?? '');
-    $slug = sanitize_title($_POST['slug'] ?: $type_name);
 
     if (!$type_name) {
         wp_send_json_error('Type name is required.');
     }
 
-    // Optional: Check for existing slug
-    $exists = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $table WHERE slug = %s AND deleted_at IS NULL",
-        $slug
-    ));
-    if ($exists) {
-        $slug .= '-' . time(); // make slug unique
-    }
-
     $wpdb->insert($table, [
-        'type_name' => $type_name,
-        'slug' => $slug,
+        'type_name'  => $type_name,
         'created_at' => current_time('mysql'),
         'created_by' => get_current_user_id()
     ]);
 
     if ($wpdb->insert_id) {
         wp_send_json_success([
-            'id' => $wpdb->insert_id,
-            'type_name' => $type_name,
-            'slug' => $slug
+            'id'        => $wpdb->insert_id,
+            'type_name' => $type_name
         ]);
     } else {
         wp_send_json_error('Failed to add document type.');
@@ -56,33 +44,21 @@ add_action('wp_ajax_rt_update_document_type', function() {
 
     $id = intval($_POST['id'] ?? 0);
     $type_name = sanitize_text_field($_POST['type_name'] ?? '');
-    $slug = sanitize_title($_POST['slug'] ?: $type_name);
 
     if (!$id || !$type_name) {
         wp_send_json_error('Invalid data.');
     }
 
-    // Optional: prevent duplicate slug for other records
-    $exists = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $table WHERE slug = %s AND id != %d AND deleted_at IS NULL",
-        $slug, $id
-    ));
-    if ($exists) {
-        $slug .= '-' . time(); // make slug unique
-    }
-
     $updated = $wpdb->update($table, [
-        'type_name' => $type_name,
-        'slug' => $slug,
+        'type_name'  => $type_name,
         'updated_at' => current_time('mysql'),
         'updated_by' => get_current_user_id()
     ], ['id' => $id]);
 
     if ($updated !== false) {
         wp_send_json_success([
-            'id' => $id,
-            'type_name' => $type_name,
-            'slug' => $slug
+            'id'        => $id,
+            'type_name' => $type_name
         ]);
     } else {
         wp_send_json_error('Failed to update document type.');

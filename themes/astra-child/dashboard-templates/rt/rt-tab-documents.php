@@ -1,7 +1,7 @@
 <!-- Document Types Management -->
 <div class="cld-doc-types-section">
     <div class="cld-doc-types-header">
-        <h3>Document Types</h3>
+        <h2 class="header-title">Documents Types</h2>
         <button id="addDocTypeBtn" class="btn-primary">+ Add Type</button>
     </div>
 
@@ -10,7 +10,6 @@
             <tr>
                 <th style="width:50px;">#</th>
                 <th>Type Name</th>
-                <th>Slug</th>
                 <th style="width:120px;">Actions</th>
             </tr>
         </thead>
@@ -18,12 +17,11 @@
             <?php
             global $wpdb;
             $doc_types = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}document_types WHERE deleted_at IS NULL ORDER BY created_at DESC");
-            if($doc_types):
-                foreach($doc_types as $index => $type): ?>
+            if ($doc_types):
+                foreach ($doc_types as $index => $type): ?>
                     <tr data-id="<?php echo esc_attr($type->id); ?>">
                         <td><?php echo $index + 1; ?></td>
                         <td><?php echo esc_html($type->type_name); ?></td>
-                        <td><?php echo esc_html($type->slug); ?></td>
                         <td>
                             <span class="edit-doc-type" title="Edit">✏️</span>
                             <span class="delete-doc-type" title="Delete">🗑️</span>
@@ -31,7 +29,7 @@
                     </tr>
                 <?php endforeach;
             else: ?>
-                <tr><td colspan="4" style="text-align:center;">No Document Types Found</td></tr>
+                <tr><td colspan="3" style="text-align:center;">No Document Types Found</td></tr>
             <?php endif; ?>
         </tbody>
     </table>
@@ -44,9 +42,7 @@
             Upload Document <span class="dashicons dashicons-media-document"></span>
         </button>
     </div>
-    <div class="stats-grid">
-        <!-- Dashboard cards here... same as before -->
-    </div>
+
     <div class="documents-section">
         <table class="documents-table">
             <thead>
@@ -58,140 +54,97 @@
                     <th style="width:120px; background:#2271b1; color:#fff;">Actions</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                <?php
+                global $wpdb;
+                $table_docs  = $wpdb->prefix . 'documents';
+                $table_types = $wpdb->prefix . 'document_types';
+
+                $documents = $wpdb->get_results("
+                    SELECT d.id, d.title, d.file_name, d.type_id, dt.type_name
+                    FROM $table_docs d
+                    LEFT JOIN $table_types dt ON d.type_id = dt.id
+                    WHERE d.deleted_at IS NULL
+                    ORDER BY d.created_at DESC
+                ");
+
+                if ($documents):
+                    foreach ($documents as $index => $doc): ?>
+                        <tr data-id="<?php echo esc_attr($doc->id); ?>">
+                            <td><?php echo $index + 1; ?></td>
+                            <td><?php echo esc_html($doc->title); ?></td>
+                            <td data-type-id="<?php echo esc_attr($doc->type_id); ?>">
+                                <?php echo esc_html($doc->type_name); ?>
+                            </td>
+                            <td>
+                                <?php 
+                                $upload_dir = wp_upload_dir();
+                                $file_name  = ltrim($doc->file_name, '/');
+                                $file_url   = trailingslashit($upload_dir['baseurl']) . $file_name;
+                                $file_path  = trailingslashit($upload_dir['basedir']) . $file_name;
+
+                                if (file_exists($file_path)) : ?>
+                                    <a href="<?php echo esc_url($file_url); ?>" target="_blank">
+                                        <?php echo esc_html(basename($file_name)); ?>
+                                    </a>
+                                <?php else: ?>
+                                    <span style="color:red;">File missing</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if (file_exists($file_path)) : ?>
+                                    <a href="<?php echo esc_url($file_url); ?>"
+                                       download="<?php echo esc_attr(basename($file_name)); ?>"
+                                       class="download-doc"
+                                       title="Download"
+                                       style="cursor:pointer; margin-right:5px;">⬇️</a>
+                                <?php endif; ?>
+
+                                <span class="edit-doc" title="Edit" style="cursor:pointer; margin-right:5px;">✏️</span>
+                                <span class="delete-doc" title="Delete" style="cursor:pointer;">🗑️</span>
+                            </td>
+                        </tr>
+                    <?php endforeach;
+                else: ?>
+                    <tr><td colspan="5" style="text-align:center;">No Documents Found</td></tr>
+                <?php endif; ?>
+            </tbody>
         </table>
     </div>
 </div>
 
 <?php 
     include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
-    include locate_template('dashboard-templates/rt/rt-document-type-modal.php'); // modal + JS included here
+    include locate_template('dashboard-templates/rt/rt-document-type-modal.php');
 ?>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ===============================
-    // Static dataset for each tab
-    // ===============================
-    const documentsData = {
-        "business-cards": [
-            { title: "Business Card 1", type: "Business Cards", file: "business1.pdf" },
-            { title: "Business Card 2", type: "Business Cards", file: "business2.pdf" },
-            { title: "Business Card 3", type: "Business Cards", file: "business3.pdf" },
-            { title: "Business Card 4", type: "Business Cards", file: "business4.pdf" },
-            { title: "Business Card 5", type: "Business Cards", file: "business5.pdf" }
-        ],
-        "seller-checklist": [
-            { title: "Seller Checklist 1", type: "Seller Checklist", file: "seller1.pdf" },
-            { title: "Seller Checklist 2", type: "Seller Checklist", file: "seller2.pdf" },
-            { title: "Seller Checklist 3", type: "Seller Checklist", file: "seller3.pdf" },
-            { title: "Seller Checklist 4", type: "Seller Checklist", file: "seller4.pdf" },
-            { title: "Seller Checklist 5", type: "Seller Checklist", file: "seller5.pdf" }
-        ],
-        "buyer-checklist": [
-            { title: "Buyer Checklist 1", type: "Buyer Checklist", file: "buyer1.pdf" },
-            { title: "Buyer Checklist 2", type: "Buyer Checklist", file: "buyer2.pdf" },
-            { title: "Buyer Checklist 3", type: "Buyer Checklist", file: "buyer3.pdf" },
-            { title: "Buyer Checklist 4", type: "Buyer Checklist", file: "buyer4.pdf" },
-            { title: "Buyer Checklist 5", type: "Buyer Checklist", file: "buyer5.pdf" }
-        ]
-    };
-    // ===============================
-    // Function to render table rows
-    // ===============================
-    function renderDocuments(type) {
-        const tbody = document.querySelector('.documents-table tbody');
-        tbody.innerHTML = ''; // Clear previous rows
-        const data = documentsData[type];
-        if(!data) return;
-        data.forEach((doc, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="#">${index + 1}</td>
-                <td data-label="Document Title">${doc.title}</td>
-                <td data-label="Document Type">${doc.type}</td>
-                <td data-label="File">${doc.file}</td>
-                <td data-label="Actions">
-                    <a href="#" class="doc-action download" title="Download">⬇️</a>
-                    <a href="#" class="doc-action edit" title="Edit">✏️</a>
-                    <a href="#" class="doc-action delete" title="Delete">🗑️</a>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        // Bind actions for dynamically created rows
-        bindTableActions();
-    }
-    // ===============================
-    // Bind actions for table buttons
-    // ===============================
-    function bindTableActions() {
-        // Download
-        document.querySelectorAll('.doc-action.download').forEach(link => {
-            link.addEventListener('click', e => { 
-                e.preventDefault(); 
-                alert('Download document'); 
-            });
-        });
-        // Edit -> Open same modal as upload button
-        document.querySelectorAll('.doc-action.edit').forEach(link => {
-            link.addEventListener('click', e => {
-                e.preventDefault();
-                const modal = document.getElementById('cl-upload-document-modal');
-                if(modal) modal.classList.add('show');
-            });
-        });
-        // Delete
-        document.querySelectorAll('.doc-action.delete').forEach(link => {
-            link.addEventListener('click', e => {
-                e.preventDefault();
-                alert('Delete document');
-            });
-        });
-    }
-    // ===============================
-    // Tab click event
-    // ===============================
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach(card => {
-        card.addEventListener('click', e => {
-            e.preventDefault();
-            const type = card.dataset.type;
-            // Render table for selected type
-            renderDocuments(type);
-            // Highlight active tab
-            statCards.forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-        });
-    });
-    // ===============================
-    // Initial load - default tab
-    // ===============================
-    renderDocuments('business-cards'); 
-    document.querySelector('.stat-card[data-type="business-cards"]').classList.add('active');
-    // ===============================
-    // Modal functionality for Upload button
-    // ===============================
-    const modalButtons = document.querySelectorAll('.cld-upload-btn');
-    modalButtons.forEach(btn => {
+    // Open Upload Document Modal
+    const uploadButtons = document.querySelectorAll('.cld-upload-btn');
+    uploadButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const modal = document.getElementById(btn.dataset.modal);
-            if(modal) modal.classList.add('show');
+            const modalId = btn.dataset.modal;
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('show');
+
+            // Reset form for new document
+            const form = modal.querySelector('form');
+            if(form) form.reset();
+            const hiddenInput = form.querySelector('[name="document_id"]');
+            if(hiddenInput) hiddenInput.value = '';
         });
     });
-    const closeButtons = document.querySelectorAll('.clup-close-btn, .clup-cancel');
+
+    // Close modal
+    const closeButtons = document.querySelectorAll('.clup-close-btn');
     closeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const modal = btn.closest('.clup-modal-overlay');
-            if(modal) modal.classList.remove('show');
+            btn.closest('.clup-modal-overlay').classList.remove('show');
         });
     });
-    const modals = document.querySelectorAll('.clup-modal-overlay');
-    modals.forEach(modal => {
-        modal.addEventListener('click', e => {
-            if(e.target === modal) modal.classList.remove('show');
-        });
-    });
+
+    // File browse
     const browseButtons = document.querySelectorAll('.clup-browse');
     browseButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -486,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
-    max-width: 700px;             /* max width */
+    max-width: 500px;             /* max width */
     width: 100%;
     box-sizing: border-box;
     overflow-x: auto;

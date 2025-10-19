@@ -26,6 +26,8 @@ require_once get_stylesheet_directory() . '/includes/rt-client-edit.php';
 require_once get_stylesheet_directory() . '/includes/rt-client-delete.php';
 require_once get_stylesheet_directory() . '/includes/rt-leads-to-client.php';
 require_once get_stylesheet_directory() . '/includes/rt-document-type.php';
+require_once get_stylesheet_directory() . '/includes/rt-documents.php';
+require_once get_stylesheet_directory() . '/includes/rt-settings-password.php';
 require_once get_stylesheet_directory() . '/includes/rentcast-properties.php';
 
 // ======================
@@ -102,23 +104,66 @@ function mdk_enqueue_profile_scripts() {
             'nonce'    => wp_create_nonce('cl_client_edit_nonce'),
         ]);
 
-        // document type create
+    }
+
+    if ($tab === 'documents') {
+        // -------------------------
+        // Document Type Script
+        // -------------------------
         wp_enqueue_script(
-            'rt-document-type-create-script',
-            get_stylesheet_directory_uri() . '/assets/js/rt-document-type-create.js',
+            'rt-document-type-script', // handle
+            get_stylesheet_directory_uri() . '/assets/js/rt-document-type.js',
             ['jquery'],
-            filemtime(get_stylesheet_directory() . '/assets/js/rt-document-type-create.js'),
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-document-type.js'),
             true
         );
-        wp_localize_script('rt-document-type-create-script', 'rt_doc_type_ajax', [
+
+        wp_localize_script('rt-document-type-script', 'rt_doc_type_ajax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('rt_doc_type_nonce'),
         ]);
 
+        // -------------------------
+        // Documents Script
+        // -------------------------
+        wp_enqueue_script(
+            'rt-documents-script', // new handle
+            get_stylesheet_directory_uri() . '/assets/js/rt-documents.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-documents.js'),
+            true
+        );
+
+        wp_localize_script('rt-documents-script', 'rt_doc_ajax', [ // new object
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_doc_nonce'),
+        ]);
     }
 
 }
 add_action('wp_enqueue_scripts', 'mdk_enqueue_profile_scripts');
+
+// ======================
+// Password Update Script Enqueue
+// ======================
+function rt_enqueue_password_script() {
+    // Load script only on the "Change Password" tab
+    if (!isset($_GET['tab']) || $_GET['tab'] !== 'rt-settings-cp') return;
+
+    wp_enqueue_script(
+        'rt-password-script',
+        get_stylesheet_directory_uri() . '/assets/js/rt-settings-password.js',
+        ['jquery'],
+        filemtime(get_stylesheet_directory() . '/assets/js/rt-settings-password.js'),
+        true
+    );
+
+    wp_localize_script('rt-password-script', 'rt_password_ajax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('rt_password_nonce'),
+    ]);
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_password_script');
 
 /**
  * Enqueue general child theme assets (CSS + JS)

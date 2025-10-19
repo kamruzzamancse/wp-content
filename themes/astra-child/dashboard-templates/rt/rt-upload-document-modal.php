@@ -1,19 +1,19 @@
-<!-- Upload Document Modal -->
+<?php if (!defined('ABSPATH')) exit; ?>
+
+<!-- Upload / Edit Document Modal -->
 <div id="cl-upload-document-modal" class="clup-modal-overlay">
   <div class="clup-box">
-    <!-- Close Button -->
-    <button class="clup-close-btn">&times;</button>
+    <button type="button" class="clup-close-btn">&times;</button>
+    <h1 class="clup-title">Upload / Edit Document</h1>
 
-    <!-- Modal Header -->
-    <h1 class="clup-title">Upload Document</h1>
+    <form id="upload-document-form" class="clup-form" enctype="multipart/form-data">
+      <input type="hidden" name="document_id" value="">
 
-    <!-- Form -->
-    <form class="clup-form">
       <!-- Document Title -->
       <div class="clup-row-single">
         <div class="clup-field">
           <label>Document Title</label>
-          <input type="text" placeholder="Enter title" />
+          <input type="text" name="title" placeholder="Enter title" required />
         </div>
       </div>
 
@@ -21,11 +21,17 @@
       <div class="clup-row-single">
         <div class="clup-field">
           <label>Document Type</label>
-          <select>
+          <select name="type_id" required>
             <option value="">Select Document Type</option>
-            <option value="business-cards">Business Cards</option>
-            <option value="seller-checklist">Seller Checklist</option>
-            <option value="buyer-checklist">Buyer Checklist</option>
+            <?php
+            global $wpdb;
+            $doc_types = $wpdb->get_results("SELECT id, type_name FROM {$wpdb->prefix}document_types WHERE deleted_at IS NULL ORDER BY type_name ASC");
+            if ($doc_types) {
+                foreach ($doc_types as $type) {
+                    echo '<option value="' . esc_attr($type->id) . '">' . esc_html($type->type_name) . '</option>';
+                }
+            }
+            ?>
           </select>
         </div>
       </div>
@@ -36,18 +42,14 @@
           <div class="clup-upload-icon">⬆</div>
           <p>Upload File</p>
           <span>Format: .jpeg, .png, .pdf & Max file size: 25 MB</span>
-
-          <!-- Browse Button -->
           <button type="button" class="clup-browse">Browse</button>
-
-          <!-- Hidden File Input -->
-          <input type="file" id="clup-file-input" class="clup-file-input" accept=".jpeg,.jpg,.png,.pdf" style="display:none;">
+          <input type="file" name="file_name" class="clup-file-input" accept=".jpeg,.jpg,.png,.pdf" style="display:none;">
+          <span id="selected-file-name" style="display:block; margin-top:5px;"></span>
         </div>
       </div>
 
-      <!-- Actions -->
       <div class="clup-actions">
-        <button type="submit" class="clup-btn clup-upload">Upload</button>
+        <button type="submit" class="clup-btn clup-upload">Save</button>
       </div>
     </form>
   </div>

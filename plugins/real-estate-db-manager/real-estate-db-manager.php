@@ -103,7 +103,6 @@ function redbm_create_tables() {
     $tables[] = "CREATE TABLE {$wpdb->prefix}document_types (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         type_name VARCHAR(255) NOT NULL,
-        slug VARCHAR(255) NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         created_by BIGINT(20) UNSIGNED NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -111,6 +110,23 @@ function redbm_create_tables() {
         deleted_at DATETIME NULL DEFAULT NULL,
         deleted_by BIGINT(20) UNSIGNED NULL,
         PRIMARY KEY (id)
+    ) $charset_collate;";
+
+    // Documents Table
+    $tables[] = "CREATE TABLE {$wpdb->prefix}documents (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        title VARCHAR(255) NOT NULL,
+        type_id BIGINT(20) UNSIGNED NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_by BIGINT(20) UNSIGNED NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        updated_by BIGINT(20) UNSIGNED NULL,
+        deleted_at DATETIME NULL DEFAULT NULL,
+        deleted_by BIGINT(20) UNSIGNED NULL,
+        PRIMARY KEY (id),
+        KEY type_id (type_id),
+        CONSTRAINT fk_document_type FOREIGN KEY (type_id) REFERENCES {$wpdb->prefix}document_types(id) ON DELETE CASCADE
     ) $charset_collate;";
 
     // Run queries
