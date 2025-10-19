@@ -1248,65 +1248,11 @@ body.bp-messages-mobile {
                   cursor: pointer;
                 }
 
-                &:hover .bm-reactions-selector {
-                  display: block;
-                }
-
                 &.bm-message-pending{
                   opacity: 0.5;
 
                   &:hover{
                     opacity: 1;
-                  }
-                }
-
-                .bm-reactions-selector {
-                  display: none;
-                  position: absolute;
-                  padding: 0;
-                  border: none;
-                  box-shadow: 0 1px 3px 0 #b0b0b0;
-                  background: white;
-                  border-radius: 50px !important;
-                  z-index: 900;
-                  bottom: -9px;
-                  right: -9px;
-                  //width: 20px;
-                  //height: 20px;
-
-                  &:hover{
-                    padding: 3px 2px;
-                    //width: 28px;
-                    overflow-y: hidden;
-
-                    .bm-reaction-icon{
-                      display: block;
-                      margin-top: 1px;
-                      margin-bottom: 1px;
-                      padding: 2px;
-
-                      > img{
-                        width: 20px !important;
-                        height: 20px !important;
-                      }
-                    }
-                  }
-
-                  .bm-reaction-icon{
-                    display: none;
-                    cursor: pointer;
-                    padding: 4px;
-
-                    > img{
-                      display: block !important;
-                      margin: 0 !important;
-                      padding: 0 !important;
-                      //transition: width, height 0.2s linear;
-                    }
-
-                    &:last-child{
-                      display: block;
-                    }
                   }
                 }
 
@@ -2838,6 +2784,59 @@ body.bp-messages-mobile {
   }
 }
 
+
+
+.bm-reactions-selector {
+  position: absolute;
+  padding: 0;
+  border: none;
+  box-shadow: 0 1px 3px 0 #b0b0b0;
+  background: white;
+  border-radius: 50px !important;
+  z-index: 10000001;
+
+  &:hover{
+    overflow-y: hidden;
+    display: grid;
+    grid-template-columns: repeat( var(--columns, 1), 1fr );
+    border-radius: 5px !important;
+    padding: 5px;
+
+    &[data-columns="1"]{
+      border-radius: 50px !important;
+      padding: 3px 2px;
+    }
+
+    .bm-reaction-icon{
+      display: block;
+      margin-top: 1px;
+      margin-bottom: 1px;
+      padding: 2px;
+
+      > img{
+        width: 20px !important;
+        height: 20px !important;
+      }
+    }
+  }
+
+  .bm-reaction-icon{
+    display: none;
+    cursor: pointer;
+    padding: 4px;
+
+    > img{
+      display: block !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      //transition: width, height 0.2s linear;
+    }
+
+    &:last-child{
+      display: block;
+    }
+  }
+}
 
 .bm_user_selector{
   position: relative;
@@ -10221,10 +10220,6 @@ html[dir="rtl"]{
               .bm-reactions{
                 flex-direction: row-reverse !important;
               }
-              .bm-reactions-selector{
-                left: -9px;
-                right: auto !important;
-              }
             }
           }
 
@@ -10691,7 +10686,7 @@ body.bm-mobile-device-pwa.bp-messages-mobile {
     margin-top: 100px;
   }
 }
- 
+
 .bp-messages-wrap-main{
   .bm-guest-wall-content{
     margin-top: 100px;

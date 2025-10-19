@@ -4,7 +4,7 @@ Tags: BuddyPress, Ultimate Member, private message, chat, messaging
 Requires at least: 5.9.0
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 2.9.13
+Stable tag: 2.9.16
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -170,7 +170,12 @@ You can translate plugin to your language with LocoTranslate or [participate in 
 
 == Changelog ==
 
-= 2.9.0 - 2.9.13 =
+= 2.9.0 - 2.9.16 =
+* Fixed reply area overlay on mobile devices in latest FluentCommunity versions
+* Updated PeepSo Messages Popup to match new PeepSo design
+* Used new messages icon in PeepSo integration
+* Automatically switching between dark and light modes in new PeepSo Block Theme
+* Reworked messages reactions selector to fit more icons nicely and better positioning in edge cases situations
 * Added integration with [Progressify PWA](https://www.better-messages.com/docs/integrations/progressify/) for push notifications
 * Minor improvements for fullscreen pwa mode
 * Added better_messages_attachments_random_file_name filter to allow developers to disable random file name generation for uploaded files
