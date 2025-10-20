@@ -29,6 +29,7 @@ require_once get_stylesheet_directory() . '/includes/rt-document-type.php';
 require_once get_stylesheet_directory() . '/includes/rt-documents.php';
 require_once get_stylesheet_directory() . '/includes/rt-settings-password.php';
 require_once get_stylesheet_directory() . '/includes/rentcast-properties.php';
+require_once get_stylesheet_directory() . '/includes/all-paginations.php'; // added for pagination
 
 // ======================
 // Conditional Script Enqueues
@@ -183,6 +184,7 @@ function astra_child_enqueue_assets() {
         'address-book-js'         => 'assets/js/rt-address-book.js',
         'realtor-settings-js'     => 'assets/js/rt-realtor-settings.js',
         'all-sticky-notes-js'     => 'assets/js/all-sticky-notes.js',
+        'all-paginations-js'      => 'assets/js/all-paginations.js', // added for pagination
         'property-upload-js'      => 'assets/js/property-upload.js',
     ];
 
@@ -201,6 +203,8 @@ function astra_child_enqueue_assets() {
     }
 
     // Localize scripts
+
+    // Todo Calendar
     if (wp_script_is('todo-calendar-js', 'enqueued')) {
         wp_localize_script('todo-calendar-js', 'todoCalendarVars', [
             'ajaxurl' => admin_url('admin-ajax.php'),
@@ -212,16 +216,35 @@ function astra_child_enqueue_assets() {
         ]);
     }
 
+    // Address Book
     if (wp_script_is('address-book-js', 'enqueued')) {
         wp_localize_script('address-book-js', 'propertyDetailsAjax', [
             'ajaxurl' => admin_url('admin-ajax.php')
         ]);
     }
 
+    // Property Upload
     if (wp_script_is('property-upload-js', 'enqueued')) {
         wp_localize_script('property-upload-js', 'property_image_vars', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('property_image_nonce'),
+        ]);
+    }
+
+    // Sticky Notes
+    if (wp_script_is('all-sticky-notes-js', 'enqueued')) {
+        wp_localize_script('all-sticky-notes-js', 'stickyNotesData', [
+            'userId'  => get_current_user_id(),
+            'ajaxurl' => admin_url('admin-ajax.php')
+        ]);
+    }
+
+    // All Paginations JS
+    if (wp_script_is('all-paginations-js', 'enqueued')) {
+        wp_localize_script('all-paginations-js', 'paginationData', [
+            'clients_nonce' => wp_create_nonce('clients_pagination_nonce'),
+            'leads_nonce'   => wp_create_nonce('leads_pagination_nonce'),
+            'ajaxurl'       => admin_url('admin-ajax.php')
         ]);
     }
 }
