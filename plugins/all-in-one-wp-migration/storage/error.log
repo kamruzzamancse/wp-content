@@ -15511,3 +15511,108 @@ Sep 15 2025 05:44:07
 Sep 15 2025 05:44:07
 {"Number":2,"Message":"fopen(C:\\\\xampp\\\\htdocs\\\\mary\\\\wp-content\\\\.git\\\\objects\\\\pack\\\\pack-acb5c65404a58f4faaa2bc31a3247bc80d9febfe.rev): Failed to open stream: Permission denied","File":"C:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\archiver\\class-ai1wm-extractor.php","Line":422}
 
+Oct 21 2025 09:38:00
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:38:07
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:38:10
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:38:15
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:38:21
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:38:35
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:38:48
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:39:00
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:39:13
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:39:28
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:39:39
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:39:51
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:40:03
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:40:15
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:40:26
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:40:38
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:40:49
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:41:01
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:41:12
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:41:25
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:41:39
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:41:56
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:42:14
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:42:28
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:42:44
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:42:56
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:43:09
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:43:23
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:43:37
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:43:50
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:43:54
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:43:59
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:44:02
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:44:06
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
+Oct 21 2025 09:44:09
+{"type":8192,"message":"Return type of Ai1wm_Recursive_Newline_Filter::accept() should either be compatible with FilterIterator::accept(): bool, or the #[\\ReturnTypeWillChange] attribute should be used to temporarily suppress the notice","file":"E:\\xampp\\htdocs\\mary\\wp-content\\plugins\\all-in-one-wp-migration\\lib\\vendor\\servmask\\filter\\class-ai1wm-recursive-newline-filter.php","line":28}
+
