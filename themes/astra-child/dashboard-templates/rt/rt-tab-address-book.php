@@ -6,7 +6,7 @@
         <div class="ab-header-right">
             <div class="ab-search-box">
                 <span class="pt-search-icon">🔍</span>
-                <input type="text" class="pt-search-input" placeholder="Search: Client Name">
+                <input type="text" class="pt-search-input" placeholder="Search: Client Name" id="addressBookSearch">
             </div>
             <div class="ab-action-buttons">
                 <button class="ab-btn ab-btn-import">
@@ -24,6 +24,15 @@
         </div>
     </div>
 
+    <div class="ab-controls">
+        <label for="addressBookRows" style="margin-right:5px;">Show:</label>
+        <select id="addressBookRows">
+            <option value="5">5 rows</option>
+            <option value="10" selected>10 rows</option>
+            <option value="25">25 rows</option>
+        </select>
+    </div>
+
     <table>
         <thead>
             <tr>
@@ -36,63 +45,13 @@
                 <th class="ab-actions-column">Actions</th>
             </tr>
         </thead>
-        <tbody>
-            <?php
-            global $wpdb;
-
-            $clients = $wpdb->get_results(
-                "SELECT * FROM {$wpdb->prefix}clients WHERE deleted_at IS NULL ORDER BY created_at DESC",
-                ARRAY_A
-            );
-
-            if ($clients):
-                foreach ($clients as $client):
-
-                    // Profile picture logic
-                    $profile_pic = !empty($client['profile_picture'])
-                        ? $client['profile_picture']
-                        : $wpdb->get_var(
-                            $wpdb->prepare(
-                                "SELECT meta_value FROM {$wpdb->prefix}usermeta WHERE user_id = %d AND meta_key = %s LIMIT 1",
-                                $client['user_id'],
-                                'profile_picture'
-                            )
-                        );
-
-                    if (empty($profile_pic)) {
-                        $profile_pic = 'https://www.pngkey.com/png/full/114-1149847_avatar-profile-png.png';
-                    }
-            ?>
-            <tr class="client-row" data-client-id="<?php echo intval($client['client_id']); ?>">
-                <td class="ab-sl-column" data-label=" " >
-                    <img src="<?php echo esc_url($profile_pic); ?>" 
-                        alt="Profile Pic" class="profile-pic" 
-                        style="border-radius:50%; width:40px; height:40px; object-fit:cover;">
-                </td>
-                <td class="client-name" data-label="Client Name">
-                    <span class="client-name-text"><?php echo esc_html($client['full_name']); ?></span>
-                </td>
-                <td data-label="Email"><?php echo esc_html($client['email']); ?></td>
-                <td data-label="Phone Number"><?php echo esc_html($client['phone']); ?></td>
-                <td data-label="Notes"><?php echo esc_html($client['note']); ?></td>
-                <td data-label="Status"><?php echo esc_html($client['status']); ?></td>
-                <td class="ab-actions-column" data-label="Actions">
-                    <div class="ab-action-icons">
-                        <span class="ab-action-icon ab-editClientDetails" title="Edit">✏️</span>
-                        <span class="ab-action-icon ab-deleteClient" title="Delete">🗑️</span>
-                    </div>
-                </td>
-            </tr>
-            <?php
-                endforeach;
-            else:
-            ?>
-            <tr>
-                <td colspan="7" style="text-align:center; padding:15px;">No Clients Found</td>
-            </tr>
-            <?php endif; ?>
+        <tbody id="addressBookBody">
+            <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
         </tbody>
     </table>
+
+    <!-- Placeholder for AJAX pagination -->
+    <div id="addressBookPagination" class="ab-pagination"></div>
 </div>
 
 <?php 
@@ -462,4 +421,38 @@ table thead th:last-child { border-top-right-radius: 10px; }
 .ab-btn { background-color: #007bff; color: #fff!important; }
 .ab-btn:hover { background-color: #0056b3; }
 
+</style>
+
+<style>
+/* === Pagination Styling (keeps your existing look) === */
+.ab-pagination {
+    display: flex;
+    justify-content: flex-end; /* Right aligned */
+    align-items: center;
+    margin-top: 15px;
+    gap: 6px;
+}
+
+.ab-page-btn {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #f5f5f5;
+    color: #0073aa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.ab-page-btn:hover {
+    background-color: #0073aa;
+    color: #fff;
+}
+
+.ab-page-btn.active {
+    background-color: #0073aa;
+    color: #fff;
+    font-weight: bold;
+}
 </style>

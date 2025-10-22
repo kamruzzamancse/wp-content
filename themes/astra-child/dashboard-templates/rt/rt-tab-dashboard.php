@@ -5,58 +5,49 @@
 
         <!-- Active Clients Section -->
         <div class="dashboard-section active-clients-section">
-          <div class="clients-header">
-            <h1 class="header-title">Active Clients</h1>
-            <button id="addClientBtn" class="btn-primary">+ Add Client</button>
-          </div>
+            <div class="clients-header">
+                <h1 class="header-title">Active Clients</h1>
+                <div class="table-controls-row">
+                    <input type="text" id="activeClientsSearch" placeholder="Search Active Clients">
+                    <select id="activeClientsRows">
+                        <option value="5">5 rows</option>
+                        <option value="10" selected>10 rows</option>
+                        <option value="25">25 rows</option>
+                    </select>
+                    <button id="addClientBtn" class="btn-primary">+ Add Client</button>
+                </div>
+            </div>
 
-          <table class="active-clients-table">
-              <thead>
-                  <tr>
-                      <th>Client Name</th>
-                      <th>Email</th>
-                      <th>Phone</th>
-                      <th>Notes</th>
-                      <th>Action</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  <?php
-                  global $wpdb;
-
-                  // Fetch active clients safely and flexibly
-                  $clients = $wpdb->get_results("
-                      SELECT client_id, full_name, email, phone, note
-                      FROM {$wpdb->prefix}clients
-                      WHERE (deleted_at IS NULL OR deleted_at = '' OR deleted_at = '0000-00-00 00:00:00')
-                      AND (LOWER(status) = 'active' OR status IS NULL OR status = '')
-                      ORDER BY created_at DESC
-                  ");
-
-                  if ($clients) :
-                      foreach ($clients as $client) : ?>
-                          <tr data-client-id="<?php echo esc_attr($client->client_id); ?>">
-                              <td data-label="Client Name"><?php echo esc_html($client->full_name); ?></td>
-                              <td data-label="Email"><?php echo esc_html($client->email ?: '—'); ?></td>
-                              <td data-label="Phone"><?php echo esc_html($client->phone ?: '—'); ?></td>
-                              <td data-label="Notes"><?php echo esc_html($client->note ?: '—'); ?></td>
-                              <td data-label="Actions" class="action-cell">
-                                  <span class="delete-client-btn" title="Delete">🗑️</span>
-                              </td>
-                          </tr>
-                      <?php endforeach;
-                  else : ?>
-                      <tr><td colspan="6" style="text-align:center;">No Active Clients Found</td></tr>
-                  <?php endif; ?>
-              </tbody>
-          </table>
+            <table class="active-clients-table">
+                <thead>
+                    <tr>
+                        <th>Client Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Notes</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="activeClientsBody">
+                    <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+                </tbody>
+            </table>
+            <div id="activeClientsPagination" class="pagination"></div>
         </div>
 
         <!-- Leads Section -->
         <div class="dashboard-section leads-section">
             <div class="leads-header">
                 <h1 class="header-title">Leads</h1>
-                <button id="addLeadBtn" class="btn-primary">+ Add Lead</button>
+                <div class="table-controls-row">
+                    <input type="text" id="leadsSearch" placeholder="Search Leads">
+                    <select id="leadsRows">
+                        <option value="5">5 rows</option>
+                        <option value="10" selected>10 rows</option>
+                        <option value="25">25 rows</option>
+                    </select>
+                    <button id="addLeadBtn" class="btn-primary">+ Add Lead</button>
+                </div>
             </div>
 
             <table class="leads-table">
@@ -69,64 +60,11 @@
                         <th style="width:140px">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <?php
-                    global $wpdb;
-
-                    // Fetch leads (status may be blank)
-                    $leads = $wpdb->get_results("
-                        SELECT client_id, full_name, note, lead_status
-                        FROM {$wpdb->prefix}clients
-                        WHERE (deleted_at IS NULL OR deleted_at = '' OR deleted_at = '0000-00-00 00:00:00')
-                        AND (LOWER(status) = 'lead' OR status IS NULL OR status = '') 
-                        ORDER BY created_at DESC
-                    ");
-
-                    if ($leads) :
-                        foreach ($leads as $lead) :
-                            // Normalize lead_status value
-                            $lead_status = strtolower($lead->lead_status ?: 'cold');
-                            $status_label = ucfirst($lead_status);
-
-                            // Assign color class (matches your existing .status-dot structure)
-                            $status_color = '';
-                            switch ($lead_status) {
-                                case 'hot':
-                                    $status_color = 'background-color:#ff4d4d;'; // red
-                                    break;
-                                case 'warm':
-                                    $status_color = 'background-color:#ffc107;'; // yellow
-                                    break;
-                                case 'cold':
-                                default:
-                                    $status_color = 'background-color:#4caf50;'; // green
-                                    break;
-                            }
-                        ?>
-                            <tr data-client-id="<?php echo esc_attr($lead->client_id); ?>">
-                                <td data-label="Client Name"><?php echo esc_html($lead->full_name); ?></td>
-                                <td data-label="Last Touch">—</td>
-
-                                <!-- Lead Status Column (dynamic color + label) -->
-                                <td data-label="Status">
-                                    <span class="status-dot" style="<?php echo esc_attr($status_color); ?>"></span>
-                                    <?php echo esc_html($status_label); ?>
-                                </td>
-
-                                <td data-label="Notes"><?php echo esc_html($lead->note ?: '—'); ?></td>
-                                <td data-label="Actions" class="action-cell">
-                                    <span class="edit-lead-btn" title="Edit">✏️</span>
-                                    <span class="convert-lead-btn" title="Convert to Client">🔄</span>
-                                    <span class="delete-lead-btn" title="Delete">🗑️</span>
-                                </td>
-                            </tr>
-                        <?php
-                        endforeach;
-                    else : ?>
-                        <tr><td colspan="5" style="text-align:center;">No Leads Found</td></tr>
-                    <?php endif; ?>
+                <tbody id="leadsBody">
+                    <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
                 </tbody>
             </table>
+            <div id="leadsPagination" class="pagination"></div>
         </div>
 
     </div>
@@ -134,391 +72,244 @@
     <!-- RIGHT SIDE -->
     <div class="dashboard-top-right">
         <?php
-          $current_user = wp_get_current_user();
-          $user_email   = $current_user->user_email;
+        $current_user = wp_get_current_user();
+        $user_email   = $current_user->user_email;
 
-          if ($user_email) {
-              global $wpdb;
-              $calendar_id = $wpdb->get_var($wpdb->prepare("
-                  SELECT ID 
-                  FROM $wpdb->posts 
-                  WHERE post_type = 'calendar' 
-                    AND post_status = 'publish'
-                    AND post_title = %s
-                  LIMIT 1
-              ", $user_email));
+        if ($user_email) {
+            global $wpdb;
+            $calendar_id = $wpdb->get_var($wpdb->prepare("
+                SELECT ID 
+                FROM $wpdb->posts 
+                WHERE post_type = 'calendar' 
+                  AND post_status = 'publish'
+                  AND post_title = %s
+                LIMIT 1
+            ", $user_email));
 
-              if ($calendar_id) {
-                  echo do_shortcode('[calendar id="' . intval($calendar_id) . '"]');
-              } else {
-                  echo '<p>No calendar found for your account.</p>';
-              }
-          } else {
-              echo '<p>Please login to see your calendar.</p>';
-          }
+            if ($calendar_id) {
+                echo do_shortcode('[calendar id="' . intval($calendar_id) . '"]');
+            } else {
+                echo '<p>No calendar found for your account.</p>';
+            }
+        } else {
+            echo '<p>Please login to see your calendar.</p>';
+        }
         ?>
 
-        <!-- Header -->
         <div class="notes-header">
             <h1>Notes</h1>
             <button class="add-note-btn">+</button>
         </div>
 
-        <!-- Sticky Notes Container -->
         <div class="sticky-notes-container"></div>
     </div>
 </div>
 
 <?php 
-    include locate_template('dashboard-templates/rt/rt-client-create-modal.php');
-    include locate_template('dashboard-templates/rt/rt-client-edit-modal.php');
+// Include modals
+include locate_template('dashboard-templates/rt/rt-client-create-modal.php');
+include locate_template('dashboard-templates/rt/rt-client-edit-modal.php');
 ?>
 
-<!-- CREATE CLIENT / LEAD -->
+<!-- =================== IMPROVED JS =================== -->
 <script>
-// CREATE CLIENT / LEAD MODAL + AJAX
 document.addEventListener('DOMContentLoaded', function() {
 
+    // -------------------
+    // CREATE CLIENT / LEAD
+    // -------------------
     const addClientBtn = document.getElementById('addClientBtn');
-    const addLeadBtn = document.getElementById('addLeadBtn');
-    const createModal = document.getElementById('rmRealtorClientCreateModal');
+    const addLeadBtn   = document.getElementById('addLeadBtn');
+    const createModal  = document.getElementById('rmRealtorClientCreateModal');
     const closeCreateBtn = document.getElementById('closeRealtorClientCreateModal');
-    const createForm = document.getElementById('createRealtorClientForm');
+    const createForm   = document.getElementById('createRealtorClientForm');
     const createProfileInput = document.getElementById('create_realtor_client_profile_picture');
 
-    // Open Add Client modal
-    if (addClientBtn && createModal) {
-        addClientBtn.addEventListener('click', () => {
-            if (createForm) createForm.reset();
+    if(addClientBtn && createModal){
+        addClientBtn.addEventListener('click', () => { 
+            createForm?.reset();
             createModal.style.display = 'flex';
         });
     }
 
-    // Open Add Lead modal and set status to "lead"
-    if (addLeadBtn && createModal) {
-        addLeadBtn.addEventListener('click', () => {
-            if (createForm) createForm.reset();
-            const statusInput = document.getElementById('create_realtor_client_status');
-            if (statusInput) statusInput.value = 'lead';
-            const previewAvatar = document.getElementById('createRealtorClientPreviewAvatar');
-            if (previewAvatar) previewAvatar.src = "<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
+    if(addLeadBtn && createModal){
+        addLeadBtn.addEventListener('click', () => { 
+            createForm?.reset();
+            document.getElementById('create_realtor_client_status').value = 'lead';
+            document.getElementById('createRealtorClientPreviewAvatar').src = "<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
             createModal.style.display = 'flex';
         });
     }
 
-    // Close modal
-    if (closeCreateBtn && createModal) {
-        closeCreateBtn.addEventListener('click', () => createModal.style.display = 'none');
-        createModal.addEventListener('click', e => {
-            if (e.target === createModal) createModal.style.display = 'none';
-        });
-    }
+    closeCreateBtn?.addEventListener('click', ()=> createModal.style.display='none');
+    createModal?.addEventListener('click', e=> {if(e.target===createModal) createModal.style.display='none'});
 
-    // Profile picture preview
-    if (createProfileInput) {
-        createProfileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    const previewAvatar = document.getElementById('createRealtorClientPreviewAvatar');
-                    if (previewAvatar) previewAvatar.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+    createProfileInput?.addEventListener('change', function(){
+        const file = this.files[0];
+        if(file){
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById('createRealtorClientPreviewAvatar').src = e.target.result;
+            reader.readAsDataURL(file);
+        }
+    });
 
-    // AJAX submit
-    if (createForm) {
-        createForm.addEventListener('submit', function(e) {
-            e.preventDefault();
+    createForm?.addEventListener('submit', function(e){
+        e.preventDefault();
+        const fullName = document.getElementById('create_realtor_client_full_name').value.trim();
+        const email = document.getElementById('create_realtor_client_email').value.trim();
+        const status = document.getElementById('create_realtor_client_status').value;
+        if(!fullName || !email || !status){ alert('Fill all required fields'); return; }
 
-            const fullName = document.getElementById('create_realtor_client_full_name').value.trim();
-            const email = document.getElementById('create_realtor_client_email').value.trim();
-            const status = document.getElementById('create_realtor_client_status').value;
+        const fd = new FormData(createForm);
+        fd.append('action','create_realtor_client_ajax');
+        fd.append('nonce','<?php echo wp_create_nonce("cl_client_create_nonce"); ?>');
 
-            if (!fullName || !email || !status) {
-                alert('Please fill in all required fields (Name, Email, Status)');
-                return;
-            }
+        const submitBtn = createForm.querySelector('button[type="submit"]');
+        const origText = submitBtn.textContent;
+        submitBtn.textContent='Creating...'; submitBtn.disabled=true;
 
-            const formData = new FormData(createForm);
-            formData.append('action', 'create_realtor_client_ajax');
-            formData.append('nonce', '<?php echo wp_create_nonce("cl_client_create_nonce"); ?>');
+        fetch('<?php echo admin_url("admin-ajax.php"); ?>',{method:'POST',body:fd})
+        .then(r=>r.json())
+        .then(d=>{
+            if(d.success){
+                alert('Client created!');
+                createForm.reset();
+                document.getElementById('createRealtorClientPreviewAvatar').src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
+                createModal.style.display='none';
+                setTimeout(()=>window.location.reload(),800);
+            } else alert('Error: '+d.data);
+        }).finally(()=>{submitBtn.textContent=origText; submitBtn.disabled=false;});
+    });
 
-            const submitBtn = createForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Creating...';
-            submitBtn.disabled = true;
+    // -------------------
+    // EVENT DELEGATION FOR DYNAMIC ROWS
+    // -------------------
+    const tableContainer = document.querySelector('.dashboard-top-left');
+    tableContainer.addEventListener('click', function(e){
+        const target = e.target;
 
-            fetch('<?php echo admin_url("admin-ajax.php"); ?>', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Client created successfully!');
-                        createForm.reset();
-                        const previewAvatar = document.getElementById('createRealtorClientPreviewAvatar');
-                        if (previewAvatar) previewAvatar.src = "<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
-                        createModal.style.display = 'none';
-                        setTimeout(() => window.location.reload(), 800);
-                    } else {
-                        alert('Error: ' + data.data);
-                    }
+        // ===== EDIT =====
+        if(target.matches('.edit-client-btn, .edit-lead-btn')){
+            const row = target.closest('tr');
+            const clientId = row.dataset.clientId;
+            if(!clientId) return;
+            const editModal = document.getElementById('rmRealtorClientEditModal');
+            const leadStatusRow = document.getElementById('leadStatusRow');
+            const leadStatusSelect = document.getElementById('edit_realtor_lead_status');
+
+            editModal.style.display='flex';
+            fetch('<?php echo admin_url("admin-ajax.php"); ?>',{
+                method:'POST',
+                body: new URLSearchParams({
+                    action:'fetch_realtor_client_ajax',
+                    nonce:'<?php echo wp_create_nonce("cl_client_edit_nonce"); ?>',
+                    client_id:clientId
                 })
-                .catch(() => alert('Network error. Please try again.'))
-                .finally(() => { submitBtn.textContent = originalText; submitBtn.disabled = false; });
-        });
-    }
+            }).then(r=>r.json()).then(d=>{
+                if(d.success){
+                    const c=d.data;
+                    document.getElementById('edit_realtor_client_id').value=c.client_id;
+                    document.getElementById('edit_realtor_client_full_name').value=c.full_name;
+                    document.getElementById('edit_realtor_client_email').value=c.email;
+                    document.getElementById('edit_realtor_client_phone').value=c.phone;
+                    document.getElementById('edit_realtor_client_notes').value=c.note;
+                    document.getElementById('edit_realtor_client_status').value=c.status;
+                    document.getElementById('editRealtorClientPreviewAvatar').src=c.profile_picture || "<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
 
-});
-</script>
+                    if(c.status==='lead'){
+                        leadStatusRow.style.display='flex';
+                        leadStatusSelect.value=c.lead_status||'cold';
+                    } else leadStatusRow.style.display='none';
+                } else { alert('Failed to fetch client'); editModal.style.display='none'; }
+            }).catch(()=>{alert('Network error'); editModal.style.display='none';});
+        }
 
-<script>
-// EDIT CLIENT / LEAD MODAL + AJAX
-document.addEventListener('DOMContentLoaded', function() {
+        // ===== DELETE =====
+        if(target.matches('.delete-client-btn, .delete-lead-btn')){
+            const row = target.closest('tr');
+            const clientId = row.dataset.clientId;
+            if(!clientId || !confirm('Are you sure?')) return;
 
-    const editModal = document.getElementById('rmRealtorClientEditModal');
-    const closeEditBtn = document.getElementById('closeRealtorClientEditModal');
+            const fd = new FormData();
+            fd.append('action','delete_realtor_client_ajax');
+            fd.append('nonce','<?php echo wp_create_nonce("cl_client_delete_nonce"); ?>');
+            fd.append('client_id',clientId);
+
+            const origText = target.textContent;
+            target.textContent='Deleting...'; target.disabled=true;
+
+            fetch('<?php echo admin_url("admin-ajax.php"); ?>',{method:'POST',body:fd})
+            .then(r=>r.json())
+            .then(d=>{
+                if(d.success) row.remove();
+                else{ alert('Error: '+d.data); target.textContent=origText; target.disabled=false; }
+            }).catch(err=>{ alert('Network error'); target.textContent=origText; target.disabled=false;});
+        }
+
+        // ===== CONVERT LEAD =====
+        if(target.matches('.convert-lead-btn')){
+            const row = target.closest('tr');
+            const clientId = row.dataset.clientId;
+            if(!clientId || !confirm('Convert this lead?')) return;
+
+            const fd = new FormData();
+            fd.append('action','convert_lead_to_client');
+            fd.append('nonce','<?php echo wp_create_nonce("convert_lead_nonce"); ?>');
+            fd.append('client_id',clientId);
+
+            const origText = target.textContent;
+            target.textContent='Converting...'; target.disabled=true;
+
+            fetch('<?php echo admin_url("admin-ajax.php"); ?>',{method:'POST',body:fd})
+            .then(r=>r.json())
+            .then(d=>{
+                if(d.success){
+                    alert('Lead converted!');
+                    row.remove();
+                    // Optionally, reload table via AJAX
+                    // loadTable('activeClients');
+                } else { alert('Error: '+d.data); target.textContent=origText; target.disabled=false; }
+            }).catch(()=>{ alert('Network error'); target.textContent=origText; target.disabled=false;});
+        }
+    });
+
+    // -------------------
+    // EDIT FORM SUBMIT
+    // -------------------
     const editForm = document.getElementById('editRealtorClientForm');
     const editProfileInput = document.getElementById('edit_realtor_client_profile_picture');
+    const editModal = document.getElementById('rmRealtorClientEditModal');
+    const closeEditBtn = document.getElementById('closeRealtorClientEditModal');
 
-    document.querySelectorAll('.edit-client-btn, .edit-lead-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const clientId = this.closest('tr').dataset.clientId;
-            if (!clientId || !editModal) return;
+    closeEditBtn?.addEventListener('click', ()=> editModal.style.display='none');
+    editModal?.addEventListener('click', e=>{if(e.target===editModal) editModal.style.display='none';});
 
-            editModal.style.display = 'flex';
-
-            fetch('<?php echo admin_url("admin-ajax.php"); ?>', {
-                method: 'POST',
-                body: new URLSearchParams({
-                    action: 'fetch_realtor_client_ajax',
-                    nonce: '<?php echo wp_create_nonce("cl_client_edit_nonce"); ?>',
-                    client_id: clientId
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const client = data.data;
-                    document.getElementById('edit_realtor_client_id').value = client.client_id;
-                    document.getElementById('edit_realtor_client_full_name').value = client.full_name;
-                    document.getElementById('edit_realtor_client_email').value = client.email;
-                    document.getElementById('edit_realtor_client_phone').value = client.phone;
-                    document.getElementById('edit_realtor_client_notes').value = client.note;
-                    document.getElementById('edit_realtor_client_status').value = client.status;
-                    document.getElementById('editRealtorClientPreviewAvatar').src = client.profile_picture || "<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>";
-
-                    // === Show Lead Status dropdown only for leads ===
-                    const leadStatusRow = document.getElementById('leadStatusRow');
-                    const leadStatusSelect = document.getElementById('edit_realtor_lead_status');
-
-                    if (client.status === 'lead') {
-                        leadStatusRow.style.display = 'flex';
-                        // Set current lead_status value if exists, else default to 'cold'
-                        if (client.lead_status) {
-                            leadStatusSelect.value = client.lead_status;
-                        } else {
-                            leadStatusSelect.value = 'cold';
-                        }
-                    } else {
-                        leadStatusRow.style.display = 'none';
-                    }
-                } else {
-                    alert('Failed to fetch client data');
-                    editModal.style.display = 'none';
-                }
-            })
-            .catch(() => { alert('Network error. Please try again.'); editModal.style.display = 'none'; });
-        });
+    editProfileInput?.addEventListener('change', function(){
+        const file=this.files[0];
+        if(file){const reader=new FileReader(); reader.onload=e=>document.getElementById('editRealtorClientPreviewAvatar').src=e.target.result; reader.readAsDataURL(file);}
     });
 
-    // Close modal
-    if (closeEditBtn) {
-        closeEditBtn.addEventListener('click', () => editModal.style.display = 'none');
-        editModal.addEventListener('click', e => { if (e.target === editModal) editModal.style.display = 'none'; });
-    }
+    editForm?.addEventListener('submit', function(e){
+        e.preventDefault();
+        const fd = new FormData(editForm);
+        fd.append('action','update_realtor_client_ajax');
+        fd.append('nonce','<?php echo wp_create_nonce("cl_client_edit_nonce"); ?>');
 
-    // Profile picture preview
-    if (editProfileInput) {
-        editProfileInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = e => { document.getElementById('editRealtorClientPreviewAvatar').src = e.target.result; };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+        const submitBtn = editForm.querySelector('button[type="submit"]');
+        const origText = submitBtn.textContent;
+        submitBtn.textContent='Updating...'; submitBtn.disabled=true;
 
-    // AJAX submit
-    if (editForm) {
-        editForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const formData = new FormData(editForm);
-            formData.append('action', 'update_realtor_client_ajax');
-            formData.append('nonce', '<?php echo wp_create_nonce("cl_client_edit_nonce"); ?>');
-
-            const submitBtn = editForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Updating...';
-            submitBtn.disabled = true;
-
-            fetch('<?php echo admin_url("admin-ajax.php"); ?>', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Client updated successfully!');
-                        editForm.reset();
-                        editModal.style.display = 'none';
-                        setTimeout(() => window.location.reload(), 800);
-                    } else {
-                        alert('Error: ' + data.data);
-                    }
-                })
-                .catch(() => alert('Network error. Please try again.'))
-                .finally(() => { submitBtn.textContent = originalText; submitBtn.disabled = false; });
-        });
-    }
-
-});
-</script>
-
-<!-- DELETE CLIENT / LEAD -->
-<script>
-// DELETE CLIENT / LEAD AJAX
-document.addEventListener('DOMContentLoaded', function() {
-
-    document.querySelectorAll('.delete-client-btn, .delete-lead-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const row = this.closest('tr');
-            const clientId = row.dataset.clientId;
-            if (!clientId) return;
-
-            if (!confirm('Are you sure you want to delete this client/lead?')) return;
-
-            const formData = new FormData();
-            formData.append('action', 'delete_realtor_client_ajax');
-            formData.append('nonce', '<?php echo wp_create_nonce("cl_client_delete_nonce"); ?>');
-            formData.append('client_id', clientId);
-
-            const btnText = this.textContent;
-            this.textContent = 'Deleting...';
-            this.disabled = true;
-
-            fetch('<?php echo admin_url("admin-ajax.php"); ?>', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Client deleted successfully!');
-                        row.remove();
-                    } else {
-                        alert('Error: ' + data.data);
-                        this.textContent = btnText;
-                        this.disabled = false;
-                    }
-                })
-                .catch(err => {
-                    alert('Network error: ' + err.message);
-                    this.textContent = btnText;
-                    this.disabled = false;
-                });
-        });
+        fetch('<?php echo admin_url("admin-ajax.php"); ?>',{method:'POST',body:fd})
+        .then(r=>r.json())
+        .then(d=>{
+            if(d.success){ alert('Client updated!'); editForm.reset(); editModal.style.display='none'; setTimeout(()=>window.location.reload(),800);}
+            else alert('Error: '+d.data);
+        }).finally(()=>{submitBtn.textContent=origText; submitBtn.disabled=false;});
     });
 
 });
 </script>
 
-<!-- CONVERT LEAD TO CLIENT -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-
-    const convertBtns = document.querySelectorAll('.convert-lead-btn');
-
-    convertBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const row = this.closest('tr');
-            const clientId = row.dataset.clientId;
-            if (!clientId) return;
-
-            if (!confirm('Do you want to convert this lead to a client?')) return;
-
-            const formData = new FormData();
-            formData.append('action', 'convert_lead_to_client');
-            formData.append('nonce', '<?php echo wp_create_nonce("convert_lead_nonce"); ?>');
-            formData.append('client_id', clientId);
-
-            btn.textContent = 'Converting...';
-            btn.disabled = true;
-
-            fetch('<?php echo admin_url("admin-ajax.php"); ?>', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Lead successfully converted to client!');
-
-                        // Remove the row from Leads table
-                        row.remove();
-
-                        // Add the row to Active Clients table
-                        const activeClientsTable = document.querySelector('.active-clients-table tbody');
-                        if (activeClientsTable) {
-                            const newRow = document.createElement('tr');
-                            newRow.dataset.clientId = clientId;
-                            newRow.innerHTML = `
-                                <td data-label="Client Name">${row.querySelector('[data-label="Client Name"]').textContent}</td>
-                                <td data-label="Email">${row.querySelector('[data-label="Email"]')?.textContent || '—'}</td>
-                                <td data-label="Phone">${row.querySelector('[data-label="Phone"]')?.textContent || '—'}</td>
-                                <td data-label="Notes">${row.querySelector('[data-label="Notes"]')?.textContent || '—'}</td>
-                                <td data-label="Actions" class="action-cell">
-                                    <span class="delete-client-btn" title="Delete">🗑️</span>
-                                </td>
-                            `;
-                            activeClientsTable.prepend(newRow);
-
-                            // Rebind delete event for new row
-                            newRow.querySelector('.delete-client-btn').addEventListener('click', function() {
-                                const clientRow = this.closest('tr');
-                                const clientId = clientRow.dataset.clientId;
-                                if (!clientId) return;
-                                if (!confirm('Are you sure you want to delete this client?')) return;
-
-                                const fd = new FormData();
-                                fd.append('action', 'delete_realtor_client_ajax');
-                                fd.append('nonce', '<?php echo wp_create_nonce("cl_client_delete_nonce"); ?>');
-                                fd.append('client_id', clientId);
-
-                                const btnText = this.textContent;
-                                this.textContent = 'Deleting...';
-                                this.disabled = true;
-
-                                fetch('<?php echo admin_url("admin-ajax.php"); ?>', { method: 'POST', body: fd })
-                                    .then(res => res.json())
-                                    .then(data => {
-                                        if (data.success) clientRow.remove();
-                                        else { alert('Error: ' + data.data); this.textContent = btnText; this.disabled = false; }
-                                    })
-                                    .catch(err => { alert('Network error: ' + err.message); this.textContent = btnText; this.disabled = false; });
-                            });
-                        }
-                    } else {
-                        alert('Error: ' + data.data);
-                        btn.textContent = '🔄';
-                        btn.disabled = false;
-                    }
-                })
-                .catch(err => {
-                    alert('Network error: ' + err.message);
-                    btn.textContent = '🔄';
-                    btn.disabled = false;
-                });
-        });
-    });
-
-});
-</script>
 
 <style>
 /* Primary button (Add & Save Lead) */
@@ -763,5 +554,91 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .lead-cold .lead-status-dot {
   background-color: #4caf50; /* green */
+}
+</style>
+
+<style>
+/* Header + controls row */
+.clients-header,
+.leads-header {
+    display: flex;
+    justify-content: space-between; /* title left, controls right */
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Controls container */
+.table-controls-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Search box */
+.table-controls-row input[type="text"] {
+    width: 200px;
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Dropdown */
+.table-controls-row select {
+    width: 100px;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Button already styled; small top adjustment if needed */
+.table-controls-row .btn-primary {
+    padding: 12px 12px;
+}
+
+/* Pagination buttons styling */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px; /* spacing between buttons */
+    margin-top: 12px;
+}
+
+.pagination button {
+    background: transparent;       /* remove background */
+    border: 1px solid #2271b1;     /* only border */
+    color: #2271b1;                /* text color same as border */
+    padding: 4px 10px;             /* small size */
+    border-radius: 4px;            /* rounded corners */
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination button:hover {
+    background: #2271b1;  /* blue hover */
+    color: #fff;
+}
+
+.pagination button.active {
+    background: #2271b1;  /* active state */
+    color: #fff!important;
+    font-weight: 600;
+}
+
+
+/* Responsive fix */
+@media screen and (max-width: 600px) {
+    .clients-header,
+    .leads-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .table-controls-row {
+        margin-top: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
 }
 </style>
