@@ -310,7 +310,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-
 <style>
 /* Primary button (Add & Save Lead) */
 .btn-primary {

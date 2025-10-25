@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+/* document.addEventListener('DOMContentLoaded', function() {
     const editModal = document.getElementById('rmRealtorClientEditModal');
     const closeEditBtn = document.getElementById('closeRealtorClientEditModal');
     const form = document.getElementById('editRealtorClientForm');
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-});
+}); */
 </script>
 
 <script>

@@ -22,7 +22,6 @@ jQuery(document).ready(function($){
         $(bodyContainer).html('<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>');
 
         $.post(ajaxurl, { action, nonce, page, rows_per_page: rows, search }, function(res){
-            console.log(res); // Debug
             if(res.success){
                 $(bodyContainer).html(res.data.html);
                 renderPagination(paginationContainer, res.data.total_pages, res.data.current_page);
@@ -50,8 +49,11 @@ jQuery(document).ready(function($){
     });
 });
 
+
+// ==============================
+// ✅ Address Book Pagination
+// ==============================
 jQuery(document).ready(function ($) {
-    // -------- ADDRESS BOOK (AJAX Pagination) -------- //
 
     function renderAddressBookPagination(totalPages, currentPage) {
         let html = '';
@@ -67,9 +69,9 @@ jQuery(document).ready(function ($) {
 
         $('#addressBookBody').html('<tr><td colspan="7" style="text-align:center;">Loading...</td></tr>');
 
-        $.post(clientActionData.ajax_url, {
+        $.post(paginationData.ajaxurl, {
             action: 'get_address_book_page',
-            nonce: clientActionData.edit_nonce,
+            nonce: paginationData.clients_nonce,
             page: page,
             rows_per_page: rows,
             search: search
@@ -93,11 +95,76 @@ jQuery(document).ready(function ($) {
 
     // Pagination Button Click
     $(document).on('click', '.ab-page-btn', function (e) {
-        e.preventDefault(); // prevent URL change
+        e.preventDefault();
         const page = $(this).data('page');
         $('.ab-page-btn').removeClass('active');
         $(this).addClass('active');
         loadAddressBook(page);
     });
-});
 
+    // ==============================
+    // ✅ Event Delegation for Edit/Delete
+    // ==============================
+
+    // Delete Client
+    $(document).on('click', '.ab-deleteClient', function () {
+        const row = $(this).closest('tr');
+        const clientId = row.data('client-id');
+        if (!clientId) return;
+
+        if (!confirm('Are you sure you want to delete this client?')) return;
+
+        const btn = $(this);
+        btn.text('Deleting...').prop('disabled', true);
+
+        $.post(paginationData.ajaxurl, {
+            action: 'delete_realtor_client_ajax',
+            nonce: paginationData.delete_nonce,
+            client_id: clientId
+        }, function (res) {
+            if (res.success) {
+                row.remove();
+            } else {
+                alert('Error: ' + res.data);
+                btn.text('🗑️').prop('disabled', false);
+            }
+        }).fail(function () {
+            alert('Network error. Please try again.');
+            btn.text('🗑️').prop('disabled', false);
+        });
+    });
+
+    // Edit Client - Open Modal
+    $(document).on('click', '.ab-editClientDetails', function () {
+        const row = $(this).closest('tr');
+        const clientId = row.data('client-id');
+        if (!clientId) return;
+
+        const editModal = $('#rmRealtorClientEditModal');
+        editModal.show();
+
+        $.post(paginationData.ajaxurl, {
+            action: 'fetch_realtor_client_ajax',
+            nonce: paginationData.edit_nonce,
+            client_id: clientId
+        }, function (res) {
+            if (res.success) {
+                const client = res.data;
+                $('#edit_realtor_client_id').val(client.client_id);
+                $('#edit_realtor_client_full_name').val(client.full_name);
+                $('#edit_realtor_client_email').val(client.email);
+                $('#edit_realtor_client_phone').val(client.phone);
+                $('#edit_realtor_client_notes').val(client.note);
+                $('#edit_realtor_client_status').val(client.status);
+                $('#editRealtorClientPreviewAvatar').attr('src', client.profile_picture || paginationData.default_avatar);
+            } else {
+                alert('Error: ' + res.data);
+                editModal.hide();
+            }
+        }).fail(function () {
+            alert('Network error. Please try again.');
+            editModal.hide();
+        });
+    });
+
+});

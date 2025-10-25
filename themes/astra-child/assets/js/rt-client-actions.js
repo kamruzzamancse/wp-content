@@ -1,19 +1,21 @@
 jQuery(document).ready(function($){
 
-    // Container for delegation
     const tableContainer = document.querySelector('.dashboard-top-left');
+    if(!tableContainer) return;
 
     tableContainer.addEventListener('click', function(e){
         const target = e.target;
         const row = target.closest('tr');
         if(!row) return;
+
         const clientId = row.dataset.clientId;
         if(!clientId) return;
 
         // ======================
         // EDIT CLIENT / LEAD
         // ======================
-        if(target.classList.contains('edit-client-btn') || target.classList.contains('edit-lead-btn')){
+        const editBtn = target.closest('.edit-client-btn, .edit-lead-btn');
+        if(editBtn){
             const editModal = document.getElementById('rmRealtorClientEditModal');
             if(!editModal) return;
             editModal.style.display = 'flex';
@@ -38,7 +40,6 @@ jQuery(document).ready(function($){
                     document.getElementById('edit_realtor_client_status').value = client.status;
                     document.getElementById('editRealtorClientPreviewAvatar').src = client.profile_picture || clientActionData.default_avatar;
 
-                    // Show lead status if lead
                     const leadStatusRow = document.getElementById('leadStatusRow');
                     const leadStatusSelect = document.getElementById('edit_realtor_lead_status');
                     if(client.status === 'lead'){
@@ -52,23 +53,20 @@ jQuery(document).ready(function($){
                     editModal.style.display = 'none';
                 }
             })
-            .catch(() => { alert('Network error.'); editModal.style.display = 'none'; });
+            .catch(() => { alert('Network error'); editModal.style.display = 'none'; });
         }
 
         // ======================
         // DELETE CLIENT / LEAD
         // ======================
-        if(target.classList.contains('delete-client-btn') || target.classList.contains('delete-lead-btn')){
+        const deleteBtn = target.closest('.delete-client-btn, .delete-lead-btn');
+        if(deleteBtn){
             if(!confirm('Are you sure you want to delete this client/lead?')) return;
 
             const formData = new FormData();
             formData.append('action', 'delete_realtor_client_ajax');
             formData.append('nonce', clientActionData.delete_nonce);
             formData.append('client_id', clientId);
-
-            const btnText = target.textContent;
-            target.textContent = 'Deleting...';
-            target.disabled = true;
 
             fetch(clientActionData.ajax_url, { method: 'POST', body: formData })
                 .then(res => res.json())
@@ -78,31 +76,22 @@ jQuery(document).ready(function($){
                         row.remove();
                     } else {
                         alert('Error: ' + data.data);
-                        target.textContent = btnText;
-                        target.disabled = false;
                     }
                 })
-                .catch(err => {
-                    alert('Network error: ' + err.message);
-                    target.textContent = btnText;
-                    target.disabled = false;
-                });
+                .catch(() => { alert('Network error'); });
         }
 
         // ======================
         // CONVERT LEAD TO CLIENT
         // ======================
-        if(target.classList.contains('convert-lead-btn')){
+        const convertBtn = target.closest('.convert-lead-btn');
+        if(convertBtn){
             if(!confirm('Do you want to convert this lead to a client?')) return;
 
             const formData = new FormData();
             formData.append('action', 'convert_lead_to_client');
             formData.append('nonce', clientActionData.convert_nonce);
             formData.append('client_id', clientId);
-
-            const btnText = target.textContent;
-            target.textContent = 'Converting...';
-            target.disabled = true;
 
             fetch(clientActionData.ajax_url, { method: 'POST', body: formData })
                 .then(res => res.json())
@@ -111,7 +100,6 @@ jQuery(document).ready(function($){
                         alert('Lead successfully converted to client!');
                         row.remove();
 
-                        // Add row to Active Clients table
                         const activeClientsTable = document.querySelector('.active-clients-table tbody');
                         if(activeClientsTable){
                             const newRow = document.createElement('tr');
@@ -129,15 +117,9 @@ jQuery(document).ready(function($){
                         }
                     } else {
                         alert('Error: ' + data.data);
-                        target.textContent = btnText;
-                        target.disabled = false;
                     }
                 })
-                .catch(err => {
-                    alert('Network error: ' + err.message);
-                    target.textContent = btnText;
-                    target.disabled = false;
-                });
+                .catch(() => { alert('Network error'); });
         }
 
     }); // End container click listener

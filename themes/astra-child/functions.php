@@ -157,6 +157,23 @@ function mdk_enqueue_profile_scripts() {
         'default_avatar'=> esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg')
     ]);
 
+    if ($tab === 'rt-tab-address-book') {
+        wp_enqueue_script(
+            'address-book-actions',
+            get_stylesheet_directory_uri() . '/assets/js/rt-address-book-actions.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-address-book-actions.js'),
+            true
+        );
+
+        wp_localize_script('rt-address-book-actions', 'abClientData', [
+            'ajax_url'      => admin_url('admin-ajax.php'),
+            'edit_nonce'    => wp_create_nonce('cl_client_edit_nonce'),
+            'delete_nonce'  => wp_create_nonce('cl_client_delete_nonce'),
+            'default_avatar'=> esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'),
+        ]);
+    }
+
 }
 add_action('wp_enqueue_scripts', 'mdk_enqueue_profile_scripts');
 

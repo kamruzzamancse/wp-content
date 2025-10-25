@@ -134,7 +134,9 @@ add_action('wp_ajax_get_address_book_page', 'get_address_book_page');
 add_action('wp_ajax_nopriv_get_address_book_page', 'get_address_book_page');
 
 function get_address_book_page() {
-    check_ajax_referer('address_book_pagination_nonce', 'nonce');
+    // Verify nonce
+    check_ajax_referer('clients_pagination_nonce', 'nonce');
+
     global $wpdb;
 
     $page = isset($_POST['page']) ? intval($_POST['page']) : 1;
@@ -142,12 +144,19 @@ function get_address_book_page() {
     $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
     $offset = ($page - 1) * $rows_per_page;
 
+    // Default avatar
+    $default_avatar = esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg');
+
+    // Build where clause
     $where = "WHERE deleted_at IS NULL";
     if (!empty($search)) {
         $where .= $wpdb->prepare(" AND full_name LIKE %s", "%{$search}%");
     }
 
+    // Total clients count
     $total = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}clients {$where}");
+
+    // Fetch clients
     $clients = $wpdb->get_results("
         SELECT client_id, full_name, email, phone, note, status, profile_picture
         FROM {$wpdb->prefix}clients
@@ -157,21 +166,20 @@ function get_address_book_page() {
     ");
 
     ob_start();
-    if ($clients):
-        foreach ($clients as $client):
-            $profile_pic = !empty($client->profile_picture)
-                ? $client->profile_picture
-                : 'https://www.pngkey.com/png/full/114-1149847_avatar-profile-png.png';
+
+    if ($clients) :
+        foreach ($clients as $client) :
+            $profile_pic = !empty($client->profile_picture) ? esc_url($client->profile_picture) : $default_avatar;
             ?>
             <tr class="client-row" data-client-id="<?php echo intval($client->client_id); ?>">
-                <td><img src="<?php echo esc_url($profile_pic); ?>" style="border-radius:50%; width:40px; height:40px;"></td>
+                <td><img src="<?php echo $profile_pic; ?>" style="border-radius:50%; width:40px; height:40px;"></td>
                 <td><?php echo esc_html($client->full_name); ?></td>
-                <td><?php echo esc_html($client->email); ?></td>
-                <td><?php echo esc_html($client->phone); ?></td>
-                <td><?php echo esc_html($client->note); ?></td>
-                <td><?php echo esc_html($client->status); ?></td>
-                <td class="ab-actions-column">
-                    <div class="ab-action-icons">
+                <td><?php echo esc_html($client->email ?: '—'); ?></td>
+                <td><?php echo esc_html($client->phone ?: '—'); ?></td>
+                <td><?php echo esc_html($client->note ?: '—'); ?></td>
+                <td><?php echo esc_html($client->status ?: '—'); ?></td>
+                <td class="ab-actions-column" style="text-align:right;">
+                    <div class="ab-action-icons" style="display:flex; justify-content:flex-end; gap:10px;">
                         <span class="ab-action-icon ab-editClientDetails" title="Edit">✏️</span>
                         <span class="ab-action-icon ab-deleteClient" title="Delete">🗑️</span>
                     </div>
@@ -179,14 +187,16 @@ function get_address_book_page() {
             </tr>
             <?php
         endforeach;
-    else:
+    else :
         echo '<tr><td colspan="7" style="text-align:center;">No Clients Found</td></tr>';
     endif;
+
     $html = ob_get_clean();
 
     wp_send_json_success([
-        'html' => $html,
-        'total_pages' => ceil($total / $rows_per_page),
+        'html'         => $html,
+        'total_pages'  => ceil($total / $rows_per_page),
         'current_page' => $page,
+        'default_avatar'=> $default_avatar, // JS এ centralized avatar হিসেবে ব্যবহার করা যাবে
     ]);
 }
