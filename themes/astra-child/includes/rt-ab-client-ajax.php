@@ -9,7 +9,7 @@ function rt_client_current_user_required() {
 }
 
 // =====================
-// Fetch Clients
+// Fetch Clients (Address Book only)
 // =====================
 function rt_fetch_clients_ajax() {
     rt_client_current_user_required();
@@ -88,14 +88,25 @@ function rt_create_realtor_client_ajax() {
     $email = sanitize_email($_POST['realtor_client_email'] ?? '');
     $status = sanitize_text_field($_POST['realtor_client_status'] ?? '');
 
-    if (!$full_name || !$email || !$status) wp_send_json_error('Name, Email, Status are required');
+    // Check if client with same email already exists
+    $existing_client = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$table} WHERE email = %s AND deleted_at IS NULL",
+        $email
+    ));
+
+    if ($existing_client > 0) {
+        wp_send_json_error('A client with this email already exists');
+    }
+
+    if (!$full_name || !$email || !$status) {
+        wp_send_json_error('Name, Email, Status are required');
+    }
 
     $phone = sanitize_text_field($_POST['realtor_client_phone'] ?? '');
     $note = sanitize_textarea_field($_POST['realtor_client_note'] ?? '');
     $preferred_location = sanitize_text_field($_POST['preferred_location'] ?? '');
     $lead_status = sanitize_text_field($_POST['realtor_lead_status'] ?? 'cold');
 
-    // Profile picture
     $profile_url = null;
     if (!empty($_FILES['realtor_client_profile_picture']['name'])) {
         require_once(ABSPATH.'wp-admin/includes/file.php');
@@ -103,26 +114,35 @@ function rt_create_realtor_client_ajax() {
         require_once(ABSPATH.'wp-admin/includes/image.php');
 
         $upload = wp_handle_upload($_FILES['realtor_client_profile_picture'], ['test_form'=>false]);
-        if (isset($upload['error'])) wp_send_json_error('Upload Error: '.$upload['error']);
+        if (isset($upload['error'])) {
+            wp_send_json_error('Upload Error: '.$upload['error']);
+        }
         $profile_url = esc_url_raw($upload['url']);
     }
 
     $data = [
-        'full_name'=>$full_name,
-        'email'=>$email,
-        'phone'=>$phone,
-        'note'=>$note,
-        'status'=>$status,
-        'preferred_location'=>$preferred_location,
-        'lead_status'=>$lead_status,
-        'profile_picture'=>$profile_url,
-        'created_at'=>current_time('mysql'),
-        'created_by'=>get_current_user_id()
+        'full_name' => $full_name,
+        'email' => $email,
+        'phone' => $phone,
+        'note' => $note,
+        'status' => $status,
+        'preferred_location' => $preferred_location,
+        'lead_status' => $lead_status,
+        'profile_picture' => $profile_url,
+        'created_at' => current_time('mysql'),
+        'created_by' => get_current_user_id()
     ];
 
-    $inserted = $wpdb->insert($table,$data);
-    if ($inserted) wp_send_json_success(['client_id'=>$wpdb->insert_id]);
-    wp_send_json_error('Could not create client');
+    $inserted = $wpdb->insert($table, $data);
+    
+    if ($inserted) {
+        wp_send_json_success([
+            'client_id' => $wpdb->insert_id,
+            'message' => 'Client created successfully'
+        ]);
+    }
+    
+    wp_send_json_error('Could not create client. Database error: ' . $wpdb->last_error);
 }
 add_action('wp_ajax_create_realtor_client_ajax','rt_create_realtor_client_ajax');
 

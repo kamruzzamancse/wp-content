@@ -108,7 +108,7 @@
 <?php 
 // Include modals
 include locate_template('dashboard-templates/rt/rt-client-create-modal.php');
-include locate_template('dashboard-templates/rt/rt-client-edit-modal.php');
+include locate_template('dashboard-templates/rt/rt-db-client-edit-modal.php');
 ?>
 
 <style>

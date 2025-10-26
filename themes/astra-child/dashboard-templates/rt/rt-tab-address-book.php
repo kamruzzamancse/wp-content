@@ -159,4 +159,72 @@ table thead th:last-child { border-top-right-radius: 10px; }
     color: #fff;
     font-weight: bold;
 }
+
+.action-cell {
+  text-align: center;
+}
+
+.action-cell .editClientBtn,
+.action-cell .deleteClientBtn {
+  display: inline-block;
+  margin: 0 6px; /* <-- gap between icons */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.action-cell .editClientBtn:hover,
+.action-cell .deleteClientBtn:hover {
+  transform: scale(1.2);
+}
+
+.ab-controls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+}
+
+#abControls #addressBookRows,
+#addressBookRows {
+    width: 100px;
+    padding: 0 8px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.ab-pagination {
+  display: flex;
+  justify-content: flex-end; /* ✅ Right aligned */
+  align-items: center;
+  gap: 5px;                 /* Space between buttons */
+  margin-top: 15px;
+  padding-right: 10px;      /* Optional – adds a little breathing room on the right */
+}
+
+.ab-pagination button {
+  padding: 4px 8px;         /* Small button size */
+  font-size: 13px;          /* Compact font */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ab-pagination button:hover {
+  background-color: #e6e6e6;
+  border-color: #bbb;
+}
+
+.ab-pagination button.active {
+  background-color: #0052cc;
+  color: #fff;
+  border-color: #0052cc;
+}
+
+
 </style>
