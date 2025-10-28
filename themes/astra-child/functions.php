@@ -32,16 +32,12 @@ foreach ($includes as $file) {
 }
 
 // ======================
-// Enqueue JS for Dashboard
+// Enqueue JS for Active Client Dashboard
 // ======================
-function rt_enqueue_dashboard_scripts() {
+function rt_enqueue_active_client_dashboard_scripts() {
     $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
 
     if ($current_tab === 'dashboard') {
-        // jQuery (ensure it's loaded)
-        wp_enqueue_script('jquery');
-
-        // Active Clients Script (with pagination included)
         wp_enqueue_script(
             'rt-db-active-client-js',
             get_stylesheet_directory_uri() . '/assets/js/rt-db-active-client.js',
@@ -50,20 +46,16 @@ function rt_enqueue_dashboard_scripts() {
             true
         );
 
-        // Localize script
-        wp_localize_script('rt-db-active-client-js', 'rtDashboardAjax', [
+        wp_localize_script('rt-db-active-client-js','rtActiveClientAjax', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'create_nonce' => wp_create_nonce('cl_active_client_create_nonce'),
-            'delete_nonce' => wp_create_nonce('cl_active_client_delete_nonce'),
             'pagination_nonce' => wp_create_nonce('clients_pagination_nonce'),
-            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'
         ]);
     }
 }
-add_action('wp_enqueue_scripts', 'rt_enqueue_dashboard_scripts');
+add_action('wp_enqueue_scripts','rt_enqueue_active_client_dashboard_scripts');
 
 // ======================
-// Enqueue JS & Localize AJAX for Dashboard (create, update, convert, delete) for Leads
+// Enqueue JS for Lead Dashboard
 // ======================
 function rt_enqueue_lead_client_scripts() {
     $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
@@ -90,7 +82,7 @@ function rt_enqueue_lead_client_scripts() {
 add_action('wp_enqueue_scripts', 'rt_enqueue_lead_client_scripts');
 
 // ======================
-// Register AJAX Handlers for Dashboard (Leads only)
+// Register AJAX Handlers for Leads
 // ======================
 add_action('wp_ajax_fetch_dashboard_leads_ajax', 'rt_fetch_dashboard_leads_ajax');
 add_action('wp_ajax_fetch_dashboard_lead_ajax', 'rt_fetch_dashboard_lead_ajax');
@@ -117,9 +109,12 @@ function rt_enqueue_client_scripts() {
         wp_localize_script('rt-ab-client-js', 'rtClientAjax', [
             'ajax_url' => admin_url('admin-ajax.php'),
             'create_nonce' => wp_create_nonce('cl_client_create_nonce'),
-            'edit_nonce' => wp_create_nonce('cl_client_edit_nonce'),
+            'edit_nonce'   => wp_create_nonce('cl_client_edit_nonce'),
             'delete_nonce' => wp_create_nonce('cl_client_delete_nonce'),
-            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'
+            'export_nonce' => wp_create_nonce('cl_client_export_nonce'),
+            'import_nonce' => wp_create_nonce('cl_client_import_nonce'),
+            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
+            'default_property_image' => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg'
         ]);
     }
 }

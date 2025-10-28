@@ -28,13 +28,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ---------------------------
-    // Show notification (single instance)
+    // Show notification
     // ---------------------------
     function showNotification(message, type = 'success') {
-        // Remove existing notifications
-        const existingNotifications = document.querySelectorAll('.client-notification');
-        existingNotifications.forEach(notification => notification.remove());
-
+        document.querySelectorAll('.client-notification').forEach(n => n.remove());
         const notification = document.createElement('div');
         notification.className = `client-notification ${type}`;
         notification.style.cssText = `
@@ -50,31 +47,21 @@ document.addEventListener('DOMContentLoaded', function () {
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             animation: slideIn 0.3s ease;
         `;
-        
         notification.textContent = message;
         document.body.appendChild(notification);
-
-        // Auto remove after 3 seconds
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => notification.remove(), 300);
             }
-        }, 3000);
+        }, 300);
 
-        // Add CSS animations
         if (!document.querySelector('#notification-styles')) {
             const style = document.createElement('style');
             style.id = 'notification-styles';
             style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
+                @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+                @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
             `;
             document.head.appendChild(style);
         }
@@ -130,29 +117,20 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No clients found</td></tr>`;
         }
-    }
+    };
 
     // ---------------------------
     // Create client
     // ---------------------------
     const createForm = document.getElementById('createRealtorClientForm');
     if (createForm) {
-        // Remove any existing event listeners by cloning the form
         const newForm = createForm.cloneNode(true);
         createForm.parentNode.replaceChild(newForm, createForm);
-
-        // Add fresh event listener to the new form
         document.getElementById('createRealtorClientForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const submitBtn = this.querySelector('button[type="submit"]');
-            
-            // Prevent duplicate submissions
-            if (submitBtn.disabled) {
-                console.log('Form submission already in progress');
-                return;
-            }
-            
+            if (submitBtn.disabled) return;
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Creating...';
 
@@ -161,16 +139,12 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('nonce', rtClientAjax.create_nonce);
 
             try {
-                console.log('Sending create client request...');
                 const result = await ajaxFetch(formData);
-
                 if (result.success) {
                     showNotification('Client created successfully!');
                     this.reset();
                     document.getElementById('createRealtorClientPreviewAvatar').src = rtClientAjax.default_avatar;
                     document.getElementById('rmRealtorClientCreateModal').style.display = 'none';
-                    
-                    // Refresh the table after a short delay
                     setTimeout(() => {
                         fetchClients({
                             page: 1,
@@ -182,13 +156,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     }, 500);
                 } else {
                     showNotification('Error: ' + result.data, 'error');
-                    // Re-enable form on error
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Create Client';
                 }
             } catch (error) {
                 showNotification('Network error. Please try again.', 'error');
-                // Re-enable form on network error
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Client';
             }
@@ -202,8 +174,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (editForm) {
         editForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            // Prevent duplicate submissions
             if (isProcessing) return;
             isProcessing = true;
 
@@ -217,12 +187,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             try {
                 const result = await ajaxFetch(formData);
-
                 if (result.success) {
                     showNotification('Client updated successfully!');
                     document.getElementById('rmRealtorClientEditModal').style.display = 'none';
-                    
-                    // Refresh the table
                     await fetchClients({
                         page: 1,
                         rows: parseInt(document.getElementById('addressBookRows').value, 10),
@@ -236,7 +203,6 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
                 showNotification('Network error. Please try again.', 'error');
             } finally {
-                // Re-enable form
                 isProcessing = false;
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Update Client';
@@ -270,7 +236,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Edit avatar preview
         const editProfileInput = document.getElementById('edit_realtor_client_profile_picture');
         const editPreviewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
         if (editProfileInput && editPreviewAvatar) {
@@ -292,7 +257,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const tbody = document.getElementById(bodyId);
         if (!tbody) return;
 
-        // Edit row click
         tbody.querySelectorAll('.editClientBtn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const row = this.closest('tr');
@@ -325,7 +289,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
-        // Delete row click
         tbody.querySelectorAll('.deleteClientBtn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const row = this.closest('tr');
@@ -376,6 +339,114 @@ document.addEventListener('DOMContentLoaded', function () {
 
         searchInput.addEventListener('input', fetchTable);
         rowsSelect.addEventListener('change', fetchTable);
+    }
+
+    // ---------------------------
+    // Export Clients
+    // ---------------------------
+    const exportBtn = document.getElementById('exportClientsBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', async () => {
+            const format = document.getElementById('exportFormatSelect').value; // 'csv' or 'xlsx'
+
+            const formData = new FormData();
+            formData.append('action', 'export_clients_ajax');
+            formData.append('nonce', rtClientAjax.export_nonce);
+            formData.append('format', format);
+
+            try {
+                const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.data);
+                }
+
+                const clients = result.data;
+
+                if (format === 'csv') {
+                    const csvData = [
+                        ['full_name', 'email', 'phone', 'note', 'status'],
+                        ...clients.map(client => [
+                            client.full_name,
+                            client.email,
+                            client.phone,
+                            client.note || '',
+                            client.status || ''
+                        ])
+                    ];
+
+                    const csvContent = csvData.map(row => row.map(v => `"${v}"`).join(',')).join('\r\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const filename = `clients-export-${new Date().toISOString().slice(0, 10)}.csv`;
+
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                    showNotification('Clients exported successfully!');
+                } else if (format === 'xlsx') {
+                    const worksheet = XLSX.utils.json_to_sheet(clients);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, 'Clients');
+
+                    const filename = `clients-export-${new Date().toISOString().slice(0, 10)}.xlsx`;
+                    XLSX.writeFile(workbook, filename);
+                    showNotification('Clients exported successfully!');
+                }
+            } catch (error) {
+                showNotification('Export failed: ' + error.message, 'error');
+            }
+        });
+    }
+
+    // ---------------------------
+    // Import Clients
+    // ---------------------------
+    const importInput = document.getElementById('importClientsInput');
+    const importBtn = document.getElementById('importClientsBtn');
+    if (importInput && importBtn) {
+        importBtn.addEventListener('click', async () => {
+            if (!importInput.files || !importInput.files[0]) {
+                showNotification('Please select a file to import.', 'error');
+                return;
+            }
+
+            const file = importInput.files[0];
+            const formData = new FormData();
+            formData.append('action', 'import_clients_ajax');
+            formData.append('nonce', rtClientAjax.import_nonce);
+            formData.append('clients_file', file);
+
+            importBtn.disabled = true;
+            importBtn.textContent = 'Importing...';
+
+            try {
+                const result = await ajaxFetch(formData);
+                if (result.success) {
+                    showNotification(result.data.message || 'Clients imported successfully!');
+                    fetchClients({
+                        page: 1,
+                        rows: parseInt(document.getElementById('addressBookRows').value, 10),
+                        search: document.getElementById('addressBookSearch').value.trim(),
+                        bodyId: 'addressBookBody',
+                        paginationId: 'addressBookPagination'
+                    });
+                    importInput.value = '';
+                } else {
+                    showNotification('Import failed: ' + result.data, 'error');
+                }
+            } catch (error) {
+                showNotification('Import failed: ' + error.message, 'error');
+            } finally {
+                importBtn.disabled = false;
+                importBtn.textContent = 'Import Clients';
+            }
+        });
     }
 
     // ---------------------------
@@ -457,5 +528,4 @@ document.addEventListener('DOMContentLoaded', function () {
             clientModal.style.display = 'flex';
         });
     }
-
 });

@@ -1,56 +1,59 @@
+<!-- Include SheetJS for XLSX export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.3/xlsx.full.min.js"></script>
+
 <div class="ab-container">
-    <div class="ab-table-header">
-        <div class="ab-header-left">
-            <h1 class="header-title">Address Book</h1>
-        </div>
-        <div class="ab-header-right">
-            <div class="ab-search-box">
-                <span class="pt-search-icon">🔍</span>
-                <input type="text" class="pt-search-input" placeholder="Search: Client Name" id="addressBookSearch">
-            </div>
-            <div class="ab-action-buttons">
-                <button class="ab-btn ab-btn-import">
-                    <span style="color: #000" class="dashicons dashicons-upload"></span> Import
-                </button>
-                <div class="ab-export-dropdown">
-                    <button class="ab-btn ab-btn-export">
-                        <span class="dashicons dashicons-download"></span> Export
-                    </button>
-                </div>
-                <button class="ab-btn ab-btn-create">
-                    <span class="dashicons dashicons-plus-alt"></span> Add Contact
-                </button>
-            </div>
-        </div>
+  <div class="ab-table-header">
+    <div class="ab-header-left">
+      <h1 class="header-title">Address Book</h1>
     </div>
-
-    <div class="ab-controls" style="justify-content: flex-end; display: flex;">
-        <label for="addressBookRows" style="margin-right:5px;">Show:</label>
-        <select id="addressBookRows" style="width:100px; padding:2px 6px;">
-            <option value="5">5 rows</option>
-            <option value="10" selected>10 rows</option>
-            <option value="25">25 rows</option>
-        </select>
+    <div class="ab-header-right">
+      <div class="ab-search-box">
+        <span class="pt-search-icon">🔍</span>
+        <input type="text" class="pt-search-input" placeholder="Search: Client Name" id="addressBookSearch">
+      </div>
+      <div class="ab-action-buttons">
+        <button class="ab-btn ab-btn-import" id="openAbImportModal">
+          <span class="dashicons dashicons-upload"></span> Import
+        </button>
+        <div class="ab-export-dropdown">
+          <button class="ab-btn ab-btn-export" id="openAbExportModal">
+            <span class="dashicons dashicons-download"></span> Export
+          </button>
+        </div>
+        <button class="ab-btn ab-btn-create">
+          <span class="dashicons dashicons-plus-alt"></span> Add Contact
+        </button>
+      </div>
     </div>
+  </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th class="ab-sl-column">Profile</th>
-                <th class="client-name">Client Name</th>
-                <th class="email">Email</th>
-                <th class="phone-number">Phone Number</th>
-                <th class="notes">Notes</th>
-                <th class="Status">Status</th>
-                <th class="ab-actions-column">Actions</th>
-            </tr>
-        </thead>
-        <tbody id="addressBookBody">
-            <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
-        </tbody>
-    </table>
+  <div class="ab-controls">
+    <label for="addressBookRows">Show:</label>
+    <select id="addressBookRows">
+      <option value="5">5 rows</option>
+      <option value="10" selected>10 rows</option>
+      <option value="25">25 rows</option>
+    </select>
+  </div>
 
-    <div id="addressBookPagination" class="ab-pagination"></div>
+  <table>
+    <thead>
+      <tr>
+        <th class="ab-sl-column">Profile</th>
+        <th class="client-name">Client Name</th>
+        <th class="email">Email</th>
+        <th class="phone-number">Phone Number</th>
+        <th class="notes">Notes</th>
+        <th class="Status">Status</th>
+        <th class="ab-actions-column">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="addressBookBody">
+      <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+    </tbody>
+  </table>
+
+  <div id="addressBookPagination" class="ab-pagination"></div>
 </div>
 
 <?php
@@ -60,7 +63,403 @@ include locate_template('dashboard-templates/rt/rt-ab-client-edit-modal.php');
 include locate_template('dashboard-templates/rt/rt-ab-client-details-modal.php');
 ?>
 
+<!-- ===== Export Modal ===== -->
+<div id="abExportModal" class="ab-modal">
+  <div class="ab-modal-inner" role="dialog" aria-modal="true" aria-labelledby="abExportTitle">
+    <button class="ab-modal-close" id="abExportClose">✕</button>
+    <h2 id="abExportTitle">Export Address Book</h2>
+    <p>Select export format and data scope below.</p>
+
+    <div class="ab-section">
+      <label>File format</label>
+      <div class="ab-radios">
+        <label><input type="radio" name="ab_export_format" value="csv" checked> CSV (.csv)</label>
+        <label><input type="radio" name="ab_export_format" value="xlsx"> Excel (.xlsx)</label>
+      </div>
+    </div>
+
+    <div class="ab-section">
+      <label>Export scope</label>
+      <div class="ab-radios">
+        <label><input type="radio" name="ab_export_scope" value="current" checked> Current page only</label>
+        <label><input type="radio" name="ab_export_scope" value="all"> All records</label>
+      </div>
+    </div>
+
+    <div class="ab-section">
+      <label>Columns to include</label>
+      <div class="ab-checkboxes">
+        <label><input type="checkbox" name="ab_export_columns" value="full_name" checked> Client Name</label>
+        <label><input type="checkbox" name="ab_export_columns" value="email" checked> Email</label>
+        <label><input type="checkbox" name="ab_export_columns" value="phone" checked> Phone</label>
+        <label><input type="checkbox" name="ab_export_columns" value="note" checked> Notes</label>
+        <label><input type="checkbox" name="ab_export_columns" value="status" checked> Status</label>
+        <label><input type="checkbox" name="ab_export_columns" value="profile_picture"> Profile Picture URL</label>
+        <label><input type="checkbox" name="ab_export_columns" value="created_at"> Created At</label>
+      </div>
+    </div>
+
+    <div class="ab-footer-buttons">
+      <button class="ab-btn" id="abExportCancel">Cancel</button>
+      <button class="ab-btn ab-btn-primary" id="abExportStart">Export</button>
+    </div>
+
+    <div id="abExportStatus"></div>
+  </div>
+</div>
+
+<!-- ===== Import Modal ===== -->
+<div id="abImportModal" class="ab-modal">
+  <div class="ab-modal-inner" role="dialog" aria-modal="true" aria-labelledby="abImportTitle">
+    <button class="ab-modal-close" id="abImportClose">✕</button>
+    <h2 id="abImportTitle">Import Address Book</h2>
+    <p>You can upload a CSV (.csv) or Excel (.xlsx) file to import contacts. Download a sample template first to check the format.</p>
+
+    <div class="ab-section">
+      <a href="#" id="abDownloadCsvTemplate" class="ab-btn">Download CSV Template</a>
+      <a href="#" id="abDownloadXlsxTemplate" class="ab-btn">Download Excel Template</a>
+    </div>
+
+    <div class="ab-section">
+      <label>Select file to import</label>
+      <input type="file" id="abImportFileInput" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+    </div>
+
+    <div class="ab-section">
+      <label>If a record with the same email exists:</label>
+      <div class="ab-radios">
+        <label><input type="radio" name="ab_import_duplicate" value="skip" checked> Skip (keep existing)</label>
+        <label><input type="radio" name="ab_import_duplicate" value="update"> Update existing</label>
+        <label><input type="radio" name="ab_import_duplicate" value="create"> Create duplicate</label>
+      </div>
+    </div>
+
+    <div class="ab-section">
+      <label>Preview first rows (optional)</label>
+      <div id="abImportPreview">No file selected</div>
+    </div>
+
+    <div class="ab-footer-buttons">
+      <button class="ab-btn" id="abImportCancel">Cancel</button>
+      <button class="ab-btn ab-btn-primary" id="abImportStart" disabled>Import</button>
+    </div>
+
+    <div id="abImportStatus"></div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const exportModal = document.getElementById('abExportModal');
+  const importModal = document.getElementById('abImportModal');
+  const exportStatus = document.getElementById('abExportStatus');
+  const importStatus = document.getElementById('abImportStatus');
+  const importFileInput = document.getElementById('abImportFileInput');
+  const importStartBtn = document.getElementById('abImportStart');
+
+  // --- Modal Open/Close ---
+  document.getElementById('openAbExportModal')?.addEventListener('click', () => exportModal.style.display = 'flex');
+  document.getElementById('abExportClose')?.addEventListener('click', () => exportModal.style.display = 'none');
+  document.getElementById('abExportCancel')?.addEventListener('click', () => exportModal.style.display = 'none');
+  exportModal?.addEventListener('click', e => { if (e.target === exportModal) exportModal.style.display = 'none'; });
+
+  document.getElementById('openAbImportModal')?.addEventListener('click', () => importModal.style.display = 'flex');
+  document.getElementById('abImportClose')?.addEventListener('click', () => importModal.style.display = 'none');
+  document.getElementById('abImportCancel')?.addEventListener('click', () => importModal.style.display = 'none');
+  importModal?.addEventListener('click', e => { if (e.target === importModal) importModal.style.display = 'none'; });
+
+  // --- Enable import button when file selected ---
+  importFileInput?.addEventListener('change', () => {
+    if (importFileInput.files && importFileInput.files.length > 0) {
+      importStartBtn.disabled = false;
+      importStatus.textContent = `Selected file: ${importFileInput.files[0].name}`;
+    } else {
+      importStartBtn.disabled = true;
+      importStatus.textContent = 'No file selected';
+    }
+  });
+
+  // --- Export Function ---
+  document.getElementById('abExportStart')?.addEventListener('click', async () => {
+    const format = document.querySelector('input[name="ab_export_format"]:checked')?.value || 'csv';
+    const scope = document.querySelector('input[name="ab_export_scope"]:checked')?.value || 'current';
+    const columns = Array.from(document.querySelectorAll('input[name="ab_export_columns"]:checked')).map(el => el.value);
+
+    exportStatus.textContent = 'Exporting...';
+
+    try {
+      // Fetch data from server
+      const formData = new FormData();
+      formData.append('action', 'export_clients_ajax');
+      formData.append('nonce', rtClientAjax.export_nonce);
+      formData.append('format', format);
+      formData.append('scope', scope);
+      formData.append('columns', JSON.stringify(columns));
+
+      const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+      if (!response.ok) throw new Error('Network response not ok');
+      const data = await response.json(); // Expect backend returns JSON array of clients
+
+      if (!data.success) throw new Error(data.data || 'Export failed');
+
+      const clients = data.data.clients || [];
+
+      if (format === 'csv') {
+        // CSV Export
+        const csvRows = [];
+        csvRows.push(columns.join(',')); // Header
+        clients.forEach(client => {
+          const row = columns.map(col => {
+            let val = client[col] ?? '';
+            if (typeof val === 'string' && val.includes(',')) val = `"${val.replace(/"/g, '""')}"`; // quote if contains comma
+            return val;
+          });
+          csvRows.push(row.join(','));
+        });
+        const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `clients-export-${new Date().toISOString().slice(0,10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      } else {
+        // XLSX Export using SheetJS
+        const worksheetData = clients.map(client => {
+          const obj = {};
+          columns.forEach(col => obj[col] = client[col] ?? '');
+          return obj;
+        });
+        const ws = XLSX.utils.json_to_sheet(worksheetData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Clients');
+        XLSX.writeFile(wb, `clients-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+      }
+
+      exportStatus.textContent = 'Export completed!';
+      setTimeout(() => exportModal.style.display = 'none', 1000);
+
+    } catch (error) {
+      exportStatus.textContent = 'Export failed: ' + error.message;
+    }
+  });
+
+  // --- Import Function ---
+  importStartBtn?.addEventListener('click', async () => {
+    if (!importFileInput.files || importFileInput.files.length === 0) return;
+
+    const file = importFileInput.files[0];
+    const duplicateHandling = document.querySelector('input[name="ab_import_duplicate"]:checked')?.value || 'skip';
+
+    importStartBtn.disabled = true;
+    importStartBtn.textContent = 'Importing...';
+    importStatus.textContent = 'Importing...';
+
+    const formData = new FormData();
+    formData.append('action', 'import_clients_ajax');
+    formData.append('nonce', rtClientAjax.import_nonce);
+    formData.append('clients_file', file);
+    formData.append('duplicate_handling', duplicateHandling);
+
+    try {
+      const result = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+      const data = await result.json();
+      if (data.success) {
+        importStatus.textContent = data.data?.message || 'Import successful!';
+        setTimeout(() => importModal.style.display = 'none', 1000);
+
+        // Refresh client table after import
+        window.fetchClients({
+          page: 1,
+          rows: parseInt(document.getElementById('addressBookRows').value, 10),
+          search: document.getElementById('addressBookSearch').value.trim(),
+          bodyId: 'addressBookBody',
+          paginationId: 'addressBookPagination'
+        });
+
+        importFileInput.value = '';
+        importStartBtn.disabled = true;
+        importStartBtn.textContent = 'Import';
+      } else {
+        importStatus.textContent = 'Import failed: ' + data.data;
+      }
+    } catch (error) {
+      importStatus.textContent = 'Import failed: ' + error.message;
+    } finally {
+      importStartBtn.disabled = false;
+      importStartBtn.textContent = 'Import';
+    }
+  });
+});
+</script>
+
 <style>
+/* ---------- Layout ---------- */
+.ab-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+#abControls #addressBookRows, #addressBookRows {
+  width: 100px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ---------- Table ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+}
+thead th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #ddd;
+  font-weight: 600;
+}
+tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+tbody tr:hover { background-color: #f9f9f9; }
+.ab-sl-column img {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+/* ---------- Pagination ---------- */
+.ab-pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-top: 15px;
+}
+.ab-pagination button {
+  padding: 4px 8px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+.ab-pagination button.active {
+  background-color: #0052cc;
+  color: #fff;
+  border-color: #0052cc;
+}
+
+/* ---------- Modal ---------- */
+.ab-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
+.ab-modal-inner {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  position: relative;
+}
+.ab-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  color: #444;
+}
+
+/* ---------- Buttons (Updated) ---------- */
+.ab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: #fff !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ab-btn:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.ab-btn:active {
+  background-color: #004a99;
+  border-color: #004a99;
+  transform: scale(0.98);
+}
+
+/* Specific buttons if needed */
+.ab-btn-import { background-color: #007bff; border-color: #007bff; }
+.ab-btn-export { background-color: #007bff; border-color: #007bff; }
+.ab-btn-create { background-color: #007bff; border-color: #007bff; }
+
+/* Optional icon spacing */
+.ab-btn .dashicons {
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+/* Cancel button (gray variant) */
+.cancel-btn {
+  background-color: #6c757d;
+  color: #fff !important;
+  border: 1px solid #6c757d;
+}
+.cancel-btn:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+.cancel-btn:active {
+  background-color: #4e555b;
+  transform: scale(0.98);
+}
+
+/* ---------- Footer Buttons ---------- */
+.ab-footer-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.ab-footer-buttons .ab-btn {
+  min-width: 60px;
+  text-align: center;
+}
+
 /* ==== Table & Modal CSS ==== */
 table { 
     width: 100%; 
@@ -77,7 +476,7 @@ table {
     width: 100px; 
     min-width: 100px; 
     max-width: 100px; 
-    text-align: center; /* ✅ Center aligned content */
+    text-align: center;
 }
 
 .client-name { 
@@ -131,7 +530,7 @@ tbody td:hover::after {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
 }
 
-/* ✅ Action icons (center + gap + hover) */
+/* ✅ Action icons */
 .ab-action-icons { 
     display: flex; 
     gap: 8px; 
@@ -156,7 +555,6 @@ tbody td:hover::after {
 
 tbody tr.client-row:hover { background-color: #f5f5f5; }
 
-/* ✅ Center align only Profile and Actions columns */
 .ab-sl-column,
 .ab-actions-column,
 table td:first-child,
@@ -165,7 +563,6 @@ table td:last-child {
     vertical-align: middle;
 }
 
-/* ✅ Profile image styling */
 .ab-sl-column img {
     display: block;
     margin: 0 auto;
@@ -306,10 +703,6 @@ table thead th:last-child { border-top-right-radius: 10px; }
 
 .modal button:last-child { color: #fff!important; }
 
-/* ==== Buttons ==== */
-.ab-btn { background-color: #007bff; color: #fff!important; }
-.ab-btn:hover { background-color: #0056b3; }
-
 /* ==== Pagination ==== */
 .ab-pagination {
     display: flex;
@@ -362,4 +755,83 @@ table thead th:last-child { border-top-right-radius: 10px; }
     cursor: pointer;
 }
 
+/* ===== Address Book Modals ===== */
+.ab-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-in-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.ab-modal-inner {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  position: relative;
+  animation: slideUp 0.25s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
+}
+.ab-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  color: #444;
+}
+.ab-modal h2 {
+  margin-top: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+}
+.ab-modal p {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.ab-section { margin: 14px 0; }
+.ab-section label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+.ab-checkboxes, .ab-radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.ab-radios label, .ab-checkboxes label {
+  font-weight: normal;
+  cursor: pointer;
+}
+#abImportPreview {
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #eee;
+  padding: 10px;
+  background: #fafafa;
+  font-size: 13px;
+}
+#abExportStatus, #abImportStatus {
+  margin-top: 10px;
+  color: #555;
+  font-size: 14px;
+  display: none;
+}
 </style>

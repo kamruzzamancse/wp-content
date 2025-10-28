@@ -88,15 +88,23 @@ function rt_create_realtor_client_ajax() {
     $email = sanitize_email($_POST['realtor_client_email'] ?? '');
     $status = sanitize_text_field($_POST['realtor_client_status'] ?? '');
 
-    if (!$full_name || !$email || !$status) wp_send_json_error('Name, Email, Status are required');
+    if (!$full_name || !$email || !$status) {
+        wp_send_json_error('Name, Email, Status are required');
+    }
 
+    // Check existing client/email in custom table
     $existing_client = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM {$table} WHERE email = %s AND deleted_at IS NULL",
         $email
     ));
-    if ($existing_client > 0) wp_send_json_error('A client with this email already exists');
+    if ($existing_client > 0) {
+        wp_send_json_error('A client with this email already exists in your client list');
+    }
 
-    if (email_exists($email)) wp_send_json_error('A WordPress user with this email already exists');
+    // Check if WordPress user already exists
+    if (email_exists($email)) {
+        wp_send_json_error('A WordPress user with this email already exists');
+    }
 
     $phone = sanitize_text_field($_POST['realtor_client_phone'] ?? '');
     $note = sanitize_textarea_field($_POST['realtor_client_note'] ?? '');
@@ -112,21 +120,29 @@ function rt_create_realtor_client_ajax() {
         $profile_url = esc_url_raw($upload['url']);
     }
 
+    // Start transaction to ensure both operations complete or none
     $wpdb->query('START TRANSACTION');
 
     try {
+        // Create WordPress user first
         $password = wp_generate_password(12, false);
         $user_id = wp_create_user($email, $password, $email);
-        if (is_wp_error($user_id)) throw new Exception('WP User creation failed: '.$user_id->get_error_message());
-
+        
+        if (is_wp_error($user_id)) {
+            throw new Exception('WP User creation failed: '.$user_id->get_error_message());
+        }
+        
+        // Update user details
         wp_update_user([
             'ID' => $user_id,
             'display_name' => $full_name,
             'first_name' => $full_name
         ]);
+        
         $wp_user = new WP_User($user_id);
-        $wp_user->set_role('client');
+        $wp_user->set_role('client'); // Custom client role
 
+        // Insert client into custom table
         $data = [
             'full_name' => $full_name,
             'email' => $email,
@@ -140,13 +156,28 @@ function rt_create_realtor_client_ajax() {
         ];
 
         $inserted = $wpdb->insert($table, $data);
-        if (!$inserted) throw new Exception('Could not create client. DB error: ' . $wpdb->last_error);
+        
+        if (!$inserted) {
+            throw new Exception('Could not create client. Database error: ' . $wpdb->last_error);
+        }
 
+        // Commit transaction
         $wpdb->query('COMMIT');
-        wp_send_json_success(['client_id'=>$wpdb->insert_id,'message'=>'Client created successfully']);
+        
+        wp_send_json_success([
+            'client_id' => $wpdb->insert_id,
+            'message' => 'Client created successfully'
+        ]);
+
     } catch (Exception $e) {
+        // Rollback transaction on error
         $wpdb->query('ROLLBACK');
-        if (isset($user_id) && $user_id) wp_delete_user($user_id);
+        
+        // If WordPress user was created but client insert failed, delete the user
+        if (isset($user_id) && $user_id) {
+            wp_delete_user($user_id);
+        }
+        
         wp_send_json_error($e->getMessage());
     }
 }
@@ -164,6 +195,7 @@ function rt_update_realtor_client_ajax() {
 
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
+
     $client = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE client_id=%d",$client_id));
     if (!$client) wp_send_json_error('Client not found');
 
@@ -183,6 +215,7 @@ function rt_update_realtor_client_ajax() {
         $profile_url = esc_url_raw($upload['url']);
     }
 
+    // Update WP user
     if (!empty($client->user_id)) {
         $user_data = [
             'ID' => $client->user_id,
@@ -196,6 +229,7 @@ function rt_update_realtor_client_ajax() {
         wp_update_user($user_data);
     }
 
+    // Update client table
     $data = [
         'full_name'=>$full_name,
         'email'=>$email,
@@ -208,7 +242,9 @@ function rt_update_realtor_client_ajax() {
     ];
 
     $updated = $wpdb->update($table,$data,['client_id'=>$client_id]);
-    if ($updated !== false) wp_send_json_success('Client updated successfully');
+    if ($updated !== false) {
+        wp_send_json_success('Client updated successfully');
+    }
     wp_send_json_error('Could not update client or nothing changed');
 }
 add_action('wp_ajax_update_realtor_client_ajax','rt_update_realtor_client_ajax');
@@ -225,14 +261,17 @@ function rt_delete_realtor_client_ajax() {
 
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
+
     $client = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE client_id=%d",$client_id));
     if (!$client) wp_send_json_error('Client not found');
 
+    // Soft delete in clients table
     $deleted = $wpdb->update($table, [
         'deleted_at'=>current_time('mysql'),
         'deleted_by'=>get_current_user_id()
     ], ['client_id'=>$client_id]);
 
+    // Update WP user status
     if ($client->user_id) {
         wp_update_user([
             'ID' => $client->user_id,
@@ -240,69 +279,9 @@ function rt_delete_realtor_client_ajax() {
         ]);
     }
 
-    if ($deleted !== false) wp_send_json_success('Client deleted successfully');
+    if ($deleted !== false) {
+        wp_send_json_success('Client deleted successfully');
+    }
     wp_send_json_error('Could not delete client');
 }
 add_action('wp_ajax_delete_realtor_client_ajax','rt_delete_realtor_client_ajax');
-
-// =====================
-// Export Clients (JSON for frontend CSV/XLSX)
-// =====================
-function rt_export_clients_ajax() {
-    rt_client_current_user_required();
-    check_ajax_referer('cl_client_export_nonce','nonce');
-
-    global $wpdb;
-    $table = $wpdb->prefix . 'clients';
-
-    // Columns to export
-    $columns = json_decode(stripslashes($_POST['columns'] ?? '[]'), true);
-    $select = '*';
-    if (!empty($columns) && is_array($columns)) {
-        $select = implode(',', array_map('esc_sql', $columns));
-    }
-
-    // Scope: current/all (optional, can implement later)
-    $scope = sanitize_text_field($_POST['scope'] ?? 'all');
-
-    $sql = "SELECT {$select} FROM {$table} WHERE deleted_at IS NULL";
-    $results = $wpdb->get_results($sql, ARRAY_A);
-
-    // Always return JSON for frontend to handle CSV/XLSX formatting
-    wp_send_json_success(['clients' => $results]);
-}
-add_action('wp_ajax_export_clients_ajax', 'rt_export_clients_ajax');
-
-
-// =====================
-// Import Clients (JSON)
-// =====================
-function rt_import_clients_ajax() {
-    rt_client_current_user_required();
-    check_ajax_referer('cl_client_import_nonce','nonce');
-
-    if (!isset($_FILES['clients_file'])) wp_send_json_error('No file uploaded');
-
-    $file = $_FILES['clients_file']['tmp_name'];
-    $content = file_get_contents($file);
-    $clients = json_decode($content,true);
-    if (!is_array($clients)) wp_send_json_error('Invalid file format');
-
-    global $wpdb;
-    $table = $wpdb->prefix . 'clients';
-    $inserted = 0;
-
-    foreach ($clients as $client) {
-        // Skip if required fields missing
-        if (empty($client['full_name']) || empty($client['email'])) continue;
-
-        $exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE email=%s",$client['email']));
-        if ($exists) continue;
-
-        $wpdb->insert($table,$client);
-        $inserted++;
-    }
-
-    wp_send_json_success(['message'=>"$inserted clients imported successfully"]);
-}
-add_action('wp_ajax_import_clients_ajax','rt_import_clients_ajax');
