@@ -15,7 +15,8 @@ add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
 // Include Required Files
 // ======================
 $includes = [
-    'rt-db-client-ajax.php',
+    'rt-db-active-client-ajax.php',
+    'rt-db-lead-client-ajax.php',
     'rt-ab-client-ajax.php',
     'cl-client-profile.php',
     'rt-realtor-profile.php',
@@ -31,21 +32,52 @@ foreach ($includes as $file) {
 }
 
 // ======================
-// Enqueue JS & Localize AJAX for Dashboard
+// Enqueue JS for Dashboard
 // ======================
 function rt_enqueue_dashboard_scripts() {
     $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
 
     if ($current_tab === 'dashboard') {
+        // jQuery (ensure it's loaded)
+        wp_enqueue_script('jquery');
+
+        // Active Clients Script (with pagination included)
         wp_enqueue_script(
-            'rt-db-client-js',
-            get_stylesheet_directory_uri() . '/assets/js/rt-db-client.js',
+            'rt-db-active-client-js',
+            get_stylesheet_directory_uri() . '/assets/js/rt-db-active-client.js',
             ['jquery'],
-            filemtime(get_stylesheet_directory() . '/assets/js/rt-db-client.js'),
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-db-active-client.js'),
             true
         );
 
-        wp_localize_script('rt-db-client-js', 'rtDashboardAjax', [
+        // Localize script
+        wp_localize_script('rt-db-active-client-js', 'rtDashboardAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'create_nonce' => wp_create_nonce('cl_active_client_create_nonce'),
+            'delete_nonce' => wp_create_nonce('cl_active_client_delete_nonce'),
+            'pagination_nonce' => wp_create_nonce('clients_pagination_nonce'),
+            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_dashboard_scripts');
+
+// ======================
+// Enqueue JS & Localize AJAX for Dashboard (create, update, convert, delete) for Leads
+// ======================
+function rt_enqueue_lead_client_scripts() {
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
+
+    if ($current_tab === 'dashboard') {
+        wp_enqueue_script(
+            'rt-db-lead-client-js',
+            get_stylesheet_directory_uri() . '/assets/js/rt-db-lead-client.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-db-lead-client.js'),
+            true
+        );
+
+        wp_localize_script('rt-db-lead-client-js', 'rtDashboardAjax', [
             'ajax_url'       => admin_url('admin-ajax.php'),
             'create_nonce'   => wp_create_nonce('cl_client_create_nonce'),
             'edit_nonce'     => wp_create_nonce('cl_client_edit_nonce'),
@@ -55,18 +87,17 @@ function rt_enqueue_dashboard_scripts() {
         ]);
     }
 }
-add_action('wp_enqueue_scripts', 'rt_enqueue_dashboard_scripts');
+add_action('wp_enqueue_scripts', 'rt_enqueue_lead_client_scripts');
 
 // ======================
-// Register AJAX Handlers for Dashboard
+// Register AJAX Handlers for Dashboard (Leads only)
 // ======================
-add_action('wp_ajax_fetch_dashboard_clients_ajax', 'rt_fetch_dashboard_clients_ajax');
 add_action('wp_ajax_fetch_dashboard_leads_ajax', 'rt_fetch_dashboard_leads_ajax');
-add_action('wp_ajax_create_dashboard_client_ajax', 'rt_create_dashboard_client_ajax');
-add_action('wp_ajax_update_dashboard_client_ajax', 'rt_update_dashboard_client_ajax');
-add_action('wp_ajax_delete_dashboard_client_ajax', 'rt_delete_dashboard_client_ajax');
+add_action('wp_ajax_fetch_dashboard_lead_ajax', 'rt_fetch_dashboard_lead_ajax');
+add_action('wp_ajax_create_dashboard_lead_ajax', 'rt_create_dashboard_lead_ajax');
+add_action('wp_ajax_update_dashboard_lead_ajax', 'rt_update_dashboard_lead_ajax');
+add_action('wp_ajax_delete_dashboard_lead_ajax', 'rt_delete_dashboard_lead_ajax');
 add_action('wp_ajax_convert_lead_to_client_ajax', 'rt_convert_lead_to_client_ajax');
-add_action('wp_ajax_fetch_single_dashboard_client_ajax', 'rt_fetch_single_dashboard_client_ajax');
 
 // ======================
 // Enqueue JS & Localize AJAX

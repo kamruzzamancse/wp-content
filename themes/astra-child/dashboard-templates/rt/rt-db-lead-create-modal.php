@@ -1,0 +1,166 @@
+<div id="rtDbLeadCreateModal" class="modal-overlay-rt-db-lead">
+    <div class="modal-content-rt-db-lead">
+        <div class="rt-db-lead-create-container">
+
+            <!-- Header -->
+            <div class="create-header-rt-db-lead">
+                <h2>Create New Lead</h2>
+                <span id="closeRtDbLeadCreateModal" class="close-button-rt-db-lead">&times;</span>
+            </div>
+
+            <!-- Form -->
+            <form id="createRtDbLeadForm" method="POST" enctype="multipart/form-data">
+                <div class="create-content-rt-db-lead">
+
+                    <!-- Profile Picture -->
+                    <div class="create-pic-container-rt-db-lead">
+                        <label for="create_rt_db_lead_profile_picture" title="Click to upload profile picture">
+                            <img class="create-rt-db-lead-avatar" id="createRtDbLeadPreviewAvatar"
+                                 src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>"
+                                 alt="Profile Preview">
+                            <input type="file" id="create_rt_db_lead_profile_picture"
+                                   name="rt_db_lead_profile_picture" accept="image/*" style="display:none;">
+                        </label>
+                        <p>Click image to upload</p>
+                    </div>
+
+                    <!-- Lead Details -->
+                    <div class="create-details-rt-db-lead">
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_full_name">Full Name: *</label>
+                            <input type="text" id="create_rt_db_lead_full_name" name="rt_db_lead_full_name" required placeholder="Enter full name">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_email">Email: *</label>
+                            <input type="email" id="create_rt_db_lead_email" name="rt_db_lead_email" required placeholder="Enter email address">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_phone">Phone:</label>
+                            <input type="text" id="create_rt_db_lead_phone" name="rt_db_lead_phone" placeholder="Enter phone number">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_preferred_location">Preferred Location:</label>
+                            <input type="text" id="create_rt_db_lead_preferred_location" name="rt_db_lead_preferred_location" placeholder="Enter preferred location">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_note">Note:</label>
+                            <textarea id="create_rt_db_lead_note" name="rt_db_lead_note" rows="4" placeholder="Enter note"></textarea>
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_status">Status: *</label>
+                            <select id="create_rt_db_lead_status" name="rt_db_lead_status" required>
+                                <option value="" disabled selected>Select Status</option>
+                                <option value="lead">Lead</option>
+                                <option value="active">Active</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="submit" class="create-submit-btn-rt-db-lead">Create Lead</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const createModal = document.getElementById('rtDbLeadCreateModal');
+    const addLeadBtn = document.getElementById('addLeadBtn');
+    const closeBtn = document.getElementById('closeRtDbLeadCreateModal');
+    const form = document.getElementById('createRtDbLeadForm');
+    const profileInput = document.getElementById('create_rt_db_lead_profile_picture');
+    const previewAvatar = document.getElementById('createRtDbLeadPreviewAvatar');
+
+    // Open modal
+    if(addLeadBtn && createModal){
+        addLeadBtn.addEventListener('click', () => createModal.style.display='flex');
+    }
+
+    // Close modal
+    if(closeBtn && createModal){
+        closeBtn.addEventListener('click', () => createModal.style.display='none');
+        createModal.addEventListener('click', e => { if(e.target === createModal) createModal.style.display='none'; });
+    }
+
+    // Image preview
+    if(profileInput){
+        profileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if(file){
+                const reader = new FileReader();
+                reader.onload = e => previewAvatar.src = e.target.result;
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // AJAX submit
+    if(form){
+        form.addEventListener('submit', async function(e){
+            e.preventDefault();
+            const formData = new FormData(form);
+            formData.append('action', 'create_dashboard_lead_ajax'); // Must match PHP action
+            formData.append('nonce', rtDashboardAjax.create_nonce);
+
+            try {
+                const response = await fetch(rtDashboardAjax.ajax_url, { method:'POST', body: formData });
+                const text = await response.text();
+
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (err) {
+                    console.error('Invalid JSON:', text);
+                    alert('Server error: invalid JSON (see console)');
+                    return;
+                }
+
+                if(result.success){
+                    alert('Lead created successfully!');
+                    form.reset();
+                    previewAvatar.src = rtDashboardAjax.default_avatar;
+                    createModal.style.display = 'none';
+
+                    if(typeof fetchLeads === 'function'){
+                        fetchLeads({ page:1, rows:10, search:'', bodyId:'leadsBody', paginationId:'leadsPagination' });
+                    }
+                } else {
+                    alert('Error: ' + (result.data || 'Unknown error'));
+                }
+
+            } catch(err){
+                alert('Network error: ' + err.message);
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.modal-overlay-rt-db-lead { display: none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; }
+.modal-content-rt-db-lead { background:#fff; border-radius:8px; max-width:600px; width:90%; box-shadow:0 6px 18px rgba(0,0,0,0.12); padding:25px 30px; max-height:90vh; overflow-y:auto; }
+.create-header-rt-db-lead { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
+.close-button-rt-db-lead { font-size:28px; cursor:pointer; color:#555; transition: color 0.25s ease; }
+.close-button-rt-db-lead:hover { color:#0052cc; }
+.create-content-rt-db-lead { display:flex; gap:30px; flex-wrap:wrap; }
+.create-pic-container-rt-db-lead { flex:0 0 140px; text-align:center; }
+.create-rt-db-lead-avatar { width:140px; height:140px; object-fit:cover; border-radius:50%; cursor:pointer; border:3px solid #ddd; transition:border-color 0.3s ease; }
+.create-rt-db-lead-avatar:hover { border-color:#0052cc; }
+.create-pic-container-rt-db-lead p { font-size:12px; color:#888; margin-top:8px; }
+.create-details-rt-db-lead { flex:1; min-width:280px; }
+.create-detail-row-rt-db-lead { margin-bottom:18px; display:flex; flex-direction:column; }
+.create-submit-btn-rt-db-lead { background-color:#0052cc; border:none; color:white; padding:10px 25px; font-size:1.1rem; border-radius:8px; cursor:pointer; transition: background-color 0.25s ease; }
+.create-submit-btn-rt-db-lead:hover { background-color:#003d99; }
+@media (max-width:600px){ .create-content-rt-db-lead { flex-direction:column; } .create-pic-container-rt-db-lead { margin:0 auto 25px auto; } }
+</style>
