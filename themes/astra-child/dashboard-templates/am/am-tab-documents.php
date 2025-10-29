@@ -1,3 +1,40 @@
+<!-- Document Types Management -->
+<div class="cld-doc-types-section">
+    <div class="cld-doc-types-header">
+        <h2 class="header-title">Document Types</h2>
+        <button id="addDocTypeBtn" class="btn-primary">+ Add Type</button>
+    </div>
+
+    <table class="doc-types-table">
+        <thead>
+            <tr>
+                <th style="width:50px;">#</th>
+                <th>Type Name</th>
+                <th style="width:120px;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            global $wpdb;
+            $doc_types = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}document_types WHERE deleted_at IS NULL ORDER BY created_at DESC");
+            if ($doc_types):
+                foreach ($doc_types as $index => $type): ?>
+                    <tr data-id="<?php echo esc_attr($type->id); ?>">
+                        <td><?php echo $index + 1; ?></td>
+                        <td><?php echo esc_html($type->type_name); ?></td>
+                        <td>
+                            <span class="edit-doc-type" title="Edit">✏️</span>
+                            <span class="delete-doc-type" title="Delete">🗑️</span>
+                        </td>
+                    </tr>
+                <?php endforeach;
+            else: ?>
+                <tr><td colspan="3" style="text-align:center;">No Document Types Found</td></tr>
+            <?php endif; ?>
+        </tbody>
+    </table>
+</div>
+
 <div class="cld-task-section">
     <div class="cld-task-header">
         <h2 class="header-title">Documents</h2>
@@ -5,31 +42,7 @@
             Upload Document <span class="dashicons dashicons-media-document"></span>
         </button>
     </div>
-    <!-- Dashboard Cards Grid -->
-    <div class="stats-grid">
-        <!-- Business Cards Card -->
-        <a href="#" class="stat-card" data-type="business-cards">
-            <h3>
-                <span class="dashicons dashicons-admin-users"></span> 
-                <?php echo esc_html__('Business Cards', 'text-domain'); ?>
-            </h3>
-        </a>
-        <!-- Sellers Checklist Card -->
-        <a href="#" class="stat-card" data-type="seller-checklist">
-            <h3>
-                <span class="dashicons dashicons-clipboard"></span> 
-                <?php echo esc_html__('Sellers Checklist', 'text-domain'); ?>
-            </h3>
-        </a>
-        <!-- Buyers Checklist Card -->
-        <a href="#" class="stat-card" data-type="buyer-checklist">
-            <h3>
-                <span class="dashicons dashicons-portfolio"></span> 
-                <?php echo esc_html__('Buyers Checklist', 'text-domain'); ?>
-            </h3>
-        </a>
-    </div>
-    <!-- Documents Table -->
+
     <div class="documents-section">
         <table class="documents-table">
             <thead>
@@ -42,137 +55,96 @@
                 </tr>
             </thead>
             <tbody>
+                <?php
+                global $wpdb;
+                $table_docs  = $wpdb->prefix . 'documents';
+                $table_types = $wpdb->prefix . 'document_types';
+
+                $documents = $wpdb->get_results("
+                    SELECT d.id, d.title, d.file_name, d.type_id, dt.type_name
+                    FROM $table_docs d
+                    LEFT JOIN $table_types dt ON d.type_id = dt.id
+                    WHERE d.deleted_at IS NULL
+                    ORDER BY d.created_at DESC
+                ");
+
+                if ($documents):
+                    foreach ($documents as $index => $doc): ?>
+                        <tr data-id="<?php echo esc_attr($doc->id); ?>">
+                            <td><?php echo $index + 1; ?></td>
+                            <td><?php echo esc_html($doc->title); ?></td>
+                            <td data-type-id="<?php echo esc_attr($doc->type_id); ?>">
+                                <?php echo esc_html($doc->type_name); ?>
+                            </td>
+                            <td>
+                                <?php 
+                                $upload_dir = wp_upload_dir();
+                                $file_name  = ltrim($doc->file_name, '/');
+                                $file_url   = trailingslashit($upload_dir['baseurl']) . $file_name;
+                                $file_path  = trailingslashit($upload_dir['basedir']) . $file_name;
+
+                                if (file_exists($file_path)) : ?>
+                                    <a href="<?php echo esc_url($file_url); ?>" target="_blank">
+                                        <?php echo esc_html(basename($file_name)); ?>
+                                    </a>
+                                <?php else: ?>
+                                    <span style="color:red;">File missing</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if (file_exists($file_path)) : ?>
+                                    <a href="<?php echo esc_url($file_url); ?>"
+                                       download="<?php echo esc_attr(basename($file_name)); ?>"
+                                       class="download-doc"
+                                       title="Download"
+                                       style="cursor:pointer; margin-right:5px;">⬇️</a>
+                                <?php endif; ?>
+
+                                <span class="edit-doc" title="Edit" style="cursor:pointer; margin-right:5px;">✏️</span>
+                                <span class="delete-doc" title="Delete" style="cursor:pointer;">🗑️</span>
+                            </td>
+                        </tr>
+                    <?php endforeach;
+                else: ?>
+                    <tr><td colspan="5" style="text-align:center;">No Documents Found</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
 </div>
+
 <?php 
     include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
+    include locate_template('dashboard-templates/rt/rt-document-type-modal.php');
 ?>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ===============================
-    // Static dataset for each tab
-    // ===============================
-    const documentsData = {
-        "business-cards": [
-            { title: "Business Card 1", type: "Business Cards", file: "business1.pdf" },
-            { title: "Business Card 2", type: "Business Cards", file: "business2.pdf" },
-            { title: "Business Card 3", type: "Business Cards", file: "business3.pdf" },
-            { title: "Business Card 4", type: "Business Cards", file: "business4.pdf" },
-            { title: "Business Card 5", type: "Business Cards", file: "business5.pdf" }
-        ],
-        "seller-checklist": [
-            { title: "Seller Checklist 1", type: "Seller Checklist", file: "seller1.pdf" },
-            { title: "Seller Checklist 2", type: "Seller Checklist", file: "seller2.pdf" },
-            { title: "Seller Checklist 3", type: "Seller Checklist", file: "seller3.pdf" },
-            { title: "Seller Checklist 4", type: "Seller Checklist", file: "seller4.pdf" },
-            { title: "Seller Checklist 5", type: "Seller Checklist", file: "seller5.pdf" }
-        ],
-        "buyer-checklist": [
-            { title: "Buyer Checklist 1", type: "Buyer Checklist", file: "buyer1.pdf" },
-            { title: "Buyer Checklist 2", type: "Buyer Checklist", file: "buyer2.pdf" },
-            { title: "Buyer Checklist 3", type: "Buyer Checklist", file: "buyer3.pdf" },
-            { title: "Buyer Checklist 4", type: "Buyer Checklist", file: "buyer4.pdf" },
-            { title: "Buyer Checklist 5", type: "Buyer Checklist", file: "buyer5.pdf" }
-        ]
-    };
-    // ===============================
-    // Function to render table rows
-    // ===============================
-    function renderDocuments(type) {
-        const tbody = document.querySelector('.documents-table tbody');
-        tbody.innerHTML = ''; // Clear previous rows
-        const data = documentsData[type];
-        if(!data) return;
-        data.forEach((doc, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="#">${index + 1}</td>
-                <td data-label="Document Title">${doc.title}</td>
-                <td data-label="Document Type">${doc.type}</td>
-                <td data-label="File">${doc.file}</td>
-                <td data-label="Actions">
-                    <a href="#" class="doc-action download" title="Download">⬇️</a>
-                    <a href="#" class="doc-action edit" title="Edit">✏️</a>
-                    <a href="#" class="doc-action delete" title="Delete">🗑️</a>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-        // Bind actions for dynamically created rows
-        bindTableActions();
-    }
-    // ===============================
-    // Bind actions for table buttons
-    // ===============================
-    function bindTableActions() {
-        // Download
-        document.querySelectorAll('.doc-action.download').forEach(link => {
-            link.addEventListener('click', e => { 
-                e.preventDefault(); 
-                alert('Download document'); 
-            });
-        });
-        // Edit -> Open same modal as upload button
-        document.querySelectorAll('.doc-action.edit').forEach(link => {
-            link.addEventListener('click', e => {
-                e.preventDefault();
-                const modal = document.getElementById('cl-upload-document-modal');
-                if(modal) modal.classList.add('show');
-            });
-        });
-        // Delete
-        document.querySelectorAll('.doc-action.delete').forEach(link => {
-            link.addEventListener('click', e => {
-                e.preventDefault();
-                alert('Delete document');
-            });
-        });
-    }
-    // ===============================
-    // Tab click event
-    // ===============================
-    const statCards = document.querySelectorAll('.stat-card');
-    statCards.forEach(card => {
-        card.addEventListener('click', e => {
-            e.preventDefault();
-            const type = card.dataset.type;
-            // Render table for selected type
-            renderDocuments(type);
-            // Highlight active tab
-            statCards.forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-        });
-    });
-    // ===============================
-    // Initial load - default tab
-    // ===============================
-    renderDocuments('business-cards'); 
-    document.querySelector('.stat-card[data-type="business-cards"]').classList.add('active');
-    // ===============================
-    // Modal functionality for Upload button
-    // ===============================
-    const modalButtons = document.querySelectorAll('.cld-upload-btn');
-    modalButtons.forEach(btn => {
+    // Open Upload Document Modal
+    const uploadButtons = document.querySelectorAll('.cld-upload-btn');
+    uploadButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const modal = document.getElementById(btn.dataset.modal);
-            if(modal) modal.classList.add('show');
+            const modalId = btn.dataset.modal;
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.add('show');
+
+            // Reset form for new document
+            const form = modal.querySelector('form');
+            if(form) form.reset();
+            const hiddenInput = form.querySelector('[name="document_id"]');
+            if(hiddenInput) hiddenInput.value = '';
         });
     });
-    const closeButtons = document.querySelectorAll('.clup-close-btn, .clup-cancel');
+
+    // Close modal
+    const closeButtons = document.querySelectorAll('.clup-close-btn');
     closeButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const modal = btn.closest('.clup-modal-overlay');
-            if(modal) modal.classList.remove('show');
+            btn.closest('.clup-modal-overlay').classList.remove('show');
         });
     });
-    const modals = document.querySelectorAll('.clup-modal-overlay');
-    modals.forEach(modal => {
-        modal.addEventListener('click', e => {
-            if(e.target === modal) modal.classList.remove('show');
-        });
-    });
+
+    // File browse
     const browseButtons = document.querySelectorAll('.clup-browse');
     browseButtons.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -252,8 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 
 .stat-card.active { 
-    background: #2271b1; 
-    color: #fff; 
+    background:#2271b1; 
+    color:#fff; 
 }
 
 .stat-card.active h3 { 
@@ -277,14 +249,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .documents-table {
     width: 100%;
-    border-collapse: collapse;
     min-width: 600px;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ddd;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+}
+
+/* Apply radius to first and last header cells */
+.documents-table thead th:first-child {
+    border-top-left-radius: 10px;
+}
+
+.documents-table thead th:last-child {
+    border-top-right-radius: 10px;
 }
 
 .documents-table th, .documents-table td {
     padding: 12px 15px;
     text-align: left;
-    border: 1px solid #ddd;
     font-size: 14px;
 }
 
@@ -329,6 +313,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .documents-table { 
         min-width: auto;
+        border: none;
+        border-radius: 0;
+        background: transparent;
     }
     
     .documents-table thead { 
@@ -343,6 +330,11 @@ document.addEventListener('DOMContentLoaded', function() {
         width: 100% !important;
     }
     
+    .documents-table tbody {
+        display: block;
+        width: 100%;
+    }
+    
     .documents-table tr { 
         margin-bottom: 15px; 
         border: 1px solid #ddd; 
@@ -351,6 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
         background: #fff; 
         position: relative;
         box-sizing: border-box;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .documents-table td { 
@@ -381,12 +374,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     /* Special handling for Actions cell */
     .documents-table td[data-label="Actions"] {
-        padding-left: 10px;
+        padding: 10px;
         text-align: center;
+        border-bottom: none;
         display: flex;
         justify-content: center;
+        align-items: center;
         gap: 10px;
-        border-bottom: none;
     }
     
     .documents-table td[data-label="Actions"]::before {
@@ -395,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     .doc-action {
         margin: 0 5px;
+        font-size: 16px;
     }
 }
 
@@ -436,4 +431,159 @@ document.addEventListener('DOMContentLoaded', function() {
         margin: 0 3px;
     }
 }
+</style>
+
+<style>
+.cld-doc-types-section {
+    background: #fff;              /* match Documents section background */
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    max-width: 500px;             /* max width */
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Header */
+.cld-doc-types-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Table */
+.doc-types-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #ddd;
+    border-radius: 10px 10px 0 0; /* top-left and top-right radius like Documents table */
+    overflow: hidden;
+}
+
+/* Table headers */
+.doc-types-table th, .doc-types-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd; /* bottom border */
+    text-align: left;
+    font-size: 14px;
+}
+
+/* Header styling */
+.doc-types-table th {
+    background: #2271b1;
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Rounded corners for first and last headers */
+.doc-types-table th:first-child {
+    border-top-left-radius: 10px;
+}
+.doc-types-table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Bottom border for last row */
+.doc-types-table tr:last-child td {
+    border-bottom: 1px solid #ddd;
+}
+
+/* Action buttons */
+.edit-doc-type, .delete-doc-type {
+    cursor: pointer;
+    margin-right: 5px;
+}
+.edit-doc-type:hover { color: #ffb400; }
+.delete-doc-type:hover { color: #e63946; }
+
+/* ===============================
+   Responsive - Mobile View
+================================= */
+@media (max-width: 768px) {
+    .doc-types-table {
+        border: none;
+        border-radius: 0;
+    }
+
+    .doc-types-table thead {
+        display: none; /* hide headers */
+    }
+
+    .doc-types-table, 
+    .doc-types-table tbody, 
+    .doc-types-table tr, 
+    .doc-types-table td {
+        display: block;
+        width: 100% !important;
+    }
+
+    .doc-types-table tr {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-sizing: border-box;
+        position: relative;
+    }
+
+    .doc-types-table td {
+        padding: 10px 10px 10px 45%;
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        min-height: 20px;
+        box-sizing: border-box;
+    }
+
+    .doc-types-table td:last-child {
+        border-bottom: none;
+    }
+
+    .doc-types-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 40%;
+        padding-right: 10px;
+        white-space: nowrap;
+        font-weight: 600;
+        color: #333;
+    }
+
+    /* Actions cell special handling */
+    .doc-types-table td[data-label="Actions"] {
+        padding: 10px;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .doc-types-table td[data-label="Actions"]::before {
+        display: none;
+    }
+
+    .edit-doc-type, .delete-doc-type {
+        font-size: 16px;
+        margin: 0 5px 0 0;
+    }
+}
+
+/* ===============================
+   Keep your existing .btn-primary intact
+================================= */
+.btn-primary {
+    padding-top: 10px;
+    padding-right: 20px;
+    padding-bottom: 10px;
+    padding-left: 20px;
+    color: #FFF!important;
+}
+
 </style>

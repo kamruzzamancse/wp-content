@@ -56,12 +56,12 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
         </li>
 
         <!-- Settings -->
-        <li class="<?php echo $current_tab === 'settings' ? 'active' : ''; ?>">
+        <!-- <li class="<?php echo $current_tab === 'settings' ? 'active' : ''; ?>">
             <a href="?tab=settings" title="Settings">
                 <span class="dashicons dashicons-admin-settings"></span>
                 <span>Settings</span>
             </a>
-        </li>
+        </li> -->
 
         <!-- Logout -->
         <li>

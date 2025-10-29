@@ -30,6 +30,11 @@ function redbm_create_tables() {
         license_number VARCHAR(100),
         rating_avg FLOAT DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_by BIGINT(20) UNSIGNED DEFAULT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        updated_by BIGINT(20) UNSIGNED DEFAULT NULL,
+        deleted_at DATETIME DEFAULT NULL,
+        deleted_by BIGINT(20) UNSIGNED DEFAULT NULL,
         PRIMARY KEY (realtor_id)
     ) $charset_collate;";
 
