@@ -1,6 +1,3 @@
-<!-- Include SheetJS for XLSX export -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.3/xlsx.full.min.js"></script>
-
 <div class="ab-container">
   <div class="ab-table-header">
     <div class="ab-header-left">
@@ -402,6 +399,7 @@ tbody tr:hover { background-color: #f9f9f9; }
   gap: 6px;
   padding: 8px 14px;
   font-size: 14px;
+  margin-bottom: 10px;
   border-radius: 6px;
   border: 1px solid #007bff;
   background-color: #007bff;

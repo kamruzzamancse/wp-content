@@ -37,7 +37,7 @@ foreach ($includes as $file) {
 function rt_enqueue_active_client_dashboard_scripts() {
     $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
 
-    if ($current_tab === 'dashboard') {
+    if ( is_page('realtor-dashboard') && ( empty($current_tab) || $current_tab === 'dashboard' ) ) {
         wp_enqueue_script(
             'rt-db-active-client-js',
             get_stylesheet_directory_uri() . '/assets/js/rt-db-active-client.js',
@@ -60,7 +60,7 @@ add_action('wp_enqueue_scripts','rt_enqueue_active_client_dashboard_scripts');
 function rt_enqueue_lead_client_scripts() {
     $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
 
-    if ($current_tab === 'dashboard') {
+    if ( is_page('realtor-dashboard') && ( empty($current_tab) || $current_tab === 'dashboard' ) ) {
         wp_enqueue_script(
             'rt-db-lead-client-js',
             get_stylesheet_directory_uri() . '/assets/js/rt-db-lead-client.js',
@@ -92,29 +92,46 @@ add_action('wp_ajax_delete_dashboard_lead_ajax', 'rt_delete_dashboard_lead_ajax'
 add_action('wp_ajax_convert_lead_to_client_ajax', 'rt_convert_lead_to_client_ajax');
 
 // ======================
-// Enqueue JS & Localize AJAX
+// Enqueue JS & Localize AJAX for Address Book
 // ======================
 function rt_enqueue_client_scripts() {
+    // Get current tab (if set)
     $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
 
-    if (in_array($current_tab, ['address-book'], true)) {
+    // Load scripts only on Realtor Dashboard > Address Book tab
+    if (is_page('realtor-dashboard') && ($current_tab === 'address-book' || $current_tab === '')) {
+
+        // Enqueue SheetJS (for XLSX export/import)
         wp_enqueue_script(
-            'rt-ab-client-js',
-            get_stylesheet_directory_uri() . '/assets/js/rt-ab-client.js',
-            ['jquery'],
-            filemtime(get_stylesheet_directory() . '/assets/js/rt-ab-client.js'),
+            'sheetjs',
+            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+            [],
+            '0.18.5',
             true
         );
 
+        // Enqueue custom JS file for Address Book
+        $script_path = get_stylesheet_directory() . '/assets/js/rt-ab-client.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ab-client.js';
+
+        wp_enqueue_script(
+            'rt-ab-client-js',
+            $script_uri,
+            ['jquery', 'sheetjs'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        // Localize AJAX variables & nonces
         wp_localize_script('rt-ab-client-js', 'rtClientAjax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'create_nonce' => wp_create_nonce('cl_client_create_nonce'),
-            'edit_nonce'   => wp_create_nonce('cl_client_edit_nonce'),
-            'delete_nonce' => wp_create_nonce('cl_client_delete_nonce'),
-            'export_nonce' => wp_create_nonce('cl_client_export_nonce'),
-            'import_nonce' => wp_create_nonce('cl_client_import_nonce'),
-            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
-            'default_property_image' => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg'
+            'ajax_url'                => admin_url('admin-ajax.php'),
+            'create_nonce'            => wp_create_nonce('cl_client_create_nonce'),
+            'edit_nonce'              => wp_create_nonce('cl_client_edit_nonce'),
+            'delete_nonce'            => wp_create_nonce('cl_client_delete_nonce'),
+            'export_nonce'            => wp_create_nonce('cl_client_export_nonce'),
+            'import_nonce'            => wp_create_nonce('cl_client_import_nonce'),
+            'default_avatar'          => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
+            'default_property_image'  => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg',
         ]);
     }
 }
@@ -656,7 +673,7 @@ function restrict_specific_users_from_wpadmin() {
                 wp_redirect(site_url('/am/admin-dashboard/'));
                 exit;
             case 'anis':
-                wp_redirect(site_url('/rt/realtor-dashboard/'));
+                wp_redirect(site_url('/rt/realtor-dashboard'));
                 exit;
             case 'sadi':
                 wp_redirect(site_url('/cl/client-dashboard/'));

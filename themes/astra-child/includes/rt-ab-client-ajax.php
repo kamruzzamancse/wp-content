@@ -255,27 +255,36 @@ function rt_export_clients_ajax() {
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
 
-    // Columns to export
+    // Allowed columns
+    $allowed_cols = ['full_name','email','phone','note','status','profile_picture','created_at'];
     $columns = json_decode(stripslashes($_POST['columns'] ?? '[]'), true);
-    $select = '*';
-    if (!empty($columns) && is_array($columns)) {
-        $select = implode(',', array_map('esc_sql', $columns));
+    $columns = array_intersect($allowed_cols, $columns);
+    if (empty($columns)) $columns = $allowed_cols;
+
+    // Scope
+    $scope = sanitize_text_field($_POST['scope'] ?? 'all');
+    $where = "WHERE deleted_at IS NULL";
+    $params = [];
+
+    if ($scope === 'current' && !empty($_POST['current_ids'])) {
+        $current_ids = array_map('intval', $_POST['current_ids']);
+        if (!empty($current_ids)) {
+            $placeholders = implode(',', array_fill(0, count($current_ids), '%d'));
+            $where .= " AND client_id IN ($placeholders)";
+            $params = $current_ids;
+        }
     }
 
-    // Scope: current/all (optional, can implement later)
-    $scope = sanitize_text_field($_POST['scope'] ?? 'all');
-
-    $sql = "SELECT {$select} FROM {$table} WHERE deleted_at IS NULL";
+    $select = implode(',', array_map('esc_sql', $columns));
+    $sql = !empty($params) ? $wpdb->prepare("SELECT {$select} FROM {$table} {$where}", $params) : "SELECT {$select} FROM {$table} {$where}";
     $results = $wpdb->get_results($sql, ARRAY_A);
 
-    // Always return JSON for frontend to handle CSV/XLSX formatting
     wp_send_json_success(['clients' => $results]);
 }
 add_action('wp_ajax_export_clients_ajax', 'rt_export_clients_ajax');
 
-
 // =====================
-// Import Clients (JSON)
+// Import Clients (CSV/XLSX/JSON)
 // =====================
 function rt_import_clients_ajax() {
     rt_client_current_user_required();
@@ -284,25 +293,70 @@ function rt_import_clients_ajax() {
     if (!isset($_FILES['clients_file'])) wp_send_json_error('No file uploaded');
 
     $file = $_FILES['clients_file']['tmp_name'];
-    $content = file_get_contents($file);
-    $clients = json_decode($content,true);
-    if (!is_array($clients)) wp_send_json_error('Invalid file format');
+    $filename = $_FILES['clients_file']['name'];
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+
+    require_once(ABSPATH . 'wp-admin/includes/file.php');
+    require_once(ABSPATH . 'wp-admin/includes/media.php');
+    require_once(ABSPATH . 'wp-admin/includes/image.php');
+
+    $clients = [];
+
+    if ($ext === 'json') {
+        $content = file_get_contents($file);
+        $clients = json_decode($content,true);
+        if (!is_array($clients)) wp_send_json_error('Invalid JSON file');
+    } elseif ($ext === 'csv') {
+        if (($handle = fopen($file, "r")) !== false) {
+            $headers = fgetcsv($handle);
+            while (($row = fgetcsv($handle)) !== false) {
+                $clients[] = array_combine($headers,$row);
+            }
+            fclose($handle);
+        }
+    } elseif ($ext === 'xlsx') {
+        if (!class_exists('PhpOffice\PhpSpreadsheet\IOFactory')) {
+            require_once get_stylesheet_directory() . '/includes/libs/phpoffice/phpspreadsheet/vendor/autoload.php';
+        }
+        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+        $sheet = $spreadsheet->getActiveSheet();
+        $rows = $sheet->toArray();
+        $headers = array_map('trim', $rows[0]);
+        for ($i = 1; $i < count($rows); $i++) {
+            $clients[] = array_combine($headers, $rows[$i]);
+        }
+    } else {
+        wp_send_json_error('Unsupported file type');
+    }
+
+    $duplicate_handling = sanitize_text_field($_POST['duplicate_handling'] ?? 'skip');
 
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
     $inserted = 0;
+    $updated = 0;
 
     foreach ($clients as $client) {
-        // Skip if required fields missing
-        if (empty($client['full_name']) || empty($client['email'])) continue;
+        $full_name = sanitize_text_field($client['full_name'] ?? '');
+        $email = sanitize_email($client['email'] ?? '');
+        if (!$full_name || !$email) continue;
 
-        $exists = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$table} WHERE email=%s",$client['email']));
-        if ($exists) continue;
+        $existing_id = $wpdb->get_var($wpdb->prepare("SELECT client_id FROM {$table} WHERE email=%s",$email));
 
-        $wpdb->insert($table,$client);
-        $inserted++;
+        if ($existing_id) {
+            if ($duplicate_handling === 'update') {
+                $wpdb->update($table, $client, ['client_id'=>$existing_id]);
+                $updated++;
+            } elseif ($duplicate_handling === 'create') {
+                $wpdb->insert($table, $client);
+                $inserted++;
+            } // skip does nothing
+        } else {
+            $wpdb->insert($table, $client);
+            $inserted++;
+        }
     }
 
-    wp_send_json_success(['message'=>"$inserted clients imported successfully"]);
+    wp_send_json_success(['message'=>"Imported: $inserted new, $updated updated"]);
 }
 add_action('wp_ajax_import_clients_ajax','rt_import_clients_ajax');

@@ -346,91 +346,81 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---------------------------
     const exportModal = document.getElementById('abExportModal');
     const exportStatus = document.getElementById('abExportStatus');
-    const exportBtn = document.getElementById('abExportStart');
 
-    if (exportBtn) {
-        exportBtn.addEventListener('click', async () => {
-            exportBtn.disabled = true;
-            exportBtn.textContent = 'Exporting...';
+    // --- Export Function ---
+    document.getElementById('abExportStart')?.addEventListener('click', async () => {
+        const format = document.querySelector('input[name="ab_export_format"]:checked')?.value || 'csv';
+        const scope = document.querySelector('input[name="ab_export_scope"]:checked')?.value || 'current';
+        const columns = Array.from(document.querySelectorAll('input[name="ab_export_columns"]:checked')).map(el => el.value);
 
-            const format = document.querySelector('input[name="ab_export_format"]:checked')?.value || 'csv';
-            const scope = document.querySelector('input[name="ab_export_scope"]:checked')?.value || 'current';
-            const columns = Array.from(document.querySelectorAll('input[name="ab_export_columns"]:checked')).map(el => el.value);
-            const currentIds = Array.from(document.querySelectorAll('#addressBookBody tr')).map(tr => parseInt(tr.dataset.clientId));
+        exportStatus.textContent = 'Exporting...';
 
-            exportStatus.textContent = 'Exporting...';
+        try {
+        const formData = new FormData();
+        formData.append('action', 'export_clients_ajax');
+        formData.append('nonce', rtClientAjax.export_nonce);
+        formData.append('format', format);
+        formData.append('scope', scope);
+        formData.append('columns', JSON.stringify(columns));
 
-            try {
-                const formData = new FormData();
-                formData.append('action', 'export_clients_ajax');
-                formData.append('nonce', rtClientAjax.export_nonce);
-                formData.append('format', format);
-                formData.append('scope', scope);
-                formData.append('columns', JSON.stringify(columns));
-                if (scope === 'current') formData.append('current_ids', JSON.stringify(currentIds));
+        const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+        if (!response.ok) throw new Error('Network response not ok');
+        const data = await response.json();
 
-                const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                if (!response.ok) throw new Error('Network response not ok');
+        if (!data.success) throw new Error(data.data || 'Export failed');
 
-                const data = await response.json();
-                if (!data.success) throw new Error(data.data || 'Export failed');
+        const clients = data.data.clients || [];
+        if (clients.length === 0) throw new Error('No clients found.');
 
-                const clients = data.data.clients || [];
-                if (!clients.length) throw new Error('No clients found.');
+        if (format === 'csv') {
+            // CSV Export
+            const csvRows = [];
+            csvRows.push(columns.join(',')); // Header
+            clients.forEach(client => {
+            const row = columns.map(col => {
+                let val = client[col] ?? '';
+                if (typeof val === 'string' && val.includes(',')) val = `"${val.replace(/"/g, '""')}"`;
+                return val;
+            });
+            csvRows.push(row.join(','));
+            });
+            const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `clients-export-${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        } else if (typeof XLSX !== 'undefined') {
+            // XLSX Export using SheetJS
+            const worksheetData = clients.map(client => {
+            const obj = {};
+            columns.forEach(col => obj[col] = client[col] ?? '');
+            return obj;
+            });
+            const ws = XLSX.utils.json_to_sheet(worksheetData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Clients');
+            XLSX.writeFile(wb, `clients-export-${new Date().toISOString().slice(0,10)}.xlsx`);
+        } else {
+            throw new Error('XLSX library not loaded');
+        }
 
-                if (format === 'csv') {
-                    // CSV Export
-                    const csvRows = [];
-                    csvRows.push(columns.join(',')); // Header
-                    clients.forEach(client => {
-                        const row = columns.map(col => {
-                            let val = client[col] ?? '';
-                            if (typeof val === 'string' && val.includes(',')) val = `"${val.replace(/"/g, '""')}"`;
-                            return val;
-                        });
-                        csvRows.push(row.join(','));
-                    });
-                    const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `clients-export-${new Date().toISOString().slice(0,10)}.csv`;
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    URL.revokeObjectURL(url);
-                } else if (format === 'xlsx') {
-                    // XLSX Export using SheetJS
-                    if (typeof XLSX === 'undefined') throw new Error('XLSX library not loaded');
-                    const worksheetData = clients.map(client => {
-                        const obj = {};
-                        columns.forEach(col => obj[col] = client[col] ?? '');
-                        return obj;
-                    });
-                    const ws = XLSX.utils.json_to_sheet(worksheetData);
-                    const wb = XLSX.utils.book_new();
-                    XLSX.utils.book_append_sheet(wb, ws, 'Clients');
-                    XLSX.writeFile(wb, `clients-export-${new Date().toISOString().slice(0,10)}.xlsx`);
-                }
+        exportStatus.textContent = 'Export completed!';
+        setTimeout(() => exportModal.style.display = 'none', 1000);
 
-                exportStatus.textContent = 'Export completed!';
-                setTimeout(() => exportModal.style.display = 'none', 1000);
-
-            } catch (error) {
-                exportStatus.textContent = 'Export failed: ' + error.message;
-            } finally {
-                exportBtn.disabled = false;
-                exportBtn.textContent = 'Start Export';
-            }
-        });
-    }
+        } catch (error) {
+        exportStatus.textContent = 'Export failed: ' + error.message;
+        }
+    });
 
     // ---------------------------
     // Import Clients
     // ---------------------------
     const importInput = document.getElementById('importClientsInput');
     const importBtn = document.getElementById('importClientsBtn');
-
     if (importInput && importBtn) {
         importBtn.addEventListener('click', async () => {
             if (!importInput.files || !importInput.files[0]) {
@@ -438,20 +428,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            importBtn.disabled = true;
-            importBtn.textContent = 'Importing...';
-
             const file = importInput.files[0];
             const formData = new FormData();
             formData.append('action', 'import_clients_ajax');
             formData.append('nonce', rtClientAjax.import_nonce);
             formData.append('clients_file', file);
 
-            try {
-                const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                if (!response.ok) throw new Error('Network response not ok');
+            importBtn.disabled = true;
+            importBtn.textContent = 'Importing...';
 
-                const result = await response.json();
+            try {
+                const result = await ajaxFetch(formData);
                 if (result.success) {
                     showNotification(result.data.message || 'Clients imported successfully!');
                     fetchClients({
@@ -463,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     });
                     importInput.value = '';
                 } else {
-                    showNotification('Import failed: ' + (result.data || 'Unknown error'), 'error');
+                    showNotification('Import failed: ' + result.data, 'error');
                 }
             } catch (error) {
                 showNotification('Import failed: ' + error.message, 'error');
@@ -473,7 +460,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-
 
     // ---------------------------
     // Initialize
