@@ -283,80 +283,303 @@ function rt_export_clients_ajax() {
 }
 add_action('wp_ajax_export_clients_ajax', 'rt_export_clients_ajax');
 
+
 // =====================
-// Import Clients (CSV/XLSX/JSON)
+// Import Clients (CSV/XLSX) with WP User creation
 // =====================
 function rt_import_clients_ajax() {
-    rt_client_current_user_required();
-    check_ajax_referer('cl_client_import_nonce','nonce');
 
-    if (!isset($_FILES['clients_file'])) wp_send_json_error('No file uploaded');
+    // =====================
+    // DEBUG LOGS
+    // =====================
+    error_log('=== IMPORT CLIENTS DEBUG START ===');
+    error_log('Import started - File: ' . ($_FILES['clients_file']['name'] ?? 'No file'));
+    error_log('File size: ' . ($_FILES['clients_file']['size'] ?? '0'));
+    error_log('File error: ' . ($_FILES['clients_file']['error'] ?? 'No error code'));
+    error_log('POST data: ' . print_r($_POST, true));
+
+    // Check if user is logged in
+    if (!is_user_logged_in()) {
+        error_log('User not logged in');
+        wp_send_json_error('You must be logged in');
+    }
+    
+    // Verify nonce
+    if (!wp_verify_nonce($_POST['nonce'], 'cl_client_import_nonce')) {
+        error_log('Nonce verification failed');
+        wp_send_json_error('Security verification failed');
+    }
+
+    // Check if file was uploaded
+    if (!isset($_FILES['clients_file']) || empty($_FILES['clients_file']['tmp_name'])) {
+        error_log('No file uploaded or file is empty');
+        wp_send_json_error('No file uploaded or file is empty');
+    }
 
     $file = $_FILES['clients_file']['tmp_name'];
     $filename = $_FILES['clients_file']['name'];
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-    require_once(ABSPATH . 'wp-admin/includes/file.php');
-    require_once(ABSPATH . 'wp-admin/includes/media.php');
-    require_once(ABSPATH . 'wp-admin/includes/image.php');
+    error_log('File extension: ' . $ext);
+    error_log('File temp path: ' . $file);
 
     $clients = [];
-
-    if ($ext === 'json') {
-        $content = file_get_contents($file);
-        $clients = json_decode($content,true);
-        if (!is_array($clients)) wp_send_json_error('Invalid JSON file');
-    } elseif ($ext === 'csv') {
-        if (($handle = fopen($file, "r")) !== false) {
-            $headers = fgetcsv($handle);
-            while (($row = fgetcsv($handle)) !== false) {
-                $clients[] = array_combine($headers,$row);
-            }
-            fclose($handle);
-        }
-    } elseif ($ext === 'xlsx') {
-        if (!class_exists('PhpOffice\PhpSpreadsheet\IOFactory')) {
-            require_once get_stylesheet_directory() . '/includes/libs/phpoffice/phpspreadsheet/vendor/autoload.php';
-        }
-        $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
-        $sheet = $spreadsheet->getActiveSheet();
-        $rows = $sheet->toArray();
-        $headers = array_map('trim', $rows[0]);
-        for ($i = 1; $i < count($rows); $i++) {
-            $clients[] = array_combine($headers, $rows[$i]);
-        }
-    } else {
-        wp_send_json_error('Unsupported file type');
-    }
-
-    $duplicate_handling = sanitize_text_field($_POST['duplicate_handling'] ?? 'skip');
-
-    global $wpdb;
-    $table = $wpdb->prefix . 'clients';
     $inserted = 0;
     $updated = 0;
+    $errors = [];
 
-    foreach ($clients as $client) {
-        $full_name = sanitize_text_field($client['full_name'] ?? '');
-        $email = sanitize_email($client['email'] ?? '');
-        if (!$full_name || !$email) continue;
+    // Parse file with detailed logging
+    if ($ext === 'csv') {
+        error_log('Processing as CSV file');
+        $clients = rt_parse_csv_file($file);
+        
+        if (empty($clients)) {
+            wp_send_json_error('No valid data found in CSV file. Please check the file format.');
+        }
+    } 
+    // Parse XLSX file - Show user-friendly message
+    elseif ($ext === 'xlsx') {
+        error_log('XLSX file detected - showing conversion message');
+        wp_send_json_error('Please convert your Excel file to CSV format. In Excel: File → Save As → CSV (Comma delimited). Then upload the CSV file.');
+    } else {
+        error_log('Unsupported file type: ' . $ext);
+        wp_send_json_error('Unsupported file type. Please use CSV format.');
+    }
 
-        $existing_id = $wpdb->get_var($wpdb->prepare("SELECT client_id FROM {$table} WHERE email=%s",$email));
+    error_log('Total clients parsed: ' . count($clients));
 
-        if ($existing_id) {
-            if ($duplicate_handling === 'update') {
-                $wpdb->update($table, $client, ['client_id'=>$existing_id]);
-                $updated++;
-            } elseif ($duplicate_handling === 'create') {
-                $wpdb->insert($table, $client);
-                $inserted++;
-            } // skip does nothing
-        } else {
-            $wpdb->insert($table, $client);
-            $inserted++;
+    if (empty($clients)) {
+        error_log('No valid client data found in file');
+        wp_send_json_error('No valid client data found in file. Please check the file format.');
+    }
+
+    // Insert into database
+    global $wpdb;
+    $table = $wpdb->prefix . 'clients';
+    $current_user_id = get_current_user_id();
+    $duplicate_handling = sanitize_text_field($_POST['duplicate_handling'] ?? 'skip');
+
+    foreach ($clients as $index => $client) {
+        try {
+            // Clean and validate data with multiple possible field names
+            $full_name = sanitize_text_field($client['full_name'] ?? $client['client_name'] ?? $client['name'] ?? '');
+            $email = sanitize_email($client['email'] ?? '');
+            $status = sanitize_text_field($client['status'] ?? 'active');
+            $phone = sanitize_text_field($client['phone'] ?? $client['phone_number'] ?? $client['mobile'] ?? '');
+            $note = sanitize_textarea_field($client['note'] ?? $client['notes'] ?? $client['description'] ?? '');
+
+            // Validate required fields
+            if (empty($full_name) || empty($email)) {
+                $errors[] = "Row " . ($index + 1) . ": Missing required fields (name or email)";
+                continue;
+            }
+
+            if (!is_email($email)) {
+                $errors[] = "Row " . ($index + 1) . ": Invalid email format: " . $email;
+                continue;
+            }
+
+            // Check if client already exists
+            $existing_id = $wpdb->get_var($wpdb->prepare(
+                "SELECT client_id FROM {$table} WHERE email = %s AND deleted_at IS NULL",
+                $email
+            ));
+
+            if ($existing_id) {
+                if ($duplicate_handling === 'update') {
+                    $result = $wpdb->update(
+                        $table, 
+                        [
+                            'full_name' => $full_name,
+                            'status' => $status,
+                            'phone' => $phone,
+                            'note' => $note,
+                            'updated_at' => current_time('mysql'),
+                            'updated_by' => $current_user_id
+                        ],
+                        ['client_id' => $existing_id],
+                        ['%s', '%s', '%s', '%s', '%s', '%d'],
+                        ['%d']
+                    );
+                    
+                    if ($result !== false) {
+                        $updated++;
+                        error_log('Updated client: ' . $email);
+                    } else {
+                        $errors[] = "Row " . ($index + 1) . ": Failed to update client " . $email;
+                    }
+                } else {
+                    error_log('Skipped existing client: ' . $email);
+                }
+            } 
+            
+            // Create new client if doesn't exist or duplicate handling is 'create'
+            if (!$existing_id || $duplicate_handling === 'create') {
+                $result = $wpdb->insert(
+                    $table,
+                    [
+                        'full_name' => $full_name,
+                        'email' => $email,
+                        'status' => $status,
+                        'phone' => $phone,
+                        'note' => $note,
+                        'created_at' => current_time('mysql'),
+                        'created_by' => $current_user_id
+                    ],
+                    ['%s', '%s', '%s', '%s', '%s', '%s', '%d']
+                );
+
+                if ($result !== false) {
+                    $inserted++;
+                    error_log('Inserted new client: ' . $email);
+                    
+                    // Create WP user for new clients
+                    $new_client_id = $wpdb->insert_id;
+                    
+                    // Check if user already exists
+                    $existing_user_id = email_exists($email);
+                    if (!$existing_user_id) {
+                        $password = wp_generate_password(12, false);
+                        $user_id = wp_create_user($email, $password, $email);
+                        
+                        if (!is_wp_error($user_id)) {
+                            wp_update_user([
+                                'ID' => $user_id,
+                                'display_name' => $full_name,
+                                'first_name' => $full_name
+                            ]);
+                            
+                            // Update client record with user_id
+                            $wpdb->update(
+                                $table,
+                                ['user_id' => $user_id],
+                                ['client_id' => $new_client_id],
+                                ['%d'],
+                                ['%d']
+                            );
+                            error_log('Created WP user for: ' . $email);
+                        } else {
+                            error_log('Failed to create WP user for: ' . $email . ' - ' . $user_id->get_error_message());
+                        }
+                    } else {
+                        error_log('WP user already exists for: ' . $email);
+                    }
+                } else {
+                    $errors[] = "Row " . ($index + 1) . ": Failed to insert client " . $email;
+                }
+            }
+
+        } catch (Exception $e) {
+            $error_msg = "Row " . ($index + 1) . ": " . $e->getMessage();
+            $errors[] = $error_msg;
+            error_log($error_msg);
         }
     }
 
-    wp_send_json_success(['message'=>"Imported: $inserted new, $updated updated"]);
+    $message = "Import completed successfully! {$inserted} new clients added, {$updated} clients updated";
+    if (!empty($errors)) {
+        $message .= ". " . count($errors) . " errors occurred during import.";
+    }
+
+    error_log('Import completed - Inserted: ' . $inserted . ', Updated: ' . $updated);
+    error_log('=== IMPORT CLIENTS DEBUG END ===');
+
+    wp_send_json_success([
+        'message' => $message,
+        'inserted' => $inserted,
+        'updated' => $updated,
+        'total_processed' => count($clients),
+        'error_count' => count($errors),
+        'errors' => array_slice($errors, 0, 10) // Return first 10 errors only
+    ]);
 }
-add_action('wp_ajax_import_clients_ajax','rt_import_clients_ajax');
+
+// =====================
+// CSV Parser Function
+// =====================
+function rt_parse_csv_file($file_path) {
+    $clients = [];
+    
+    error_log('Parsing CSV file: ' . $file_path);
+    
+    if (!file_exists($file_path)) {
+        error_log('CSV file not found: ' . $file_path);
+        return $clients;
+    }
+
+    if (($handle = fopen($file_path, "r")) !== false) {
+        // Read headers
+        $headers = fgetcsv($handle);
+        if ($headers === false) {
+            error_log('Failed to read CSV headers');
+            fclose($handle);
+            return $clients;
+        }
+        
+        // Clean headers - remove BOM and trim
+        $headers = array_map(function($header) {
+            // Remove UTF-8 BOM if present
+            $header = preg_replace('/^\xEF\xBB\xBF/', '', $header);
+            return trim($header);
+        }, $headers);
+        
+        // Convert headers to lowercase for consistency
+        $headers = array_map('strtolower', $headers);
+        
+        error_log('CSV Headers found: ' . implode(', ', $headers));
+        
+        $row_count = 0;
+        $valid_rows = 0;
+        
+        while (($row = fgetcsv($handle)) !== false) {
+            $row_count++;
+            
+            // Skip empty rows
+            if (empty(array_filter($row))) {
+                error_log('Skipping empty row ' . $row_count);
+                continue;
+            }
+            
+            // Handle column count mismatch
+            if (count($row) !== count($headers)) {
+                error_log('Row ' . $row_count . ': Column count mismatch. Expected: ' . count($headers) . ', Got: ' . count($row));
+                
+                // Pad or truncate row to match header count
+                if (count($row) < count($headers)) {
+                    $row = array_pad($row, count($headers), '');
+                } else {
+                    $row = array_slice($row, 0, count($headers));
+                }
+            }
+            
+            $client_data = array_combine($headers, $row);
+            
+            // Clean all values
+            foreach ($client_data as $key => $value) {
+                $client_data[$key] = trim($value);
+            }
+            
+            // Check if this row has at least one required field
+            if (!empty($client_data['full_name']) || !empty($client_data['email'])) {
+                $clients[] = $client_data;
+                $valid_rows++;
+                error_log('Valid row ' . $row_count . ': ' . json_encode($client_data));
+            } else {
+                error_log('Skipping row ' . $row_count . ': No name or email found');
+            }
+        }
+        
+        fclose($handle);
+        error_log('CSV processing completed. Total rows: ' . $row_count . ', Valid rows: ' . $valid_rows);
+        
+    } else {
+        error_log('Failed to open CSV file: ' . $file_path);
+    }
+    
+    return $clients;
+}
+
+// =====================
+// Register AJAX handler
+// =====================
+add_action('wp_ajax_import_clients_ajax', 'rt_import_clients_ajax');

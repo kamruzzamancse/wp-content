@@ -8,31 +8,63 @@
 <div class="ss-contact-form-container">
     <h2 class="ss-contact-form-title">Send Us a Message</h2>
     
-    <form class="ss-contact-form">
+    <form id="ss-contact-form">
         <div class="ss-form-row">
             <div class="ss-form-group">
                 <label class="ss-form-label">Name</label>
-                <input type="text" placeholder="Enter name" class="ss-form-input">
+                <input type="text" name="name" placeholder="Enter name" class="ss-form-input" required>
             </div>
             <div class="ss-form-group">
                 <label class="ss-form-label">Email</label>
-                <input type="email" placeholder="Enter Email" class="ss-form-input">
+                <input type="email" name="email" placeholder="Enter Email" class="ss-form-input" required>
             </div>
         </div>
-        
+
         <div class="ss-form-group">
             <label class="ss-form-label">Phone</label>
-            <input type="tel" placeholder="Enter phone" class="ss-form-input">
+            <input type="tel" name="phone" placeholder="Enter phone" class="ss-form-input">
         </div>
-        
+
         <div class="ss-form-group">
             <label class="ss-form-label">Message</label>
-            <textarea placeholder="Message" class="ss-form-textarea"></textarea>
+            <textarea name="message" placeholder="Message" class="ss-form-textarea" required></textarea>
         </div>
-        
-        <button type="submit" class="ss-submit-button">Send Us</button>
+
+        <div class="ss-submit-wrapper">
+            <button type="submit" class="ss-submit-button">Send Us</button>
+        </div>
     </form>
+    <div id="ss-contact-result"></div>
+
 </div>
+
+<script>
+jQuery(document).ready(function($) {
+    $('#ss-contact-form').on('submit', function(e) {
+        e.preventDefault();
+
+        var formData = {
+            action: 'ss_send_support_message',
+            nonce: '<?php echo wp_create_nonce("ss_support_nonce"); ?>',
+            name: $('input[name="name"]').val(),
+            email: $('input[name="email"]').val(),
+            phone: $('input[name="phone"]').val(),
+            message: $('textarea[name="message"]').val()
+        };
+
+        $('#ss-contact-result').html('<p style="color:#555;">Sending message...</p>');
+
+        $.post('<?php echo admin_url("admin-ajax.php"); ?>', formData, function(response) {
+            if (response.success) {
+                $('#ss-contact-result').html('<p style="color:green;">✅ ' + response.data + '</p>');
+                $('#ss-contact-form')[0].reset();
+            } else {
+                $('#ss-contact-result').html('<p style="color:red;">❌ ' + response.data + '</p>');
+            }
+        });
+    });
+});
+</script>
 
 <style>
 .ss-contact-form-container {
@@ -51,12 +83,6 @@
     color: #333;
 }
 
-.ss-contact-form {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
 .ss-form-row {
     display: flex;
     gap: 20px;
@@ -71,7 +97,8 @@
 .ss-form-label {
     font-size: 14px;
     font-weight: bold;
-    margin-bottom: 8px;
+    margin-top: 15px;
+    margin-bottom: 5px;
     color: #555;
 }
 
@@ -96,21 +123,38 @@
     font-family: Arial, sans-serif;
 }
 
+.ss-contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ss-submit-wrapper {
+    text-align: right;
+    margin-top: 15px;
+}
+
+/* Force style for the button */
 .ss-submit-button {
-    background-color: #3498db;
-    color: #FFF!important;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 4px;
+    background-color: #3498db !important; /* 🔹 Force background color */
+    color: #ffffff !important;            /* 🔹 Force text color white */
+    border: none !important;
+    padding: 12px 28px;
+    border-radius: 6px !important;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
-    align-self: flex-end;
+    display: inline-block;
+    transition: all 0.3s ease;
+    text-transform: none;
+    box-shadow: 0 2px 6px rgba(52, 152, 219, 0.25);
 }
 
 .ss-submit-button:hover {
-    background-color: #2980b9;
+    background-color: #2c82c9 !important; /* 🔹 Slightly darker on hover */
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
 }
 
 /* Responsive adjustments */

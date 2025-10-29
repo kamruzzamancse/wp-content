@@ -23,6 +23,7 @@ $includes = [
     'rt-document-type.php',
     'rt-documents.php',
     'rt-settings-password.php',
+    'rt-settings-support-ajax.php',
     'rentcast-properties.php',
 ];
 

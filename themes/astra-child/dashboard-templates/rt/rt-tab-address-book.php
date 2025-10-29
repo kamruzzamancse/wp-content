@@ -147,25 +147,55 @@ include locate_template('dashboard-templates/rt/rt-ab-client-details-modal.php')
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+
+  // =========================
+  // Elements
+  // =========================
   const exportModal = document.getElementById('abExportModal');
   const importModal = document.getElementById('abImportModal');
   const exportStatus = document.getElementById('abExportStatus');
   const importStatus = document.getElementById('abImportStatus');
+
   const importFileInput = document.getElementById('abImportFileInput');
   const importStartBtn = document.getElementById('abImportStart');
 
-  // --- Modal Open/Close ---
+  // =========================
+  // Helper Functions
+  // =========================
+  const closeModal = (modal) => { modal.style.display = 'none'; };
+  const showNotification = (msg, type='success') => {
+    // Replace with your actual notification function
+    console.log(type.toUpperCase(), msg);
+  };
+
+  const refreshClientsTable = async () => {
+    if (typeof window.fetchClients === 'function') {
+      await window.fetchClients({
+        page: 1,
+        rows: parseInt(document.getElementById('addressBookRows').value, 10),
+        search: document.getElementById('addressBookSearch').value.trim(),
+        bodyId: 'addressBookBody',
+        paginationId: 'addressBookPagination'
+      });
+    }
+  };
+
+  // =========================
+  // Modal Open/Close
+  // =========================
   document.getElementById('openAbExportModal')?.addEventListener('click', () => exportModal.style.display = 'flex');
-  document.getElementById('abExportClose')?.addEventListener('click', () => exportModal.style.display = 'none');
-  document.getElementById('abExportCancel')?.addEventListener('click', () => exportModal.style.display = 'none');
-  exportModal?.addEventListener('click', e => { if (e.target === exportModal) exportModal.style.display = 'none'; });
+  document.getElementById('abExportClose')?.addEventListener('click', () => closeModal(exportModal));
+  document.getElementById('abExportCancel')?.addEventListener('click', () => closeModal(exportModal));
+  exportModal?.addEventListener('click', e => { if (e.target === exportModal) closeModal(exportModal); });
 
   document.getElementById('openAbImportModal')?.addEventListener('click', () => importModal.style.display = 'flex');
-  document.getElementById('abImportClose')?.addEventListener('click', () => importModal.style.display = 'none');
-  document.getElementById('abImportCancel')?.addEventListener('click', () => importModal.style.display = 'none');
-  importModal?.addEventListener('click', e => { if (e.target === importModal) importModal.style.display = 'none'; });
+  document.getElementById('abImportClose')?.addEventListener('click', () => closeModal(importModal));
+  document.getElementById('abImportCancel')?.addEventListener('click', () => closeModal(importModal));
+  importModal?.addEventListener('click', e => { if (e.target === importModal) closeModal(importModal); });
 
-  // --- Enable import button when file selected ---
+  // =========================
+  // Enable import button on file select
+  // =========================
   importFileInput?.addEventListener('change', () => {
     if (importFileInput.files && importFileInput.files.length > 0) {
       importStartBtn.disabled = false;
@@ -176,7 +206,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- Export Function ---
+  // =========================
+  // Export Clients
+  // =========================
   document.getElementById('abExportStart')?.addEventListener('click', async () => {
     const format = document.querySelector('input[name="ab_export_format"]:checked')?.value || 'csv';
     const scope = document.querySelector('input[name="ab_export_scope"]:checked')?.value || 'current';
@@ -185,7 +217,6 @@ document.addEventListener('DOMContentLoaded', () => {
     exportStatus.textContent = 'Exporting...';
 
     try {
-      // Fetch data from server
       const formData = new FormData();
       formData.append('action', 'export_clients_ajax');
       formData.append('nonce', rtClientAjax.export_nonce);
@@ -195,20 +226,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
       if (!response.ok) throw new Error('Network response not ok');
-      const data = await response.json(); // Expect backend returns JSON array of clients
+      const data = await response.json();
 
-      if (!data.success) throw new Error(data.data || 'Export failed');
+      if (!data.success) throw new Error(data.data?.message || data.data || 'Export failed');
 
       const clients = data.data.clients || [];
 
       if (format === 'csv') {
-        // CSV Export
         const csvRows = [];
-        csvRows.push(columns.join(',')); // Header
+        csvRows.push(columns.join(','));
         clients.forEach(client => {
           const row = columns.map(col => {
             let val = client[col] ?? '';
-            if (typeof val === 'string' && val.includes(',')) val = `"${val.replace(/"/g, '""')}"`; // quote if contains comma
+            if (typeof val === 'string' && val.includes(',')) val = `"${val.replace(/"/g, '""')}"`;
             return val;
           });
           csvRows.push(row.join(','));
@@ -223,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
         a.remove();
         URL.revokeObjectURL(url);
       } else {
-        // XLSX Export using SheetJS
         const worksheetData = clients.map(client => {
           const obj = {};
           columns.forEach(col => obj[col] = client[col] ?? '');
@@ -236,59 +265,77 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       exportStatus.textContent = 'Export completed!';
-      setTimeout(() => exportModal.style.display = 'none', 1000);
+      setTimeout(() => closeModal(exportModal), 1000);
+      showNotification('Export completed!');
 
     } catch (error) {
       exportStatus.textContent = 'Export failed: ' + error.message;
+      showNotification('Export failed: ' + error.message, 'error');
     }
   });
 
-  // --- Import Function ---
+  // =========================
+  // Import Clients - FIXED VERSION
+  // =========================
   importStartBtn?.addEventListener('click', async () => {
-    if (!importFileInput.files || importFileInput.files.length === 0) return;
-
-    const file = importFileInput.files[0];
-    const duplicateHandling = document.querySelector('input[name="ab_import_duplicate"]:checked')?.value || 'skip';
-
-    importStartBtn.disabled = true;
-    importStartBtn.textContent = 'Importing...';
-    importStatus.textContent = 'Importing...';
-
-    const formData = new FormData();
-    formData.append('action', 'import_clients_ajax');
-    formData.append('nonce', rtClientAjax.import_nonce);
-    formData.append('clients_file', file);
-    formData.append('duplicate_handling', duplicateHandling);
-
-    try {
-      const result = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-      const data = await result.json();
-      if (data.success) {
-        importStatus.textContent = data.data?.message || 'Import successful!';
-        setTimeout(() => importModal.style.display = 'none', 1000);
-
-        // Refresh client table after import
-        window.fetchClients({
-          page: 1,
-          rows: parseInt(document.getElementById('addressBookRows').value, 10),
-          search: document.getElementById('addressBookSearch').value.trim(),
-          bodyId: 'addressBookBody',
-          paginationId: 'addressBookPagination'
-        });
-
-        importFileInput.value = '';
-        importStartBtn.disabled = true;
-        importStartBtn.textContent = 'Import';
-      } else {
-        importStatus.textContent = 'Import failed: ' + data.data;
+      if (!importFileInput.files || importFileInput.files.length === 0) {
+          importStatus.textContent = 'Please select a file.';
+          return;
       }
-    } catch (error) {
-      importStatus.textContent = 'Import failed: ' + error.message;
-    } finally {
-      importStartBtn.disabled = false;
-      importStartBtn.textContent = 'Import';
-    }
+
+      const file = importFileInput.files[0];
+      const duplicateHandling = document.querySelector('input[name="ab_import_duplicate"]:checked')?.value || 'skip';
+
+      importStartBtn.disabled = true;
+      importStartBtn.textContent = 'Importing...';
+      importStatus.textContent = 'Importing...';
+
+      try {
+          const formData = new FormData();
+          formData.append('action', 'import_clients_ajax'); // Fixed action name
+          formData.append('nonce', rtClientAjax.import_nonce);
+          formData.append('clients_file', file);
+          formData.append('duplicate_handling', duplicateHandling);
+
+          const response = await fetch(rtClientAjax.ajax_url, { 
+              method: 'POST', 
+              body: formData 
+          });
+
+          if (!response.ok) {
+              throw new Error('Network response not ok: ' + response.status);
+          }
+
+          const data = await response.json();
+
+          if (data.success) {
+              const message = data.data?.message || 'Import successful!';
+              importStatus.textContent = message;
+              showNotification(message);
+
+              // Refresh table
+              await refreshClientsTable();
+
+              // Reset and close
+              importFileInput.value = '';
+              setTimeout(() => closeModal(importModal), 1500);
+
+          } else {
+              const errMsg = data.data?.message || data.data || 'Unknown error occurred';
+              importStatus.textContent = 'Import failed: ' + errMsg;
+              showNotification('Import failed: ' + errMsg, 'error');
+          }
+
+      } catch (error) {
+          console.error('Import error:', error);
+          importStatus.textContent = 'Import failed: ' + error.message;
+          showNotification('Import failed: ' + error.message, 'error');
+      } finally {
+          importStartBtn.disabled = false;
+          importStartBtn.textContent = 'Import';
+      }
   });
+
 });
 </script>
 

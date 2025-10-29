@@ -1,15 +1,12 @@
 document.addEventListener('DOMContentLoaded', function () {
-    let isProcessing = false; // Global flag to prevent duplicate submissions
+    let isProcessing = false;
 
     // ---------------------------
     // AJAX wrapper
     // ---------------------------
     async function ajaxFetch(formData) {
         try {
-            const response = await fetch(rtClientAjax.ajax_url, {
-                method: 'POST',
-                body: formData
-            });
+            const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
             return await response.json();
         } catch (err) {
             return { success: false, data: err.message };
@@ -211,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ---------------------------
-    // Modal functionality
+    // Modal functionality (Create/Edit)
     // ---------------------------
     function initializeModalFunctionality() {
         const createModal = document.getElementById('rmRealtorClientCreateModal');
@@ -379,9 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!clients.length) throw new Error('No clients found.');
 
                 if (format === 'csv') {
-                    // CSV Export
                     const csvRows = [];
-                    csvRows.push(columns.join(',')); // Header
+                    csvRows.push(columns.join(','));
                     clients.forEach(client => {
                         const row = columns.map(col => {
                             let val = client[col] ?? '';
@@ -400,7 +396,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     a.remove();
                     URL.revokeObjectURL(url);
                 } else if (format === 'xlsx') {
-                    // XLSX Export using SheetJS
                     if (typeof XLSX === 'undefined') throw new Error('XLSX library not loaded');
                     const worksheetData = clients.map(client => {
                         const obj = {};
@@ -415,7 +410,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 exportStatus.textContent = 'Export completed!';
                 setTimeout(() => exportModal.style.display = 'none', 1000);
-
             } catch (error) {
                 exportStatus.textContent = 'Export failed: ' + error.message;
             } finally {
@@ -428,79 +422,77 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---------------------------
     // Import Clients
     // ---------------------------
-    const importInput = document.getElementById('importClientsInput');
-    const importBtn = document.getElementById('importClientsBtn');
+    const importInput = document.getElementById('abImportFileInput');
+    const importBtn = document.getElementById('abImportStart');
+    const importStatus = document.getElementById('abImportStatus');
 
     if (importInput && importBtn) {
         importBtn.addEventListener('click', async () => {
             if (!importInput.files || !importInput.files[0]) {
-                showNotification('Please select a file to import.', 'error');
+                importStatus.textContent = 'Please select a file to import.';
                 return;
             }
 
             importBtn.disabled = true;
             importBtn.textContent = 'Importing...';
+            importStatus.textContent = 'Importing...';
 
             const file = importInput.files[0];
+            const duplicateHandling = document.querySelector('input[name="ab_import_duplicate"]:checked')?.value || 'skip';
+
             const formData = new FormData();
             formData.append('action', 'import_clients_ajax');
             formData.append('nonce', rtClientAjax.import_nonce);
             formData.append('clients_file', file);
+            formData.append('duplicate_handling', duplicateHandling);
 
             try {
                 const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
                 if (!response.ok) throw new Error('Network response not ok');
 
                 const result = await response.json();
+
                 if (result.success) {
-                    showNotification(result.data.message || 'Clients imported successfully!');
-                    fetchClients({
-                        page: 1,
-                        rows: parseInt(document.getElementById('addressBookRows').value, 10),
-                        search: document.getElementById('addressBookSearch').value.trim(),
-                        bodyId: 'addressBookBody',
-                        paginationId: 'addressBookPagination'
-                    });
+                    const message = result.data?.message || 'Clients imported successfully!';
+                    importStatus.textContent = message;
+
+                    if (typeof window.fetchClients === 'function') {
+                        await window.fetchClients({
+                            page: 1,
+                            rows: parseInt(document.getElementById('addressBookRows').value, 10),
+                            search: document.getElementById('addressBookSearch').value.trim(),
+                            bodyId: 'addressBookBody',
+                            paginationId: 'addressBookPagination'
+                        });
+                    }
+
                     importInput.value = '';
+                    importBtn.disabled = true;
+                    importBtn.textContent = 'Import';
+                    setTimeout(() => document.getElementById('abImportModal').style.display = 'none', 1000);
                 } else {
-                    showNotification('Import failed: ' + (result.data || 'Unknown error'), 'error');
+                    const errMsg = result.data?.message || result.data || 'Unknown error';
+                    importStatus.textContent = 'Import failed: ' + errMsg;
                 }
+
             } catch (error) {
-                showNotification('Import failed: ' + error.message, 'error');
+                importStatus.textContent = 'Import failed: ' + error.message;
             } finally {
                 importBtn.disabled = false;
-                importBtn.textContent = 'Import Clients';
+                importBtn.textContent = 'Import';
             }
         });
     }
-
-
-    // ---------------------------
-    // Initialize
-    // ---------------------------
-    function initialize() {
-        initializeModalFunctionality();
-        fetchClients({
-            page: 1,
-            rows: parseInt(document.getElementById('addressBookRows').value, 10),
-            search: document.getElementById('addressBookSearch').value.trim(),
-            bodyId: 'addressBookBody',
-            paginationId: 'addressBookPagination'
-        });
-        setupSearchAndRows('addressBookSearch', 'addressBookRows', 'addressBookBody', 'addressBookPagination');
-    }
-
-    initialize();
 
     // ---------------------------
     // Client Details modal
     // ---------------------------
     const tbody = document.getElementById('addressBookBody');
     const clientModal = document.getElementById('clientDetailsModal');
-    const closeBtn = document.getElementById('closeClientDetailsModal');
+    const closeClientBtn = document.getElementById('closeClientDetailsModal');
 
-    if (clientModal && closeBtn) {
-        closeBtn.addEventListener('click', () => clientModal.style.display = 'none');
+    if (clientModal && closeClientBtn) {
+        closeClientBtn.addEventListener('click', () => clientModal.style.display = 'none');
         clientModal.addEventListener('click', e => { if (e.target === clientModal) clientModal.style.display = 'none'; });
     }
 
@@ -554,4 +546,21 @@ document.addEventListener('DOMContentLoaded', function () {
             clientModal.style.display = 'flex';
         });
     }
+
+    // ---------------------------
+    // Initialize
+    // ---------------------------
+    function initialize() {
+        initializeModalFunctionality();
+        fetchClients({
+            page: 1,
+            rows: parseInt(document.getElementById('addressBookRows').value, 10),
+            search: document.getElementById('addressBookSearch').value.trim(),
+            bodyId: 'addressBookBody',
+            paginationId: 'addressBookPagination'
+        });
+        setupSearchAndRows('addressBookSearch', 'addressBookRows', 'addressBookBody', 'addressBookPagination');
+    }
+
+    initialize();
 });
