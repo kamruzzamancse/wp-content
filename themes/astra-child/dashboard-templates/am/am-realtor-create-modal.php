@@ -10,46 +10,45 @@
 
             <form id="createRealtorForm" method="POST" enctype="multipart/form-data" novalidate>
                 <div class="create-content">
+                    <!-- Profile Picture -->
                     <div class="create-pic-container">
                         <label for="create_realtor_profile_picture" title="Click to upload profile picture">
                             <img class="create-realtor-avatar" id="createPreviewAvatar" src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>" alt="Profile Preview">
-                            <input type="file" id="create_realtor_profile_picture" name="realtor_profile_picture" accept="image/*" style="display:none;">
+                            <input type="file" id="create_realtor_profile_picture" name="profile_picture" accept="image/*" style="display:none;">
                         </label>
                         <p>Click image to upload</p>
                     </div>
 
                     <div class="create-details">
-
                         <div class="create-detail-row">
-                            <label class="create-detail-label" for="create_realtor_full_name">Full Name:</label>
-                            <input class="create-detail-value" type="text" id="create_realtor_full_name" name="realtor_full_name" required placeholder="Enter full name">
+                            <label class="create-detail-label" for="full_name">Full Name:</label>
+                            <input class="create-detail-value" type="text" id="full_name" name="full_name" required placeholder="Enter full name">
                         </div>
 
                         <div class="create-detail-row">
-                            <label class="create-detail-label" for="create_realtor_email">Email:</label>
-                            <input class="create-detail-value" type="email" id="create_realtor_email" name="realtor_email" required placeholder="Enter email address">
+                            <label class="create-detail-label" for="email">Email:</label>
+                            <input class="create-detail-value" type="email" id="email" name="email" required placeholder="Enter email address">
                         </div>
 
                         <div class="create-detail-row">
-                            <label class="create-detail-label" for="create_realtor_phone">Phone Number:</label>
-                            <input class="create-detail-value" type="text" id="create_realtor_phone" name="realtor_phone" placeholder="Enter phone number">
+                            <label class="create-detail-label" for="phone">Phone Number:</label>
+                            <input class="create-detail-value" type="text" id="phone" name="phone" placeholder="Enter phone number">
                         </div>
 
                         <div class="create-detail-row">
-                            <label class="create-detail-label" for="create_realtor_address">Address:</label>
-                            <input class="create-detail-value" type="text" id="create_realtor_address" name="realtor_address" placeholder="Enter address">
+                            <label class="create-detail-label" for="agency_name">Company / Agency Name:</label>
+                            <input class="create-detail-value" type="text" id="agency_name" name="agency_name" placeholder="Enter company/agency name">
                         </div>
 
                         <div class="create-detail-row">
-                            <label class="create-detail-label" for="create_realtor_company_name">Company Name:</label>
-                            <input class="create-detail-value" type="text" id="create_realtor_company_name" name="realtor_company_name" placeholder="Enter company name">
+                            <label class="create-detail-label" for="license_number">License Number:</label>
+                            <input class="create-detail-value" type="text" id="license_number" name="license_number" placeholder="Enter license number">
                         </div>
 
                         <div class="create-detail-row">
-                            <label class="create-detail-label" for="create_realtor_broker_number">Broker Number:</label>
-                            <input class="create-detail-value" type="text" id="create_realtor_broker_number" name="realtor_broker_number" placeholder="Enter broker number">
+                            <label class="create-detail-label" for="rating_avg">Rating (optional):</label>
+                            <input class="create-detail-value" type="number" id="rating_avg" name="rating_avg" step="0.1" placeholder="Enter rating">
                         </div>
-
                     </div>
                 </div>
 
@@ -57,6 +56,7 @@
                     <button type="submit" class="create-submit-btn">Create Realtor</button>
                 </div>
             </form>
+
         </div>
 
     </div>

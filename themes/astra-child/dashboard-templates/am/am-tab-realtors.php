@@ -20,6 +20,14 @@
         <button class="ab-btn ab-btn-create">
           <span class="dashicons dashicons-plus-alt"></span> Add Realtor
         </button>
+        <button class="details-realtor-btn ab-btn ab-btn-view" data-id="1" style="margin-right:5px;">
+            <span class="dashicons dashicons-visibility"></span> View
+        </button>
+
+        <!-- Edit Button -->
+        <button class="edit-realtor-btn ab-btn ab-btn-edit" data-id="1">
+            <span class="dashicons dashicons-edit"></span> Edit
+        </button>
       </div>
     </div>
   </div>
@@ -55,13 +63,13 @@
 
 <?php
 // Include modals for Realtors
-include locate_template('dashboard-templates/rt/rt-ab-realtor-create-modal.php');
-include locate_template('dashboard-templates/rt/rt-ab-realtor-edit-modal.php');
-include locate_template('dashboard-templates/rt/rt-ab-realtor-details-modal.php');
+include locate_template('dashboard-templates/am/am-realtor-create-modal.php');
+include locate_template('dashboard-templates/am/am-realtor-edit-modal.php');
+include locate_template('dashboard-templates/am/am-realtor-view-modal.php');
 ?>
 
 <!-- ===== Export Modal ===== -->
-<div id="realtorExportModal" class="ab-modal">
+<div id="realtorExportModal" class="ab-modal" style="display:none;>
   <div class="ab-modal-inner" role="dialog" aria-modal="true" aria-labelledby="realtorExportTitle">
     <button class="ab-modal-close" id="realtorExportClose">✕</button>
     <h2 id="realtorExportTitle">Export Realtors</h2>
@@ -107,7 +115,7 @@ include locate_template('dashboard-templates/rt/rt-ab-realtor-details-modal.php'
 </div>
 
 <!-- ===== Import Modal ===== -->
-<div id="realtorImportModal" class="ab-modal">
+<div id="realtorImportModal" class="ab-modal" style="display:none;>
   <div class="ab-modal-inner" role="dialog" aria-modal="true" aria-labelledby="realtorImportTitle">
     <button class="ab-modal-close" id="realtorImportClose">✕</button>
     <h2 id="realtorImportTitle">Import Realtors</h2>
@@ -308,3 +316,80 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ===========================
+     CREATE REALTOR MODAL
+  =========================== */
+  const createModal = document.getElementById('amRealtorCreateModal');
+  const openCreateBtn = document.querySelector('.ab-btn-create');
+  const closeCreateBtn = document.getElementById('closeRealtorCreateModal');
+
+  if (openCreateBtn && createModal) {
+    openCreateBtn.addEventListener('click', () => {
+      createModal.style.display = 'flex';
+    });
+  }
+
+  if (closeCreateBtn && createModal) {
+    closeCreateBtn.addEventListener('click', () => { createModal.style.display = 'none'; });
+    createModal.addEventListener('click', e => { if (e.target === createModal) createModal.style.display = 'none'; });
+  }
+
+  /* ===========================
+     EDIT REALTOR MODAL
+  =========================== */
+  const editModal = document.getElementById('amRealtorEditModal');
+  const closeEditBtn = document.getElementById('closeRealtorEditModal');
+
+  document.addEventListener('click', (e) => {
+    const editBtn = e.target.closest('.edit-realtor-btn');
+    if (editBtn && editModal) {
+      const realtorId = editBtn.dataset.id;
+
+      // Open modal
+      editModal.style.display = 'flex';
+
+      // Hook for live data population
+      if (typeof window.loadRealtorForEdit === 'function') {
+        window.loadRealtorForEdit(realtorId);
+      }
+    }
+  });
+
+  if (closeEditBtn && editModal) {
+    closeEditBtn.addEventListener('click', () => { editModal.style.display = 'none'; });
+    editModal.addEventListener('click', e => { if (e.target === editModal) editModal.style.display = 'none'; });
+  }
+
+  /* ===========================
+     VIEW REALTOR MODAL
+  =========================== */
+  const viewModal = document.getElementById('amRealtorViewModal');
+  const closeViewBtn = document.getElementById('closeRealtorViewModal');
+
+  document.addEventListener('click', (e) => {
+    const viewBtn = e.target.closest('.details-realtor-btn');
+    if (viewBtn && viewModal) {
+      const realtorId = viewBtn.dataset.id;
+
+      // Open modal
+      viewModal.style.display = 'flex';
+
+      // Hook for live data population
+      if (typeof window.loadRealtorDetails === 'function') {
+        window.loadRealtorDetails(realtorId);
+      }
+    }
+  });
+
+  if (closeViewBtn && viewModal) {
+    closeViewBtn.addEventListener('click', () => { viewModal.style.display = 'none'; });
+    viewModal.addEventListener('click', e => { if (e.target === viewModal) viewModal.style.display = 'none'; });
+  }
+
+});
+</script>
+

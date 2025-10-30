@@ -15,7 +15,7 @@ add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
 // Include Required Files
 // ======================
 $includes = [
-    'am-rt-realtor-ajax.php',
+    'am-rt-realtor-ajax.php',        // <-- AJAX handlers
     'rt-db-active-client-ajax.php',
     'rt-db-lead-client-ajax.php',
     'rt-ab-client-ajax.php',
@@ -32,6 +32,50 @@ foreach ($includes as $file) {
     $path = get_stylesheet_directory() . '/includes/' . $file;
     if (file_exists($path)) require_once $path;
 }
+
+// ======================
+// Enqueue JS & Localize AJAX for Realtors
+// ======================
+function rt_enqueue_realtor_scripts() {
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
+
+    if ($current_tab === 'realtors') {
+
+        // SheetJS for XLSX export/import
+        wp_enqueue_script(
+            'sheetjs',
+            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+            [],
+            '0.18.5',
+            true
+        );
+
+        // Realtor JS
+        $script_path = get_stylesheet_directory() . '/assets/js/am-rt-realtor.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/am-rt-realtor.js';
+
+        wp_enqueue_script(
+            'am-rt-realtor-js',
+            $script_uri,
+            ['jquery', 'sheetjs'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        // Localize AJAX variables & nonces
+        wp_localize_script('am-rt-realtor-js', 'rtRealtorAjax', [
+            'ajax_url'                => admin_url('admin-ajax.php'),
+            'create_nonce'            => wp_create_nonce('am_realtor_create_nonce'),
+            'edit_nonce'              => wp_create_nonce('am_realtor_edit_nonce'),
+            'delete_nonce'            => wp_create_nonce('am_realtor_delete_nonce'),
+            'export_nonce'            => wp_create_nonce('am_realtor_export_nonce'),
+            'import_nonce'            => wp_create_nonce('am_realtor_import_nonce'),
+            'default_avatar'          => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
+            'default_property_image'  => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg',
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_realtor_scripts');
 
 // ======================
 // Enqueue JS for Active Client Dashboard
@@ -147,51 +191,6 @@ function rt_enqueue_client_scripts() {
     }
 }
 add_action('wp_enqueue_scripts', 'rt_enqueue_client_scripts');
-
-// ======================
-// Enqueue JS & Localize AJAX for Realtors
-// ======================
-function rt_enqueue_realtor_scripts() {
-    // Get current tab (if set)
-    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
-
-    if ( $current_tab === 'realtors' ) {
-
-        // Enqueue SheetJS (for XLSX export/import)
-        wp_enqueue_script(
-            'sheetjs',
-            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-            [],
-            '0.18.5',
-            true
-        );
-
-        // Enqueue custom JS file for Realtor Address Book
-        $script_path = get_stylesheet_directory() . '/assets/js/am-rt-realtor.js';
-        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/am-rt-realtor.js';
-
-        wp_enqueue_script(
-            'am-rt-realtor-js',
-            $script_uri,
-            ['jquery', 'sheetjs'],
-            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
-            true
-        );
-
-        // Localize AJAX variables & nonces
-        wp_localize_script('am-rt-realtor-js', 'rtRealtorAjax', [
-            'ajax_url'                => admin_url('admin-ajax.php'),
-            'create_nonce'            => wp_create_nonce('am_realtor_create_nonce'),
-            'edit_nonce'              => wp_create_nonce('am_realtor_edit_nonce'),
-            'delete_nonce'            => wp_create_nonce('am_realtor_delete_nonce'),
-            'export_nonce'            => wp_create_nonce('am_realtor_export_nonce'),
-            'import_nonce'            => wp_create_nonce('am_realtor_import_nonce'),
-            'default_avatar'          => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
-            'default_property_image'  => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg',
-        ]);
-    }
-}
-add_action('wp_enqueue_scripts', 'rt_enqueue_realtor_scripts');
 
 // ======================
 // Register AJAX Handlers

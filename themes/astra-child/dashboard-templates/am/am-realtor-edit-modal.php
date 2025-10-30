@@ -10,10 +10,11 @@
 
             <form id="editRealtorForm" method="POST" enctype="multipart/form-data" novalidate>
                 <div class="edit-content">
+                    <!-- Profile Picture -->
                     <div class="edit-pic-container">
                         <label for="edit_realtor_profile_picture" title="Click to upload profile picture">
                             <img class="edit-realtor-avatar" id="editPreviewAvatar" src="<?php echo esc_url(wp_upload_dir()['baseurl'] . '/2025/08/client-photo.jpg'); ?>" alt="Profile Preview">
-                            <input type="file" id="edit_realtor_profile_picture" name="realtor_profile_picture" accept="image/*" style="display:none;">
+                            <input type="file" id="edit_realtor_profile_picture" name="profile_picture" accept="image/*" style="display:none;">
                         </label>
                         <p>Click image to upload</p>
                     </div>
@@ -22,35 +23,40 @@
                         <input type="hidden" name="realtor_id" id="edit_realtor_id">
 
                         <div class="edit-detail-row">
-                            <label class="edit-detail-label" for="edit_realtor_full_name">Full Name:</label>
-                            <input class="edit-detail-value" type="text" id="edit_realtor_full_name" name="realtor_full_name" required placeholder="Enter full name">
+                            <label class="edit-detail-label" for="edit_full_name">Full Name:</label>
+                            <input class="edit-detail-value" type="text" id="edit_full_name" name="full_name" required placeholder="Enter full name">
                         </div>
 
                         <div class="edit-detail-row">
-                            <label class="edit-detail-label" for="edit_realtor_email">Email:</label>
-                            <input class="edit-detail-value" type="email" id="edit_realtor_email" name="realtor_email" required placeholder="Enter email address">
+                            <label class="edit-detail-label" for="edit_email">Email:</label>
+                            <input class="edit-detail-value" type="email" id="edit_email" name="email" required placeholder="Enter email address">
                         </div>
 
                         <div class="edit-detail-row">
-                            <label class="edit-detail-label" for="edit_realtor_phone">Phone Number:</label>
-                            <input class="edit-detail-value" type="text" id="edit_realtor_phone" name="realtor_phone" placeholder="Enter phone number">
+                            <label class="edit-detail-label" for="edit_phone">Phone Number:</label>
+                            <input class="edit-detail-value" type="text" id="edit_phone" name="phone" placeholder="Enter phone number">
                         </div>
 
                         <div class="edit-detail-row">
-                            <label class="edit-detail-label" for="edit_realtor_address">Address:</label>
-                            <input class="edit-detail-value" type="text" id="edit_realtor_address" name="realtor_address" placeholder="Enter address">
+                            <label class="edit-detail-label" for="edit_agency_name">Company / Agency Name:</label>
+                            <input class="edit-detail-value" type="text" id="edit_agency_name" name="agency_name" placeholder="Enter company/agency name">
                         </div>
 
                         <div class="edit-detail-row">
-                            <label class="edit-detail-label" for="edit_realtor_company_name">Company Name:</label>
-                            <input class="edit-detail-value" type="text" id="edit_realtor_company_name" name="realtor_company_name" placeholder="Enter company name">
+                            <label class="edit-detail-label" for="edit_license_number">License Number:</label>
+                            <input class="edit-detail-value" type="text" id="edit_license_number" name="license_number" placeholder="Enter license number">
                         </div>
 
                         <div class="edit-detail-row">
-                            <label class="edit-detail-label" for="edit_realtor_broker_number">Broker Number:</label>
-                            <input class="edit-detail-value" type="text" id="edit_realtor_broker_number" name="realtor_broker_number" placeholder="Enter broker number">
+                            <label class="edit-detail-label" for="edit_rating_avg">Rating (optional):</label>
+                            <input class="edit-detail-value" type="number" id="edit_rating_avg" name="rating_avg" step="0.1" placeholder="Enter rating">
                         </div>
 
+                        <!-- Optional: Link to WP user -->
+                        <div class="edit-detail-row">
+                            <label class="edit-detail-label" for="edit_user_id">User ID (optional):</label>
+                            <input class="edit-detail-value" type="number" id="edit_user_id" name="user_id" placeholder="WP User ID">
+                        </div>
                     </div>
                 </div>
 
@@ -58,6 +64,7 @@
                     <button type="submit" class="edit-submit-btn">Update Realtor</button>
                 </div>
             </form>
+
         </div>
 
     </div>
