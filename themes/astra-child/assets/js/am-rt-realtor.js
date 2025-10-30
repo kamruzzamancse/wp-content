@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 notification.style.animation = 'slideOut 0.3s ease';
                 setTimeout(() => notification.remove(), 300);
             }
-        }, 300);
+        }, 3000); // 3 seconds stay
 
         if (!document.querySelector('#notification-styles')) {
             const style = document.createElement('style');
@@ -88,18 +88,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 const tr = document.createElement('tr');
                 tr.dataset.realtorId = realtor.realtor_id;
                 tr.innerHTML = `
-                    <td><img src="${realtor.profile_picture || rtRealtorAjax.default_avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></td>
+                    <td class="ab-sl-column">
+                        <img src="${realtor.profile_picture || rtRealtorAjax.default_avatar}" 
+                            alt="${realtor.full_name}" 
+                            style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                    </td>
                     <td class="realtor-name-text">${realtor.full_name}</td>
                     <td>${realtor.email || ''}</td>
                     <td>${realtor.phone || ''}</td>
                     <td>${realtor.agency_name || ''}</td>
                     <td>${realtor.license_number || ''}</td>
-                    <td>${realtor.rating_avg || ''}</td>
-                    <td>
-                        <span class="editRealtorBtn" style="cursor:pointer;">✏️</span>
-                        <span class="deleteRealtorBtn" style="cursor:pointer;">🗑️</span>
+                    <td class="rating">${realtor.rating_avg || ''}</td>
+                    <td class="ab-actions-column">
+                        <span class="viewRealtorBtn" style="cursor:pointer; margin-right: 10px" data-id="${realtor.realtor_id}">👁️</span>
+                        <span class="editRealtorBtn" style="cursor:pointer; margin-right: 10px" data-id="${realtor.realtor_id}">✏️</span>
+                        <span class="deleteRealtorBtn" style="cursor:pointer;" data-id="${realtor.realtor_id}">🗑️</span>
                     </td>
                 `;
+
                 tbody.appendChild(tr);
             });
 
@@ -122,9 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---------------------------
     const createForm = document.getElementById('createRealtorForm');
     if (createForm) {
-        const newForm = createForm.cloneNode(true);
-        createForm.parentNode.replaceChild(newForm, createForm);
-        document.getElementById('createRealtorForm').addEventListener('submit', async function(e) {
+        createForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = this.querySelector('button[type="submit"]');
             if (submitBtn.disabled) return;
@@ -141,17 +145,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (result.success) {
                     showNotification('Realtor created successfully!');
                     this.reset();
-                    document.getElementById('createPreviewAvatar').src = rtRealtorAjax.default_avatar;
-                    document.getElementById('amRealtorCreateModal').style.display = 'none';
-                    setTimeout(() => {
-                        fetchRealtors({
-                            page: 1,
-                            rows: parseInt(document.getElementById('realtorRows').value, 10),
-                            search: document.getElementById('realtorSearch').value.trim(),
-                            bodyId: 'realtorBody',
-                            paginationId: 'realtorPagination'
-                        });
-                    }, 500);
+                    const previewAvatar = document.getElementById('createPreviewAvatar');
+                    if (previewAvatar) previewAvatar.src = rtRealtorAjax.default_avatar;
+                    const modal = document.getElementById('amRealtorCreateModal');
+                    if (modal) modal.style.display = 'none';
+
+                    // Refresh realtor table
+                    await fetchRealtors({
+                        page: 1,
+                        rows: parseInt(document.getElementById('realtorRows').value, 10),
+                        search: document.getElementById('realtorSearch').value.trim(),
+                        bodyId: 'realtorBody',
+                        paginationId: 'realtorPagination'
+                    });
+
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Create Realtor';
                 } else {
                     showNotification('Error: ' + result.data, 'error');
                     submitBtn.disabled = false;
@@ -184,7 +193,18 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('nonce', rtRealtorAjax.edit_nonce);
 
             try {
-                const result = await ajaxFetch(formData);
+                let result;
+                try {
+                    result = await ajaxFetch(formData);
+
+                    // Extra safety: check if result is valid JSON object
+                    if (!result || typeof result !== 'object') {
+                        throw new Error('Invalid response from server');
+                    }
+                } catch (jsonError) {
+                    throw new Error('Invalid JSON response. Possibly PHP error or notice.');
+                }
+
                 if (result.success) {
                     showNotification('Realtor updated successfully!');
                     document.getElementById('amRealtorEditModal').style.display = 'none';
@@ -196,10 +216,12 @@ document.addEventListener('DOMContentLoaded', function () {
                         paginationId: 'realtorPagination'
                     });
                 } else {
-                    showNotification('Error: ' + result.data, 'error');
+                    const errorMsg = result.data || 'Unknown error';
+                    showNotification('Error: ' + errorMsg, 'error');
                 }
             } catch (error) {
-                showNotification('Network error. Please try again.', 'error');
+                console.error(error);
+                showNotification('Network or server error. Please check console.', 'error');
             } finally {
                 isProcessing = false;
                 submitBtn.disabled = false;
@@ -254,6 +276,37 @@ document.addEventListener('DOMContentLoaded', function () {
     function setupRowButtons(bodyId) {
         const tbody = document.getElementById(bodyId);
         if (!tbody) return;
+
+        tbody.querySelectorAll('.viewRealtorBtn').forEach(btn => {
+            btn.addEventListener('click', async function () {
+                const row = this.closest('tr');
+                const realtorId = row.dataset.realtorId;
+                if (!realtorId) return;
+
+                const modal = document.getElementById('amRealtorViewModal'); // make sure this exists
+                modal.style.display = 'flex';
+
+                const formData = new FormData();
+                formData.append('action', 'fetch_single_realtor_ajax');
+                formData.append('nonce', rtRealtorAjax.edit_nonce);
+                formData.append('realtor_id', realtorId);
+
+                const result = await ajaxFetch(formData);
+                if (result.success) {
+                    const r = result.data;
+                    modal.querySelector('#view_full_name').textContent = r.full_name;
+                    modal.querySelector('#view_email').textContent = r.email;
+                    modal.querySelector('#view_phone').textContent = r.phone;
+                    modal.querySelector('#view_agency_name').textContent = r.agency_name;
+                    modal.querySelector('#view_license_number').textContent = r.license_number;
+                    modal.querySelector('#view_rating_avg').textContent = r.rating_avg;
+                    modal.querySelector('#view_profile_picture').src = r.profile_picture || rtRealtorAjax.default_avatar;
+                } else {
+                    showNotification('Error: ' + result.data, 'error');
+                    modal.style.display = 'none';
+                }
+            });
+        });
 
         tbody.querySelectorAll('.editRealtorBtn').forEach(btn => {
             btn.addEventListener('click', async function () {

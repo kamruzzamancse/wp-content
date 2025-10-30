@@ -20,15 +20,17 @@ function redbm_create_tables() {
     // Table definitions
     $tables = [];
 
-    // Realtors table
+// Realtors table
     $tables[] = "CREATE TABLE {$wpdb->prefix}realtors (
         realtor_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NOT NULL,
         full_name VARCHAR(255) NOT NULL,
-        phone VARCHAR(50),
-        agency_name VARCHAR(255),
-        license_number VARCHAR(100),
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(50) DEFAULT NULL,
+        agency_name VARCHAR(255) DEFAULT NULL,
+        license_number VARCHAR(100) DEFAULT NULL,
         rating_avg FLOAT DEFAULT 0,
+        profile_picture VARCHAR(255) DEFAULT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         created_by BIGINT(20) UNSIGNED DEFAULT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -20,14 +20,6 @@
         <button class="ab-btn ab-btn-create">
           <span class="dashicons dashicons-plus-alt"></span> Add Realtor
         </button>
-        <button class="details-realtor-btn ab-btn ab-btn-view" data-id="1" style="margin-right:5px;">
-            <span class="dashicons dashicons-visibility"></span> View
-        </button>
-
-        <!-- Edit Button -->
-        <button class="edit-realtor-btn ab-btn ab-btn-edit" data-id="1">
-            <span class="dashicons dashicons-edit"></span> Edit
-        </button>
       </div>
     </div>
   </div>
@@ -50,11 +42,12 @@
         <th class="phone-number">Phone Number</th>
         <th class="agency-name">Agency</th>
         <th class="license-number">License Number</th>
+        <th class="rating">Rating</th>
         <th class="ab-actions-column">Actions</th>
       </tr>
     </thead>
     <tbody id="realtorBody">
-      <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+      <tr><td colspan="8" style="text-align:center;">Loading...</td></tr>
     </tbody>
   </table>
 
@@ -69,7 +62,7 @@ include locate_template('dashboard-templates/am/am-realtor-view-modal.php');
 ?>
 
 <!-- ===== Export Modal ===== -->
-<div id="realtorExportModal" class="ab-modal" style="display:none;>
+<div id="realtorExportModal" class="ab-modal" style="display:none;">
   <div class="ab-modal-inner" role="dialog" aria-modal="true" aria-labelledby="realtorExportTitle">
     <button class="ab-modal-close" id="realtorExportClose">✕</button>
     <h2 id="realtorExportTitle">Export Realtors</h2>
@@ -99,7 +92,7 @@ include locate_template('dashboard-templates/am/am-realtor-view-modal.php');
         <label><input type="checkbox" name="realtor_export_columns" value="phone" checked> Phone</label>
         <label><input type="checkbox" name="realtor_export_columns" value="agency_name" checked> Agency</label>
         <label><input type="checkbox" name="realtor_export_columns" value="license_number" checked> License Number</label>
-        <label><input type="checkbox" name="realtor_export_columns" value="status" checked> Status</label>
+        <label><input type="checkbox" name="realtor_export_columns" value="rating_avg" checked> Rating</label>
         <label><input type="checkbox" name="realtor_export_columns" value="profile_picture"> Profile Picture URL</label>
         <label><input type="checkbox" name="realtor_export_columns" value="created_at"> Created At</label>
       </div>
@@ -115,7 +108,7 @@ include locate_template('dashboard-templates/am/am-realtor-view-modal.php');
 </div>
 
 <!-- ===== Import Modal ===== -->
-<div id="realtorImportModal" class="ab-modal" style="display:none;>
+<div id="realtorImportModal" class="ab-modal" style="display:none;">
   <div class="ab-modal-inner" role="dialog" aria-modal="true" aria-labelledby="realtorImportTitle">
     <button class="ab-modal-close" id="realtorImportClose">✕</button>
     <h2 id="realtorImportTitle">Import Realtors</h2>
@@ -161,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const importModal = document.getElementById('realtorImportModal');
   const exportStatus = document.getElementById('realtorExportStatus');
   const importStatus = document.getElementById('realtorImportStatus');
-
   const importFileInput = document.getElementById('realtorImportFileInput');
   const importStartBtn = document.getElementById('realtorImportStart');
 
@@ -191,6 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('realtorImportCancel')?.addEventListener('click', () => closeModal(importModal));
   importModal?.addEventListener('click', e => { if (e.target === importModal) closeModal(importModal); });
 
+  // ESC key to close modals
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') [exportModal, importModal].forEach(m => m && (m.style.display = 'none'));
+  });
+
+  // Import File Input
   importFileInput?.addEventListener('change', () => {
     if (importFileInput.files && importFileInput.files.length > 0) {
       importStartBtn.disabled = false;
@@ -317,6 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -393,3 +392,185 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<style>
+/* Container & Header */
+.ab-container { width: 100%; margin: 0 auto; font-family: Arial, sans-serif; }
+.ab-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ab-header-left .header-title { font-size: 24px; font-weight: 600; margin: 0; }
+.ab-header-right { display: flex; align-items: center; gap: 10px; }
+.ab-search-box { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 6px; padding: 4px 6px; background: #fff; }
+.pt-search-icon { margin-right: 6px; }
+.pt-search-input { border: none; outline: none; font-size: 14px; width: 180px; }
+
+/* Buttons */
+.ab-btn { display: flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 14px; margin-bottom: 5px; border-radius: 6px; border: 1px solid #007bff; background-color: #007bff; color: #fff; cursor: pointer; transition: all 0.3s ease; }
+.ab-btn:hover { background-color: #0056b3; border-color: #0056b3; }
+.ab-btn:active { transform: scale(0.98); }
+.ab-btn .dashicons { font-size: 16px; vertical-align: middle; }
+.ab-btn-import, .ab-btn-export, .ab-btn-create { background-color: #007bff; border-color: #007bff; }
+
+/* Controls (Show rows dropdown) */
+.ab-controls { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-bottom: 10px; }
+#abControls #addressBookRows, #realtorRows { width: 100px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; background-color: #fff; font-size: 14px; cursor: pointer; }
+
+/* Table */
+thead th { text-align: left; padding: 10px; border-bottom: 2px solid #ddd; font-weight: 600; }
+tbody td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+tbody td:hover::after { content: attr(title); position: absolute; left: 0; top: 100%; background: #333; color: #fff; padding: 6px 10px; border-radius: 4px; white-space: normal; min-width: 200px; max-width: 400px; z-index: 1000; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+tbody tr:hover { background-color: #f9f9f9; }
+.ab-sl-column, .ab-actions-column { width: 100px; min-width: 100px; max-width: 100px; text-align: center; }
+.ab-sl-column img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto; }
+.client-name { min-width: 150px; font-weight: 600; }
+.client-name-text { cursor: pointer; color: #0073aa; text-decoration: underline; }
+.client-name-text:hover { color: #0056b3; }
+.email, .phone-number, .agency-name, .license-number, .rating { min-width: 120px; }
+.ab-action-icons { display: flex; gap: 8px; justify-content: center; }
+.ab-action-icon, .editClientBtn, .deleteClientBtn { cursor: pointer; font-size: 16px; transition: transform 0.2s; display: inline-flex; align-items: center; justify-content: center; margin: 0 6px; }
+.ab-action-icon:hover, .editClientBtn:hover, .deleteClientBtn:hover { transform: scale(1.2); }
+
+/* Pagination */
+.ab-pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 15px; padding-right: 10px; }
+.ab-pagination button { padding: 4px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; cursor: pointer; transition: all 0.2s ease; }
+.ab-pagination button:hover { background-color: #e6e6e6; border-color: #bbb; }
+.ab-pagination button.active { background-color: #0052cc; color: #fff; border-color: #0052cc; }
+
+/* Modal */
+.ab-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 9999; align-items: center; justify-content: center; animation: fadeIn 0.2s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.ab-modal-inner { background: #fff; border-radius: 12px; padding: 24px; width: 100%; max-width: 600px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); position: relative; animation: slideUp 0.25s ease-out; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.ab-modal-close { position: absolute; top: 14px; right: 14px; border: none; background: transparent; font-size: 20px; cursor: pointer; color: #444; }
+.ab-modal h2 { margin-top: 0; font-size: 20px; font-weight: 600; color: #222; }
+.ab-modal p { color: #555; font-size: 14px; margin-bottom: 12px; }
+.ab-section { margin: 14px 0; }
+.ab-section label { font-weight: 600; display: block; margin-bottom: 6px; }
+.ab-checkboxes, .ab-radios { display: flex; flex-wrap: wrap; gap: 10px; }
+.ab-radios label, .ab-checkboxes label { font-weight: normal; cursor: pointer; }
+#abImportPreview { max-height: 220px; overflow: auto; border: 1px solid #eee; padding: 10px; background: #fafafa; font-size: 13px; }
+#abExportStatus, #realtorImportStatus { margin-top: 10px; color: #555; font-size: 14px; display: none; }
+
+/* Responsive Table */
+@media screen and (max-width: 768px) {
+  table, thead, tbody, th, tr, td { display: block; width: 100%; }
+  thead { display: none; }
+  tr { margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #f9f9ff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  td { display: flex; flex-direction: column; width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid #eee; max-width: none !important; white-space: normal; overflow: visible; text-overflow: unset; }
+  td:last-child { border-bottom: none; }
+  td::before { content: attr(data-label); font-weight: 600; color: #333; margin-bottom: 4px; }
+  .ab-actions-column { flex-direction: row; justify-content: center; align-items: center; padding: 8px 0; }
+  .ab-action-icons { gap: 10px; }
+  td:hover::after { display: none; }
+}
+
+/* Table layout & borders */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #ddd;          /* Outer table border */
+  border-radius: 10px 10px 0 0;    /* Rounded top corners */
+  background: #fff;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  table-layout: auto;
+  overflow: hidden;
+}
+
+/* Table header */
+thead th {
+  padding: 10px;
+  border-bottom: 2px solid #ddd;   /* Header bottom border */
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Rounded corners for table header */
+table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+/* Center align specific columns */
+.ab-sl-column,
+.rating,
+.ab-actions-column {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Table body cells */
+tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;   /* Inner row borders */
+  vertical-align: middle;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Remove bottom border of last row */
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Hover effect for rows */
+tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Profile image styling */
+.ab-sl-column img {
+  display: block;
+  margin: 0 auto;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.ab-footer-buttons {
+  display: flex;
+  justify-content: flex-end; /* align buttons to right */
+  align-items: center;
+  gap: 10px; /* space between buttons */
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Common button style */
+.ab-footer-buttons .ab-btn {
+  width: 80px;
+  height: 36px;
+  display: flex;                 /* ✅ Use flex to center text properly */
+  justify-content: center;       /* ✅ Horizontal center */
+  align-items: center;           /* ✅ Vertical center */
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  text-align: center;
+}
+
+.ab-footer-buttons .ab-btn:hover {
+  background-color: #e9e9e9;
+}
+
+/* Primary button */
+.ab-footer-buttons .ab-btn-primary {
+  background-color: #0073aa;
+  color: white;
+  border: none;
+}
+
+.ab-footer-buttons .ab-btn-primary:hover {
+  background-color: #005f8d;
+}
+
+</style>

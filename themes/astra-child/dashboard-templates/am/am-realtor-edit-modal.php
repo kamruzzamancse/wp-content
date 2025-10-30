@@ -51,12 +51,6 @@
                             <label class="edit-detail-label" for="edit_rating_avg">Rating (optional):</label>
                             <input class="edit-detail-value" type="number" id="edit_rating_avg" name="rating_avg" step="0.1" placeholder="Enter rating">
                         </div>
-
-                        <!-- Optional: Link to WP user -->
-                        <div class="edit-detail-row">
-                            <label class="edit-detail-label" for="edit_user_id">User ID (optional):</label>
-                            <input class="edit-detail-value" type="number" id="edit_user_id" name="user_id" placeholder="WP User ID">
-                        </div>
                     </div>
                 </div>
 

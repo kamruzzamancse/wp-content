@@ -91,7 +91,6 @@ function rt_create_realtor_ajax() {
     $email = sanitize_email($_POST['email'] ?? '');
     if (!$full_name || !$email) wp_send_json_error('Full Name and Email are required');
 
-    // Check if email already exists in Realtors
     $existing = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM {$table} WHERE email = %s AND deleted_at IS NULL",
         $email
@@ -105,7 +104,6 @@ function rt_create_realtor_ajax() {
     $license_number = sanitize_text_field($_POST['license_number'] ?? '');
     $rating_avg = floatval($_POST['rating_avg'] ?? 0);
 
-    // Upload profile picture
     $profile_url = null;
     if (!empty($_FILES['profile_picture']['name'])) {
         require_once(ABSPATH.'wp-admin/includes/file.php');
@@ -138,7 +136,6 @@ function rt_create_realtor_ajax() {
             'agency_name' => $agency_name,
             'license_number' => $license_number,
             'rating_avg' => $rating_avg,
-            'profile_picture' => $profile_url,
             'user_id' => $user_id,
             'created_at' => current_time('mysql'),
             'created_by' => get_current_user_id()
@@ -179,7 +176,7 @@ function rt_update_realtor_ajax() {
     $license_number = sanitize_text_field($_POST['license_number'] ?? '');
     $rating_avg = floatval($_POST['rating_avg'] ?? 0);
 
-    $profile_url = $realtor->profile_picture;
+    $profile_url = $realtor->profile_picture ?? null;
     if (!empty($_FILES['profile_picture']['name'])) {
         require_once(ABSPATH.'wp-admin/includes/file.php');
         require_once(ABSPATH.'wp-admin/includes/media.php');
@@ -288,16 +285,24 @@ function rt_export_realtors_ajax() {
 add_action('wp_ajax_export_realtors_ajax','rt_export_realtors_ajax');
 
 // =====================
-// Import Realtors (CSV only, skip/update/create)
+// Import Realtors AJAX
 // =====================
 function rt_import_realtors_ajax() {
+
+    // Debug Start
+    error_log('=== IMPORT REALTORS DEBUG START ===');
+
     rt_realtor_current_user_required();
 
-    if (!wp_verify_nonce($_POST['nonce'] ?? '', 'am_realtor_import_nonce')) {
+    // Verify nonce
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'am_realtor_import_nonce')) {
+        error_log('Nonce verification failed');
         wp_send_json_error('Security verification failed');
     }
 
+    // Check if file uploaded
     if (!isset($_FILES['realtors_file']) || empty($_FILES['realtors_file']['tmp_name'])) {
+        error_log('No file uploaded or file is empty');
         wp_send_json_error('No file uploaded or file is empty');
     }
 
@@ -305,12 +310,19 @@ function rt_import_realtors_ajax() {
     $filename = $_FILES['realtors_file']['name'];
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
+    error_log('File uploaded: ' . $filename);
+    error_log('File extension: ' . $ext);
+
     if ($ext !== 'csv') {
+        error_log('Unsupported file type: ' . $ext);
         wp_send_json_error('Only CSV files are supported. Please convert Excel to CSV.');
     }
 
     $realtors = rt_parse_realtor_csv_file($file);
-    if (empty($realtors)) wp_send_json_error('No valid data found in CSV file.');
+    if (empty($realtors)) {
+        error_log('No valid data found in CSV file');
+        wp_send_json_error('No valid data found in CSV file.');
+    }
 
     global $wpdb;
     $table = $wpdb->prefix . 'realtors';
@@ -331,7 +343,7 @@ function rt_import_realtors_ajax() {
             $rating_avg = floatval($r['rating_avg'] ?? 0);
 
             if (!$full_name || !$email || !is_email($email)) {
-                $errors[] = "Row ".($index+1).": Missing or invalid full name/email";
+                $errors[] = "Row " . ($index + 1) . ": Missing or invalid full name/email";
                 continue;
             }
 
@@ -345,77 +357,82 @@ function rt_import_realtors_ajax() {
                     $result = $wpdb->update(
                         $table,
                         [
-                            'full_name'=>$full_name,
-                            'phone'=>$phone,
-                            'agency_name'=>$agency_name,
-                            'license_number'=>$license_number,
-                            'rating_avg'=>$rating_avg,
-                            'updated_at'=>current_time('mysql'),
-                            'updated_by'=>$current_user_id
+                            'full_name' => $full_name,
+                            'phone' => $phone,
+                            'agency_name' => $agency_name,
+                            'license_number' => $license_number,
+                            'rating_avg' => $rating_avg,
+                            'updated_at' => current_time('mysql'),
+                            'updated_by' => $current_user_id
                         ],
-                        ['realtor_id'=>$existing_id],
-                        ['%s','%s','%s','%s','%f','%s','%d'],
+                        ['realtor_id' => $existing_id],
+                        ['%s', '%s', '%s', '%s', '%f', '%s', '%d'],
                         ['%d']
                     );
                     if ($result !== false) $updated++;
+                    continue; // skip creation
+                } elseif ($duplicate_handling === 'skip') {
+                    continue; // skip this row
                 }
-                continue;
             }
 
+            // Insert new realtor
             $result = $wpdb->insert(
                 $table,
                 [
-                    'full_name'=>$full_name,
-                    'email'=>$email,
-                    'phone'=>$phone,
-                    'agency_name'=>$agency_name,
-                    'license_number'=>$license_number,
-                    'rating_avg'=>$rating_avg,
-                    'created_at'=>current_time('mysql'),
-                    'created_by'=>$current_user_id
+                    'full_name' => $full_name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'agency_name' => $agency_name,
+                    'license_number' => $license_number,
+                    'rating_avg' => $rating_avg,
+                    'created_at' => current_time('mysql'),
+                    'created_by' => $current_user_id
                 ],
-                ['%s','%s','%s','%s','%s','%f','%s','%d']
+                ['%s', '%s', '%s', '%s', '%s', '%f', '%s', '%d']
             );
 
             if ($result !== false) {
                 $inserted++;
                 $new_realtor_id = $wpdb->insert_id;
 
-                // Create WP user
+                // Create WP user if email does not exist
                 if (!email_exists($email)) {
                     $password = wp_generate_password(12, false);
                     $user_id = wp_create_user($email, $password, $email);
                     if (!is_wp_error($user_id)) {
                         wp_update_user([
-                            'ID'=>$user_id,
-                            'display_name'=>$full_name,
-                            'first_name'=>$full_name
+                            'ID' => $user_id,
+                            'display_name' => $full_name,
+                            'first_name' => $full_name
                         ]);
                         $wp_user = new WP_User($user_id);
                         $wp_user->set_role('realtor');
 
-                        $wpdb->update($table, ['user_id'=>$user_id], ['realtor_id'=>$new_realtor_id], ['%d'], ['%d']);
+                        $wpdb->update($table, ['user_id' => $user_id], ['realtor_id' => $new_realtor_id], ['%d'], ['%d']);
                     }
                 }
             } else {
-                $errors[] = "Row ".($index+1).": Failed to insert realtor";
+                $errors[] = "Row " . ($index + 1) . ": Failed to insert realtor";
             }
 
         } catch (Exception $e) {
-            $errors[] = "Row ".($index+1).": ".$e->getMessage();
+            $errors[] = "Row " . ($index + 1) . ": " . $e->getMessage();
         }
     }
 
     $message = "Import completed. {$inserted} new, {$updated} updated.";
-    if (!empty($errors)) $message .= " ".count($errors)." errors occurred.";
+    if (!empty($errors)) $message .= " " . count($errors) . " errors occurred.";
+
+    error_log('Import finished - Inserted: ' . $inserted . ', Updated: ' . $updated . ', Errors: ' . count($errors));
 
     wp_send_json_success([
-        'message'=>$message,
-        'inserted'=>$inserted,
-        'updated'=>$updated,
-        'total_processed'=>count($realtors),
-        'error_count'=>count($errors),
-        'errors'=>array_slice($errors,0,10)
+        'message' => $message,
+        'inserted' => $inserted,
+        'updated' => $updated,
+        'total_processed' => count($realtors),
+        'error_count' => count($errors),
+        'errors' => array_slice($errors, 0, 10)
     ]);
 }
 
@@ -426,10 +443,12 @@ function rt_parse_realtor_csv_file($file_path) {
     $realtors = [];
     if (!file_exists($file_path)) return $realtors;
 
-    if (($handle = fopen($file_path,"r")) !== false) {
+    if (($handle = fopen($file_path, "r")) !== false) {
         $headers = fgetcsv($handle);
         if ($headers === false) return $realtors;
-        $headers = array_map(function($h){ return strtolower(trim(preg_replace('/^\xEF\xBB\xBF/','',$h))); }, $headers);
+        $headers = array_map(function($h) {
+            return strtolower(trim(preg_replace('/^\xEF\xBB\xBF/','',$h)));
+        }, $headers);
 
         while (($row = fgetcsv($handle)) !== false) {
             if (empty(array_filter($row))) continue;
@@ -437,16 +456,13 @@ function rt_parse_realtor_csv_file($file_path) {
                 if (count($row) < count($headers)) $row = array_pad($row, count($headers), '');
                 else $row = array_slice($row, 0, count($headers));
             }
-            $data = array_combine($headers,$row);
-            $data = array_map('trim',$data);
-            if (!empty($data['full_name']) && !empty($data['email'])) $realtors[]=$data;
+            $data = array_combine($headers, $row);
+            $data = array_map('trim', $data);
+            if (!empty($data['full_name']) && !empty($data['email'])) $realtors[] = $data;
         }
         fclose($handle);
     }
     return $realtors;
 }
 
-// =====================
-// Register AJAX handler
-// =====================
-add_action('wp_ajax_import_realtors_ajax','rt_import_realtors_ajax');
+add_action('wp_ajax_import_realtors_ajax', 'rt_import_realtors_ajax');
