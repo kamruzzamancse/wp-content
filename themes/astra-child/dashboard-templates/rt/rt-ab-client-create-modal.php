@@ -1,3 +1,4 @@
+<!-- Client Create Modal -->
 <div id="rmRealtorClientCreateModal" class="modal-overlay-realtor-client">
     <div class="modal-content-realtor-client">
         <div class="realtor-client-create-container">
@@ -61,6 +62,14 @@
                             </select>
                         </div>
 
+                        <!-- Property Search -->
+                        <div class="create-detail-row-realtor-client" style="position:relative;">
+                            <label for="create_realtor_client_property">Select Property:</label>
+                            <input type="text" id="create_realtor_client_property" name="realtor_client_property" placeholder="Search property address..." autocomplete="off">
+                            <input type="hidden" id="create_realtor_client_property_id" name="realtor_client_property_id">
+                            <div id="property_suggestions" class="suggestions-box"></div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -69,10 +78,12 @@
                     <button type="submit" class="create-submit-btn-realtor-client">Create Client</button>
                 </div>
             </form>
+            
         </div>
     </div>
 </div>
 
+<!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const createModal = document.getElementById('rmRealtorClientCreateModal');
@@ -81,6 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('createRealtorClientForm');
     const profileInput = document.getElementById('create_realtor_client_profile_picture');
     const previewAvatar = document.getElementById('createRealtorClientPreviewAvatar');
+    const propertyInput = document.getElementById('create_realtor_client_property');
+    const propertyIdInput = document.getElementById('create_realtor_client_property_id');
+    const suggestionsBox = document.getElementById('property_suggestions');
 
     // Open modal
     if(addContactBtn && createModal){
@@ -91,6 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(closeBtn && createModal){
         closeBtn.addEventListener('click', () => createModal.style.display='none');
         createModal.addEventListener('click', e => { if(e.target === createModal) createModal.style.display='none'; });
+        document.addEventListener('keydown', e => { if(e.key==='Escape') createModal.style.display='none'; });
     }
 
     // Image preview
@@ -104,6 +119,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Property search AJAX
+    if(propertyInput){
+        propertyInput.addEventListener('keyup', function(){
+            const keyword = this.value.trim();
+            if(keyword.length > 1){
+                const data = new FormData();
+                data.append('action','search_properties');
+                data.append('keyword', keyword);
+                data.append('nonce', rtClientAjax.create_nonce);
+
+                fetch(rtClientAjax.ajax_url, { method:'POST', body:data })
+                    .then(res => res.json())
+                    .then(result => {
+                        if(result.success){
+                            suggestionsBox.innerHTML = result.data.html;
+                            suggestionsBox.style.display = 'block';
+                        } else {
+                            suggestionsBox.innerHTML = '<div class="property-suggestion">No results found</div>';
+                            suggestionsBox.style.display = 'block';
+                        }
+                    });
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+    }
+
+    // Click suggestion
+    document.addEventListener('click', function(e){
+        if(e.target && e.target.classList.contains('property-suggestion')){
+            propertyInput.value = e.target.textContent;
+            propertyIdInput.value = e.target.dataset.id;
+            suggestionsBox.style.display = 'none';
+        } else if(!e.target.closest('#property_suggestions') && e.target !== propertyInput){
+            suggestionsBox.style.display = 'none';
+        }
+    });
 
     // AJAX submit
     if(form){
@@ -121,7 +174,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Client created successfully!');
                     form.reset();
                     previewAvatar.src = rtClientAjax.default_avatar;
+                    propertyIdInput.value = '';
                     createModal.style.display = 'none';
+
+                    // Refresh clients table if function exists
                     if(typeof fetchClients === 'function'){
                         fetchClients({ page:1, rows:10, search:'', bodyId:'addressBookBody', paginationId:'addressBookPagination' });
                         fetchClients({ page:1, rows:10, search:'', bodyId:'activeClientsBody', paginationId:'activeClientsPagination' });
@@ -137,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- CSS -->
 <style>
 .modal-overlay-realtor-client { display: none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; }
 .modal-content-realtor-client { background:#fff; border-radius:8px; max-width:600px; width:90%; box-shadow:0 6px 18px rgba(0,0,0,0.12); padding:25px 30px; max-height:90vh; overflow-y:auto; }
@@ -152,5 +209,8 @@ document.addEventListener('DOMContentLoaded', function() {
 .create-detail-row-realtor-client { margin-bottom:18px; display:flex; flex-direction:column; }
 .create-submit-btn-realtor-client { background-color:#0052cc; border:none; color:white; padding:10px 25px; font-size:1.1rem; border-radius:8px; cursor:pointer; transition: background-color 0.25s ease; }
 .create-submit-btn-realtor-client:hover { background-color:#003d99; }
+.suggestions-box{ border:1px solid #ccc; max-height:200px; overflow-y:auto; position:absolute; background:#fff; width:100%; z-index:999; display:none;}
+.property-suggestion{ padding:5px; cursor:pointer;}
+.property-suggestion:hover{ background:#f0f0f0;}
 @media (max-width:600px){ .create-content-realtor-client { flex-direction:column; } .create-pic-container-realtor-client { margin:0 auto 25px auto; } }
 </style>

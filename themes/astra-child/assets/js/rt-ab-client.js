@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (createForm) {
         const newForm = createForm.cloneNode(true);
         createForm.parentNode.replaceChild(newForm, createForm);
-        document.getElementById('createRealtorClientForm').addEventListener('submit', async function(e) {
+        newForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const submitBtn = this.querySelector('button[type="submit"]');
             if (submitBtn.disabled) return;
@@ -208,6 +208,71 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ---------------------------
+    // Property search integration for Create modal ONLY
+    // ---------------------------
+    function setupPropertySearch(inputEl, hiddenIdEl, suggestionsEl, nonce) {
+        function debounce(func, delay = 300) {
+            let timer;
+            return function (...args) {
+                clearTimeout(timer);
+                timer = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Keyup: fetch suggestions
+        inputEl.addEventListener('input', debounce(function () {
+            const keyword = this.value.trim();
+            if (keyword.length < 2) {
+                suggestionsEl.style.display = 'none';
+                return;
+            }
+
+            const data = new FormData();
+            data.append('action', 'search_properties');
+            data.append('keyword', keyword);
+            data.append('nonce', nonce);
+
+            fetch(rtClientAjax.ajax_url, { method: 'POST', body: data })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success && result.data.html) {
+                        suggestionsEl.innerHTML = result.data.html;
+                        suggestionsEl.style.display = 'block';
+                    } else {
+                        suggestionsEl.innerHTML = '<div class="property-suggestion">No results found</div>';
+                        suggestionsEl.style.display = 'block';
+                    }
+                });
+        }, 300));
+
+        // Click on suggestion
+        suggestionsEl.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('property-suggestion')) {
+                inputEl.value = e.target.textContent;
+                hiddenIdEl.value = e.target.dataset.id;
+                suggestionsEl.style.display = 'none';
+            }
+        });
+
+        // Hide suggestions on click outside
+        document.addEventListener('click', function (e) {
+            if (!suggestionsEl.contains(e.target) && e.target !== inputEl) {
+                suggestionsEl.style.display = 'none';
+            }
+        });
+    }
+
+    // Initialize Create modal property search
+    const createPropertyInput = document.getElementById('create_realtor_client_property');
+    const createPropertyId = document.getElementById('create_realtor_client_property_id');
+    const createSuggestionsBox = document.getElementById('property_suggestions');
+    if (createPropertyInput && createPropertyId && createSuggestionsBox) {
+        setupPropertySearch(createPropertyInput, createPropertyId, createSuggestionsBox, rtClientAjax.create_nonce);
+    }
+
+    // NOTE: Edit modal property search removed completely
+
+    // ---------------------------
     // Modal functionality (Create/Edit)
     // ---------------------------
     function initializeModalFunctionality() {
@@ -270,7 +335,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const result = await ajaxFetch(formData);
 
-                if (result.success) {
+                // When filling edit modal with client info
+                if(result.success){
                     const client = result.data;
                     document.getElementById('edit_realtor_client_id').value = client.client_id;
                     document.getElementById('edit_realtor_client_full_name').value = client.full_name;
@@ -279,9 +345,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('edit_realtor_client_notes').value = client.note;
                     document.getElementById('edit_realtor_client_status').value = client.status;
                     document.getElementById('editRealtorClientPreviewAvatar').src = client.profile_picture || rtClientAjax.default_avatar;
-                } else {
-                    showNotification('Error: ' + result.data, 'error');
-                    modal.style.display = 'none';
+                    
+                    // Property info
+                    document.getElementById('edit_realtor_client_property').value = '';
+                    document.getElementById('edit_realtor_client_property_id').value = client.property_id || '';
+                    document.getElementById('previousPropertyName').textContent = client.property_title || 'No property selected';
                 }
             });
         });

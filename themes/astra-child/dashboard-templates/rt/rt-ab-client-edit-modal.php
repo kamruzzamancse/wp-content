@@ -1,3 +1,4 @@
+<!-- Edit Client Modal -->
 <div id="rmRealtorClientEditModal" class="modal-overlay-realtor-client">
     <div class="modal-content-realtor-client">
         <div class="realtor-client-edit-container">
@@ -8,7 +9,9 @@
 
             <form id="editRealtorClientForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" id="edit_realtor_client_id" name="realtor_client_id">
-                
+                <!-- Keep property ID hidden -->
+                <input type="hidden" id="edit_realtor_client_property_id" name="realtor_client_property_id">
+
                 <div class="edit-content-realtor-client">
                     <div class="edit-pic-container-realtor-client">
                         <label for="edit_realtor_client_profile_picture" title="Click to upload profile picture">
@@ -58,6 +61,15 @@
                                 <option value="cold" selected>Cold</option>
                             </select>
                         </div>
+
+                        <!-- Show previous property name only -->
+                        <div class="edit-detail-row-realtor-client">
+                            <label>Property:</label>
+                            <div id="previousPropertyName" style="margin-bottom:5px; font-weight:500; color:#333;">
+                                <?php if(!empty($client_property_name)) echo esc_html($client_property_name); ?>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -69,13 +81,15 @@
     </div>
 </div>
 
-
+<!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const editModal = document.getElementById('rmRealtorClientEditModal');
     const closeBtn = document.getElementById('closeRealtorClientEditModal');
     const profileInput = document.getElementById('edit_realtor_client_profile_picture');
     const form = document.getElementById('editRealtorClientForm');
+    const statusSelect = document.getElementById('edit_realtor_client_status');
+    const leadStatusRow = document.getElementById('leadStatusRow');
 
     // Close modal
     if(closeBtn && editModal){
@@ -92,6 +106,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 reader.onload = e => document.getElementById('editRealtorClientPreviewAvatar').src = e.target.result;
                 reader.readAsDataURL(file);
             }
+        });
+    }
+
+    // Lead status toggle
+    if(statusSelect){
+        statusSelect.addEventListener('change', function(){
+            leadStatusRow.style.display = (this.value === 'lead') ? 'flex' : 'none';
         });
     }
 
@@ -113,9 +134,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 if(result.success){
                     alert('Client updated successfully!');
                     editModal.style.display='none';
+
+                    // Update previous property display
+                    if(result.data.property_title){
+                        const prevPropertyDiv = document.getElementById('previousPropertyName');
+                        if(prevPropertyDiv) prevPropertyDiv.textContent = result.data.property_title;
+                    }
+
+                    // Refresh client list if function exists
                     if(typeof fetchClients === 'function'){
                         fetchClients({ page:1, rows:10, search:'', bodyId:'addressBookBody', paginationId:'addressBookPagination' });
-                        fetchClients({ page:1, rows:10, search:'', bodyId:'activeClientsBody', paginationId:'activeClientsPagination' });
                     }
                 } else {
                     alert('Error: ' + result.data);

@@ -44,6 +44,7 @@ function redbm_create_tables() {
     $tables[] = "CREATE TABLE {$wpdb->prefix}clients (
         client_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NULL,
+        properties_id BIGINT(20) UNSIGNED NULL,
         full_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
         phone VARCHAR(50),
