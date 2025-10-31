@@ -24,7 +24,9 @@ $includes = [
     'rt-document-type.php',
     'rt-documents.php',
     'rt-settings-password.php',
+    'cl-settings-password.php',
     'rt-settings-support-ajax.php',
+    'cl-settings-support-ajax.php',
     'rentcast-properties.php',
 ];
 
@@ -306,6 +308,29 @@ function rt_enqueue_password_script() {
     ]);
 }
 add_action('wp_enqueue_scripts', 'rt_enqueue_password_script');
+
+// ======================
+// Client Password Script Enqueue
+// ======================
+function cl_enqueue_password_script() {
+    // Load script only on the "Client Change Password" tab
+    if (!isset($_GET['tab']) || $_GET['tab'] !== 'cl-settings-cp') return;
+
+    $script_path = get_stylesheet_directory() . '/assets/js/cl-settings-password.js';
+    wp_enqueue_script(
+        'cl-password-script',
+        get_stylesheet_directory_uri() . '/assets/js/cl-settings-password.js',
+        ['jquery'],
+        file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+        true
+    );
+
+    wp_localize_script('cl-password-script', 'cl_password_ajax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('cl_password_nonce'),
+    ]);
+}
+add_action('wp_enqueue_scripts', 'cl_enqueue_password_script');
 
 /**
  * Enqueue general child theme assets (CSS + JS)

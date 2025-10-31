@@ -12,26 +12,28 @@
         <div class="ss-form-row">
             <div class="ss-form-group">
                 <label class="ss-form-label">Name</label>
-                <input type="text" placeholder="Enter name" class="ss-form-input">
+                <input type="text" name="name" placeholder="Enter name" class="ss-form-input" required>
             </div>
             <div class="ss-form-group">
                 <label class="ss-form-label">Email</label>
-                <input type="email" placeholder="Enter Email" class="ss-form-input">
+                <input type="email" name="email" placeholder="Enter Email" class="ss-form-input" required>
             </div>
         </div>
         
         <div class="ss-form-group">
             <label class="ss-form-label">Phone</label>
-            <input type="tel" placeholder="Enter phone" class="ss-form-input">
+            <input type="tel" name="phone" placeholder="Enter phone" class="ss-form-input">
         </div>
         
         <div class="ss-form-group">
             <label class="ss-form-label">Message</label>
-            <textarea placeholder="Message" class="ss-form-textarea"></textarea>
+            <textarea name="message" placeholder="Message" class="ss-form-textarea" required></textarea>
         </div>
         
         <button type="submit" class="ss-submit-button">Send Us</button>
     </form>
+
+    <div id="cl-support-result" style="margin-top:15px;"></div>
 </div>
 
 <style>
@@ -49,7 +51,6 @@
     font-weight: bold;
     margin-bottom: 25px;
     color: #333;
-    text-align: center;
 }
 
 .ss-contact-form {
@@ -102,7 +103,7 @@
     color: #FFF!important;
     border: none;
     padding: 12px 25px;
-    border-radius: 4px;
+    border-radius: 6px !important;
     font-size: 16px;
     font-weight: 500;
     cursor: pointer;
@@ -111,7 +112,7 @@
 }
 
 .ss-submit-button:hover {
-    background-color: #2980b9;
+    background-color: #2980b9 !important;
 }
 
 button[type="submit"] {
@@ -138,3 +139,33 @@ button[type="submit"] {
     }
 }
 </style>
+
+<script>
+jQuery(document).ready(function($){
+    $('.ss-contact-form').on('submit', function(e){
+        e.preventDefault();
+
+        const $form = $(this);
+        const $result = $('#cl-support-result');
+        $result.css('color','#555').text('Sending message...');
+
+        const formData = {
+            action: 'cl_send_support_message',
+            nonce: '<?php echo wp_create_nonce("cl_support_nonce"); ?>',
+            name: $form.find('input[name="name"]').val(),
+            email: $form.find('input[name="email"]').val(),
+            phone: $form.find('input[name="phone"]').val(),
+            message: $form.find('textarea[name="message"]').val()
+        };
+
+        $.post('<?php echo admin_url("admin-ajax.php"); ?>', formData, function(res){
+            if(res.success){
+                $result.css('color','green').html('✅ ' + res.data);
+                $form[0].reset();
+            } else {
+                $result.css('color','red').html('❌ ' + res.data);
+            }
+        });
+    });
+});
+</script>
