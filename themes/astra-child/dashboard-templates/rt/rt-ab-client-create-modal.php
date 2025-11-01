@@ -2,7 +2,6 @@
 <div id="rmRealtorClientCreateModal" class="modal-overlay-realtor-client">
     <div class="modal-content-realtor-client">
         <div class="realtor-client-create-container">
-
             <!-- Header -->
             <div class="create-header-realtor-client">
                 <h2>Create New Client</h2>
@@ -12,22 +11,17 @@
             <!-- Form -->
             <form id="createRealtorClientForm" method="POST" enctype="multipart/form-data">
                 <div class="create-content-realtor-client">
-
                     <!-- Profile Picture -->
                     <div class="create-pic-container-realtor-client">
                         <label for="create_realtor_client_profile_picture" title="Click to upload profile picture">
-                            <img class="create-realtor-client-avatar" id="createRealtorClientPreviewAvatar"
-                                 src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>"
-                                 alt="Profile Preview">
-                            <input type="file" id="create_realtor_client_profile_picture"
-                                   name="realtor_client_profile_picture" accept="image/*" style="display:none;">
+                            <img class="create-realtor-client-avatar" id="createRealtorClientPreviewAvatar" src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>" alt="Profile Preview">
+                            <input type="file" id="create_realtor_client_profile_picture" name="realtor_client_profile_picture" accept="image/*" style="display:none;">
                         </label>
                         <p>Click image to upload</p>
                     </div>
 
                     <!-- Client Details -->
                     <div class="create-details-realtor-client">
-
                         <div class="create-detail-row-realtor-client">
                             <label for="create_realtor_client_full_name">Full Name: *</label>
                             <input type="text" id="create_realtor_client_full_name" name="realtor_client_full_name" required placeholder="Enter full name">
@@ -66,10 +60,10 @@
                         <div class="create-detail-row-realtor-client" style="position:relative;">
                             <label for="create_realtor_client_property">Select Property:</label>
                             <input type="text" id="create_realtor_client_property" name="realtor_client_property" placeholder="Search property address..." autocomplete="off">
-                            <input type="hidden" id="create_realtor_client_property_id" name="realtor_client_property_id">
+                            <!-- properties_id field added explicitly -->
+                            <input type="hidden" id="create_realtor_client_property_id" name="properties_id">
                             <div id="property_suggestions" class="suggestions-box"></div>
                         </div>
-
                     </div>
                 </div>
 
@@ -78,7 +72,6 @@
                     <button type="submit" class="create-submit-btn-realtor-client">Create Client</button>
                 </div>
             </form>
-            
         </div>
     </div>
 </div>
@@ -104,8 +97,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Close modal
     if(closeBtn && createModal){
         closeBtn.addEventListener('click', () => createModal.style.display='none');
-        createModal.addEventListener('click', e => { if(e.target === createModal) createModal.style.display='none'; });
-        document.addEventListener('keydown', e => { if(e.key==='Escape') createModal.style.display='none'; });
+        createModal.addEventListener('click', e => {
+            if(e.target === createModal) createModal.style.display='none';
+        });
+        document.addEventListener('keydown', e => {
+            if(e.key==='Escape') createModal.style.display='none';
+        });
     }
 
     // Image preview
@@ -129,18 +126,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 data.append('action','search_properties');
                 data.append('keyword', keyword);
                 data.append('nonce', rtClientAjax.create_nonce);
-
-                fetch(rtClientAjax.ajax_url, { method:'POST', body:data })
-                    .then(res => res.json())
-                    .then(result => {
-                        if(result.success){
-                            suggestionsBox.innerHTML = result.data.html;
-                            suggestionsBox.style.display = 'block';
-                        } else {
-                            suggestionsBox.innerHTML = '<div class="property-suggestion">No results found</div>';
-                            suggestionsBox.style.display = 'block';
-                        }
-                    });
+                
+                fetch(rtClientAjax.ajax_url, {
+                    method:'POST',
+                    body:data
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if(result.success){
+                        suggestionsBox.innerHTML = result.data.html;
+                        suggestionsBox.style.display = 'block';
+                    } else {
+                        suggestionsBox.innerHTML = '<div class="property-suggestion">No results found</div>';
+                        suggestionsBox.style.display = 'block';
+                    }
+                });
             } else {
                 suggestionsBox.style.display = 'none';
             }
@@ -158,35 +158,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // AJAX submit
+    // AJAX submit - UPDATED to include properties_id explicitly
     if(form){
         form.addEventListener('submit', async function(e){
             e.preventDefault();
+            
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
             const formData = new FormData(form);
+            
+            // Add properties_id explicitly to ensure it's sent
+            const propertyId = document.getElementById('create_realtor_client_property_id').value;
+            formData.append('properties_id', propertyId);
+            formData.append('realtor_client_property_id', propertyId);
+            
             formData.append('action', 'create_realtor_client_ajax');
             formData.append('nonce', rtClientAjax.create_nonce);
 
-            try {
-                const response = await fetch(rtClientAjax.ajax_url, { method:'POST', body: formData });
-                const result = await response.json();
+            // Debug: log form data
+            for (let [key, value] of formData.entries()) {
+                console.log('Form Data:', key + ': ' + value);
+            }
 
+            try {
+                const response = await fetch(rtClientAjax.ajax_url, {
+                    method:'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                
                 if(result.success){
                     alert('Client created successfully!');
                     form.reset();
                     previewAvatar.src = rtClientAjax.default_avatar;
                     propertyIdInput.value = '';
                     createModal.style.display = 'none';
-
+                    
                     // Refresh clients table if function exists
                     if(typeof fetchClients === 'function'){
-                        fetchClients({ page:1, rows:10, search:'', bodyId:'addressBookBody', paginationId:'addressBookPagination' });
-                        fetchClients({ page:1, rows:10, search:'', bodyId:'activeClientsBody', paginationId:'activeClientsPagination' });
+                        fetchClients({
+                            page:1,
+                            rows:10,
+                            search:'',
+                            bodyId:'addressBookBody',
+                            paginationId:'addressBookPagination'
+                        });
                     }
                 } else {
                     alert('Error: ' + result.data);
                 }
             } catch(err){
                 alert('Network error: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Client';
             }
         });
     }

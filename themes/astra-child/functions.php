@@ -36,6 +36,64 @@ foreach ($includes as $file) {
 }
 
 // ======================
+// Enqueue JS & Localize AJAX for Address Book
+// ======================
+function rt_enqueue_client_scripts() {
+    // Get current tab (if set)
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
+    
+    // Load scripts only on Realtor Dashboard > Address Book tab
+    $is_allowed_page = is_page('realtor-dashboard') || is_page('admin-dashboard');
+    $is_allowed_tab = in_array($current_tab, ['address-book', 'clients', '']);
+
+    if ( $is_allowed_page && $is_allowed_tab ) {
+        // Enqueue SheetJS (for XLSX export/import)
+        wp_enqueue_script(
+            'sheetjs',
+            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+            [],
+            '0.18.5',
+            true
+        );
+
+        // Enqueue custom JS file for Address Book
+        $script_path = get_stylesheet_directory() . '/assets/js/rt-ab-client.js';
+        $script_uri = get_stylesheet_directory_uri() . '/assets/js/rt-ab-client.js';
+        
+        wp_enqueue_script(
+            'rt-ab-client-js',
+            $script_uri,
+            ['jquery', 'sheetjs'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        // Localize AJAX variables & nonces
+        wp_localize_script('rt-ab-client-js', 'rtClientAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'create_nonce' => wp_create_nonce('rt_client_create_nonce'),
+            'edit_nonce' => wp_create_nonce('rt_client_edit_nonce'),
+            'delete_nonce' => wp_create_nonce('rt_client_delete_nonce'),
+            'export_nonce' => wp_create_nonce('rt_client_export_nonce'),
+            'import_nonce' => wp_create_nonce('rt_client_import_nonce'),
+            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
+            'default_property_image' => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg',
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_client_scripts');
+
+// ======================
+// Register AJAX Handlers
+// ======================
+add_action('wp_ajax_fetch_clients_ajax', 'rt_fetch_clients_ajax');
+add_action('wp_ajax_fetch_realtor_client_ajax','rt_fetch_realtor_client_ajax');
+add_action('wp_ajax_create_realtor_client_ajax','rt_create_realtor_client_ajax');
+add_action('wp_ajax_update_realtor_client_ajax','rt_update_realtor_client_ajax');
+add_action('wp_ajax_delete_realtor_client_ajax','rt_delete_realtor_client_ajax');
+add_action('wp_ajax_search_properties','rt_search_properties_ajax');
+
+// ======================
 // Enqueue JS & Localize AJAX for Realtors
 // ======================
 function rt_enqueue_realtor_scripts() {
@@ -144,64 +202,6 @@ add_action('wp_ajax_create_dashboard_lead_ajax', 'rt_create_dashboard_lead_ajax'
 add_action('wp_ajax_update_dashboard_lead_ajax', 'rt_update_dashboard_lead_ajax');
 add_action('wp_ajax_delete_dashboard_lead_ajax', 'rt_delete_dashboard_lead_ajax');
 add_action('wp_ajax_convert_lead_to_client_ajax', 'rt_convert_lead_to_client_ajax');
-
-// ======================
-// Enqueue JS & Localize AJAX for Address Book
-// ======================
-function rt_enqueue_client_scripts() {
-    // Get current tab (if set)
-    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
-
-    // Load scripts only on Realtor Dashboard > Address Book tab
-    $is_allowed_page = is_page('realtor-dashboard') || is_page('admin-dashboard');
-    $is_allowed_tab = in_array($current_tab, ['address-book', 'clients', '']);
-
-    if ( $is_allowed_page && $is_allowed_tab ) {
-
-        // Enqueue SheetJS (for XLSX export/import)
-        wp_enqueue_script(
-            'sheetjs',
-            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
-            [],
-            '0.18.5',
-            true
-        );
-
-        // Enqueue custom JS file for Address Book
-        $script_path = get_stylesheet_directory() . '/assets/js/rt-ab-client.js';
-        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ab-client.js';
-
-        wp_enqueue_script(
-            'rt-ab-client-js',
-            $script_uri,
-            ['jquery', 'sheetjs'],
-            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
-            true
-        );
-
-        // Localize AJAX variables & nonces
-        wp_localize_script('rt-ab-client-js', 'rtClientAjax', [
-            'ajax_url'                => admin_url('admin-ajax.php'),
-            'create_nonce'            => wp_create_nonce('cl_client_create_nonce'),
-            'edit_nonce'              => wp_create_nonce('cl_client_edit_nonce'),
-            'delete_nonce'            => wp_create_nonce('cl_client_delete_nonce'),
-            'export_nonce'            => wp_create_nonce('cl_client_export_nonce'),
-            'import_nonce'            => wp_create_nonce('cl_client_import_nonce'),
-            'default_avatar'          => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
-            'default_property_image'  => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg',
-        ]);
-    }
-}
-add_action('wp_enqueue_scripts', 'rt_enqueue_client_scripts');
-
-// ======================
-// Register AJAX Handlers
-// ======================
-add_action('wp_ajax_fetch_clients_ajax', 'rt_fetch_clients_ajax');
-add_action('wp_ajax_fetch_realtor_client_ajax','rt_fetch_realtor_client_ajax');
-add_action('wp_ajax_create_realtor_client_ajax','rt_create_realtor_client_ajax');
-add_action('wp_ajax_update_realtor_client_ajax','rt_update_realtor_client_ajax');
-add_action('wp_ajax_delete_realtor_client_ajax','rt_delete_realtor_client_ajax');
 
 // ======================
 // Conditional Script Enqueues
