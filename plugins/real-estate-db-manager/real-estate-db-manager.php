@@ -63,21 +63,21 @@ function redbm_create_tables() {
         PRIMARY KEY (client_id)
     ) $charset_collate;";
 
-    // Properties table
-    $tables[] = "CREATE TABLE {$wpdb->prefix}properties (
-        property_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-        realtor_id BIGINT(20) UNSIGNED NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        description TEXT,
-        price DECIMAL(12,2) NOT NULL,
-        address VARCHAR(255),
-        city VARCHAR(100),
-        state VARCHAR(100),
-        zip VARCHAR(20),
-        status ENUM('available','pending','sold') DEFAULT 'available',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (property_id),
-        KEY realtor_id (realtor_id)
+    // Rentcast Properties table
+    $tables[] = "CREATE TABLE {$wpdb->prefix}rentcast_properties (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        listing_id VARCHAR(255) NOT NULL,
+        address VARCHAR(255) NULL,
+        city VARCHAR(100) NULL,
+        state VARCHAR(50) NULL,
+        zip VARCHAR(20) NULL,
+        bedrooms INT(11) NULL,
+        bathrooms INT(11) NULL,
+        sqft INT(11) NULL,
+        price VARCHAR(50) NULL,
+        image_url VARCHAR(255) NULL,
+        PRIMARY KEY (id),
+        KEY listing_id (listing_id)
     ) $charset_collate;";
 
     // Saved Properties table (client ↔ property relation)

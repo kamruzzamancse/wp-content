@@ -74,59 +74,69 @@ $image_url = $upload_dir['baseurl'];
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
+
     const clientModal = document.getElementById('clientDetailsModal');
-    const closeBtn = document.getElementById('closeClientDetailsModal');
-    const uploadBtn = clientModal.querySelector('.cld-upload-btn');
+    const closeModalBtn = document.getElementById('closeClientDetailsModal');
 
     // Close modal
-    if(closeBtn && clientModal){
-        closeBtn.addEventListener('click', () => clientModal.style.display='none');
-        clientModal.addEventListener('click', e => { if(e.target === clientModal) clientModal.style.display='none'; });
-    }
+    closeModalBtn.addEventListener('click', () => clientModal.style.display = 'none');
+    clientModal.addEventListener('click', e => { if (e.target === clientModal) clientModal.style.display = 'none'; });
 
-    // Open upload modal and hide client modal
-    if(uploadBtn){
-        const uploadModal = document.getElementById('cl-upload-document-modal');
-        uploadBtn.addEventListener('click', function(){
-            if(clientModal) clientModal.style.display='none';
-            if(uploadModal) uploadModal.classList.add('show');
-        });
-    }
+    // Function to open modal and populate data
+    window.openClientDetailsModal = async function(clientId) {
+        if (!clientId) return;
+
+        clientModal.style.display = 'flex';
+
+        const formData = new FormData();
+        formData.append('action', 'fetch_realtor_client_ajax');
+        formData.append('nonce', rtClientAjax.edit_nonce);
+        formData.append('client_id', clientId);
+
+        try {
+            const result = await ajaxFetch(formData);
+
+            if (result.success) {
+                const client = result.data;
+
+                // Profile info
+                document.getElementById('clientAvatar').src = client.profile_picture || rtClientAjax.default_avatar;
+                document.getElementById('clientName').textContent = client.full_name || '—';
+                document.getElementById('clientCompany').textContent = client.company || '—';
+
+                // Table cells
+                document.getElementById('clientNameCell').textContent = client.full_name || '—';
+                document.getElementById('clientEmailCell').textContent = client.email || '—';
+                document.getElementById('clientPhoneCell').textContent = client.phone || '—';
+                document.getElementById('clientNotesCell').textContent = client.note || '—';
+                document.getElementById('clientDobCell').textContent = client.dob || '—';
+                document.getElementById('clientHouseClosingCell').textContent = client.house_closing_date || '—';
+
+                // Property info
+                document.getElementById('clientPropertyImage').src = client.profile_picture || rtClientAjax.default_property_image;
+                document.getElementById('clientPropertyTitle').textContent = client.property_title || 'Property Title';
+                document.getElementById('clientPropertyPrice').textContent = client.property_price ? '$' + client.property_price : '$0';
+                document.getElementById('clientPropertyLocation').innerHTML = '<span class="dashicons dashicons-location"></span> ' + (client.property_location || 'Location');
+
+                // Clear and populate gallery if available
+                const gallery = document.getElementById('clientPropertyGallery');
+                gallery.innerHTML = '';
+                if (client.property_gallery && client.property_gallery.length) {
+                    client.property_gallery.forEach(imgUrl => {
+                        const img = document.createElement('img');
+                        img.src = imgUrl;
+                        img.classList.add('gallery-item');
+                        gallery.appendChild(img);
+                    });
+                }
+
+            } else {
+                console.error('Failed to fetch client:', result.data?.message || result.data);
+            }
+        } catch (err) {
+            console.error('Error fetching client data:', err);
+        }
+    };
 });
-
-// Function to populate client modal dynamically
-function populateClientDetails(client) {
-    const modal = document.getElementById('clientDetailsModal');
-    if(!modal) return;
-
-    modal.querySelector('#clientAvatar').src = client.profile_picture || '<?php echo esc_url($image_url . "/2025/08/client-photo.jpg"); ?>';
-    modal.querySelector('#clientName').textContent = client.full_name || '';
-    modal.querySelector('#clientCompany').textContent = client.company_name || '';
-    modal.querySelector('#clientNameCell').textContent = client.full_name || '';
-    modal.querySelector('#clientEmailCell').textContent = client.email || '';
-    modal.querySelector('#clientPhoneCell').textContent = client.phone || '';
-    modal.querySelector('#clientNotesCell').textContent = client.note || '';
-    modal.querySelector('#clientDobCell').textContent = client.date_of_birth || '';
-    modal.querySelector('#clientHouseClosingCell').textContent = client.house_closing_date || '';
-
-    // Property info
-    modal.querySelector('#clientPropertyImage').src = client.property_image || '<?php echo esc_url($image_url . "/2025/08/lakeview-standard.png"); ?>';
-    modal.querySelector('#clientPropertyTitle').textContent = client.property_title || '';
-    modal.querySelector('#clientPropertyPrice').textContent = client.property_price || '';
-    modal.querySelector('#clientPropertyLocation').textContent = client.property_location || '';
-    
-    // Optionally populate gallery
-    const gallery = modal.querySelector('#clientPropertyGallery');
-    gallery.innerHTML = '';
-    if(client.property_gallery && client.property_gallery.length){
-        client.property_gallery.forEach(img => {
-            const image = document.createElement('img');
-            image.src = img;
-            gallery.appendChild(image);
-        });
-    }
-
-    modal.style.display = 'flex';
-}
 </script>

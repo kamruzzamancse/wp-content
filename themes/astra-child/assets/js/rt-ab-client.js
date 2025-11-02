@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // ---------------------------
-    // Create client - UPDATED VERSION
+    // Create client
     // ---------------------------
     const createForm = document.getElementById('createRealtorClientForm');
     if (createForm) {
@@ -131,27 +131,14 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.textContent = 'Creating...';
 
             const formData = new FormData(this);
-            
-            // Explicitly add properties_id to ensure it's sent
             const propertyId = document.getElementById('create_realtor_client_property_id').value;
             formData.append('properties_id', propertyId);
             formData.append('realtor_client_property_id', propertyId);
-            
             formData.append('action', 'create_realtor_client_ajax');
             formData.append('nonce', rtClientAjax.create_nonce);
 
-            // Debug: log form data
-            console.log('=== FORM SUBMISSION DATA ===');
-            for (let [key, value] of formData.entries()) {
-                console.log(key + ': ' + value);
-            }
-
             try {
-                const response = await fetch(rtClientAjax.ajax_url, {
-                    method: 'POST',
-                    body: formData
-                });
-                
+                const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
                 const result = await response.json();
                 
                 if (result.success) {
@@ -161,17 +148,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('create_realtor_client_property_id').value = '';
                     document.getElementById('rmRealtorClientCreateModal').style.display = 'none';
                     
-                    // Refresh clients table
                     setTimeout(() => {
-                        if(typeof fetchClients === 'function') {
-                            fetchClients({
-                                page: 1,
-                                rows: parseInt(document.getElementById('addressBookRows').value, 10),
-                                search: document.getElementById('addressBookSearch').value.trim(),
-                                bodyId: 'addressBookBody',
-                                paginationId: 'addressBookPagination'
-                            });
-                        }
+                        fetchClients({
+                            page: 1,
+                            rows: parseInt(document.getElementById('addressBookRows').value, 10),
+                            search: document.getElementById('addressBookSearch').value.trim(),
+                            bodyId: 'addressBookBody',
+                            paginationId: 'addressBookPagination'
+                        });
                     }, 500);
                 } else {
                     showNotification('Error: ' + result.data, 'error');
@@ -187,57 +171,57 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ---------------------------
-    // Property search integration for Create modal ONLY
+    // Property search integration
     // ---------------------------
     function setupPropertySearch(inputEl, hiddenIdEl, suggestionsEl, nonce) {
-        function debounce(func, delay = 300) {
-            let timer;
-            return function (...args) {
-                clearTimeout(timer);
-                timer = setTimeout(() => func.apply(this, args), delay);
-            };
-        }
+        if (!inputEl || !hiddenIdEl || !suggestionsEl) return;
 
-        // Keyup: fetch suggestions
+        // Input event: search as user types
         inputEl.addEventListener('input', debounce(function () {
             const keyword = this.value.trim();
             if (keyword.length < 2) {
                 suggestionsEl.style.display = 'none';
+                suggestionsEl.innerHTML = '';
+                hiddenIdEl.value = ''; // reset ID if user clears input
                 return;
             }
 
-            const data = new FormData();
-            data.append('action', 'search_properties');
-            data.append('keyword', keyword);
-            data.append('nonce', nonce);
+            const formData = new FormData();
+            formData.append('action', 'search_properties');
+            formData.append('keyword', keyword);
+            formData.append('nonce', nonce);
 
-            fetch(rtClientAjax.ajax_url, {
-                method: 'POST',
-                body: data
-            })
-            .then(res => res.json())
-            .then(result => {
-                if (result.success && result.data.html) {
-                    suggestionsEl.innerHTML = result.data.html;
-                    suggestionsEl.style.display = 'block';
-                } else {
-                    suggestionsEl.innerHTML = '<div class="property-suggestion">No results found</div>';
-                    suggestionsEl.style.display = 'block';
-                }
-            });
+            fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success && result.data.html) {
+                        suggestionsEl.innerHTML = result.data.html;
+                        suggestionsEl.style.display = 'block';
+                    } else {
+                        suggestionsEl.innerHTML = '<div class="property-suggestion">No results found</div>';
+                        suggestionsEl.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error('Property search error:', err);
+                    suggestionsEl.style.display = 'none';
+                });
         }, 300));
 
         // Click on suggestion
         suggestionsEl.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('property-suggestion')) {
-                inputEl.value = e.target.textContent;
-                hiddenIdEl.value = e.target.dataset.id;
-                suggestionsEl.style.display = 'none';
-                console.log('Property selected - ID:', e.target.dataset.id, 'Address:', e.target.textContent);
+                const id = e.target.dataset.id;
+                if (id && !isNaN(id)) {
+                    hiddenIdEl.value = parseInt(id, 10); // important: force numeric ID
+                    inputEl.value = e.target.textContent;
+                    suggestionsEl.style.display = 'none';
+                    console.log('Property selected:', inputEl.value, 'ID:', hiddenIdEl.value); // debug
+                }
             }
         });
 
-        // Hide suggestions on click outside
+        // Close suggestions if clicked outside
         document.addEventListener('click', function (e) {
             if (!suggestionsEl.contains(e.target) && e.target !== inputEl) {
                 suggestionsEl.style.display = 'none';
@@ -245,24 +229,66 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Initialize Create modal property search
+    // Create Modal
     const createPropertyInput = document.getElementById('create_realtor_client_property');
     const createPropertyId = document.getElementById('create_realtor_client_property_id');
     const createSuggestionsBox = document.getElementById('property_suggestions');
-
     if (createPropertyInput && createPropertyId && createSuggestionsBox) {
         setupPropertySearch(createPropertyInput, createPropertyId, createSuggestionsBox, rtClientAjax.create_nonce);
+    }
+
+    // Edit Modal
+    const editPropertyInput = document.getElementById('edit_realtor_client_property');
+    const editPropertyIdInput = document.getElementById('edit_realtor_client_property_id');
+    const editSuggestionsBox = document.getElementById('edit_property_suggestions');
+
+    if (editPropertyInput && editPropertyIdInput && editSuggestionsBox) {
+        setupPropertySearch(editPropertyInput, editPropertyIdInput, editSuggestionsBox, rtClientAjax.edit_nonce);
     }
 
     // ---------------------------
     // Edit client
     // ---------------------------
+    let isUpdating = false; // Prevent double submission
+
+    async function ajaxFetch(formData) {
+        try {
+            const response = await fetch(rtClientAjax.ajax_url, {
+                method: 'POST',
+                body: formData
+            });
+            return await response.json();
+        } catch (err) {
+            return { success: false, data: err.message };
+        }
+    }
+
+    function showNotification(message, type = 'success') {
+        document.querySelectorAll('.client-notification').forEach(n => n.remove());
+        const notification = document.createElement('div');
+        notification.className = `client-notification ${type}`;
+        notification.style.cssText = `
+            position: fixed; top: 20px; right: 20px; 
+            padding: 15px 20px; background: ${type === 'success' ? '#4CAF50' : '#f44336'}; 
+            color: white; border-radius: 4px; z-index: 10000;
+            font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+
     const editForm = document.getElementById('editRealtorClientForm');
     if (editForm) {
-        editForm.addEventListener('submit', async function(e) {
+        editForm.addEventListener('submit', async function (e) {
             e.preventDefault();
-            if (isProcessing) return;
-            isProcessing = true;
+
+            const hiddenPropertyId = document.getElementById('edit_realtor_client_property_id').value;
+
+            if (!hiddenPropertyId || hiddenPropertyId === '0') {
+                alert('Please select a valid property from the suggestions.');
+                return;
+            }
 
             const submitBtn = editForm.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
@@ -273,26 +299,44 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('nonce', rtClientAjax.edit_nonce);
 
             try {
-                const result = await ajaxFetch(formData);
+                const res = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+                const result = await res.json();
+
                 if (result.success) {
                     showNotification('Client updated successfully!');
                     document.getElementById('rmRealtorClientEditModal').style.display = 'none';
-                    await fetchClients({
-                        page: 1,
-                        rows: parseInt(document.getElementById('addressBookRows').value, 10),
-                        search: document.getElementById('addressBookSearch').value.trim(),
-                        bodyId: 'addressBookBody',
-                        paginationId: 'addressBookPagination'
-                    });
+
+                    if (typeof fetchClients === 'function') {
+                        fetchClients({
+                            page: 1,
+                            rows: parseInt(document.getElementById('addressBookRows').value, 10),
+                            search: document.getElementById('addressBookSearch').value.trim(),
+                            bodyId: 'addressBookBody',
+                            paginationId: 'addressBookPagination'
+                        });
+                    }
                 } else {
-                    showNotification('Error: ' + result.data, 'error');
+                    showNotification('Update failed: ' + result.data, 'error');
                 }
-            } catch (error) {
-                showNotification('Network error. Please try again.', 'error');
+            } catch (err) {
+                showNotification('Network error: ' + err.message, 'error');
             } finally {
-                isProcessing = false;
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Update Client';
+            }
+        });
+    }
+
+    // Optional: preview image change in edit modal
+    const editProfileInput = document.getElementById('edit_realtor_client_profile_picture');
+    const editPreviewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
+    if (editProfileInput && editPreviewAvatar) {
+        editProfileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = e => editPreviewAvatar.src = e.target.result;
+                reader.readAsDataURL(file);
             }
         });
     }
@@ -344,6 +388,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const tbody = document.getElementById(bodyId);
         if (!tbody) return;
 
+        // Edit
         tbody.querySelectorAll('.editClientBtn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const row = this.closest('tr');
@@ -360,7 +405,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 const result = await ajaxFetch(formData);
 
-                // When filling edit modal with client info
                 if(result.success){
                     const client = result.data;
                     document.getElementById('edit_realtor_client_id').value = client.client_id;
@@ -370,15 +414,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('edit_realtor_client_notes').value = client.note;
                     document.getElementById('edit_realtor_client_status').value = client.status;
                     document.getElementById('editRealtorClientPreviewAvatar').src = client.profile_picture || rtClientAjax.default_avatar;
-                    
-                    // Property info
-                    document.getElementById('edit_realtor_client_property').value = '';
-                    document.getElementById('edit_realtor_client_property_id').value = client.property_id || '';
+                    document.getElementById('edit_realtor_client_property').value = client.property_title || '';
+                    document.getElementById('edit_realtor_client_property_id').value = client.properties_id || '';
                     document.getElementById('previousPropertyName').textContent = client.property_title || 'No property selected';
                 }
             });
         });
 
+        // Delete
         tbody.querySelectorAll('.deleteClientBtn').forEach(btn => {
             btn.addEventListener('click', async function () {
                 const row = this.closest('tr');

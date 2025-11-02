@@ -1,60 +1,49 @@
-[30-Oct-2025 11:19:24 UTC] === IMPORT REALTORS DEBUG START ===
-[30-Oct-2025 11:23:00 UTC] === IMPORT REALTORS DEBUG START ===
-[30-Oct-2025 11:23:00 UTC] File uploaded: realtors-export-2025-10-30 (2).csv
-[30-Oct-2025 11:23:00 UTC] File extension: csv
-[30-Oct-2025 11:23:00 UTC] No valid data found in CSV file
-[30-Oct-2025 11:24:51 UTC] === IMPORT REALTORS DEBUG START ===
-[30-Oct-2025 11:24:51 UTC] File uploaded: realtors-export-2025-10-30 (2).csv
-[30-Oct-2025 11:24:51 UTC] File extension: csv
-[30-Oct-2025 11:24:51 UTC] No valid data found in CSV file
-[30-Oct-2025 12:21:00 UTC] === IMPORT REALTORS DEBUG START ===
-[30-Oct-2025 12:21:00 UTC] File uploaded: clients.csv
-[30-Oct-2025 12:21:00 UTC] File extension: csv
-[30-Oct-2025 12:21:00 UTC] Import finished - Inserted: 4, Updated: 0, Errors: 0
-[31-Oct-2025 12:40:40 UTC] PHP Parse error:  syntax error, unexpected token "<", expecting end of file in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php on line 77
-[31-Oct-2025 12:40:43 UTC] PHP Parse error:  syntax error, unexpected token "<", expecting end of file in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php on line 77
-[01-Nov-2025 07:10:13 UTC] CREATE CLIENT - POST DATA: Array
+[02-Nov-2025 08:38:53 UTC] Updating client ID: 63, properties_id: '0'
+[02-Nov-2025 08:38:53 UTC] Updating client ID: 63, properties_id: '0'
+[02-Nov-2025 08:53:28 UTC] Updating client ID: 63, properties_id: '0'
+[02-Nov-2025 08:53:28 UTC] Updating client ID: 63, properties_id: '0'
+[02-Nov-2025 08:54:37 UTC] CREATE CLIENT - POST DATA: Array
 (
-    [realtor_client_full_name] => fanush
-    [realtor_client_email] => fanush@gmail.com
-    [realtor_client_phone] => 01745896635
+    [realtor_client_full_name] => liakat
+    [realtor_client_email] => liakat@gmail.com
+    [realtor_client_phone] => 01258963325
     [preferred_location] => Dhaka
     [realtor_client_note] => Nei
     [realtor_client_status] => lead
-    [realtor_client_property] => 3455 Westchester Square Blvd, # 1, Orlando, FL 32835
-    [properties_id] => 18
-    [realtor_client_property_id] => 18
+    [realtor_client_property] => 6512 Swissco Dr, Apt 1425, Orlando, FL 32822
+    [properties_id] => 17
+    [realtor_client_property_id] => 17
     [action] => create_realtor_client_ajax
-    [nonce] => 65df9acb2c
+    [nonce] => a9ad5f60ae
 )
 
-[01-Nov-2025 07:10:13 UTC] CREATE CLIENT - FILES DATA: Array
+[02-Nov-2025 08:54:37 UTC] CREATE CLIENT - FILES DATA: Array
 (
     [realtor_client_profile_picture] => Array
         (
-            [name] => 
-            [type] => 
-            [tmp_name] => 
-            [error] => 4
-            [size] => 0
+            [name] => R.jpg
+            [type] => image/jpeg
+            [tmp_name] => C:\xampp\tmp\phpB475.tmp
+            [error] => 0
+            [size] => 470652
         )
 
 )
 
-[01-Nov-2025 07:10:13 UTC] Extracted Property ID: 18
-[01-Nov-2025 07:10:14 UTC] Inserting client data: Array
+[02-Nov-2025 08:54:37 UTC] Extracted Property ID: 17
+[02-Nov-2025 08:54:37 UTC] Inserting client data: Array
 (
-    [full_name] => fanush
-    [email] => fanush@gmail.com
-    [phone] => 01745896635
+    [full_name] => liakat
+    [email] => liakat@gmail.com
+    [phone] => 01258963325
     [preferred_location] => Dhaka
     [note] => Nei
     [status] => lead
-    [profile_picture] => 
-    [user_id] => 76
-    [properties_id] => 18
-    [created_at] => 2025-11-01 07:10:14
+    [profile_picture] => http://localhost/mary/wp-content/uploads/2025/11/R-1.jpg
+    [user_id] => 78
+    [properties_id] => 17
+    [created_at] => 2025-11-02 08:54:37
     [created_by] => 21
 )
 
-[01-Nov-2025 07:10:14 UTC] Client created successfully with ID: 62, Property ID: 18
+[02-Nov-2025 08:54:37 UTC] Client created successfully with ID: 64, Property ID: 17

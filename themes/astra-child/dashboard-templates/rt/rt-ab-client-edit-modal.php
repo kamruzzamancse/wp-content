@@ -10,7 +10,7 @@
             <form id="editRealtorClientForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" id="edit_realtor_client_id" name="realtor_client_id">
                 <!-- Keep property ID hidden -->
-                <input type="hidden" id="edit_realtor_client_property_id" name="realtor_client_property_id">
+                <input type="hidden" name="realtor_client_property_id" id="edit_realtor_client_property_id" value="">
 
                 <div class="edit-content-realtor-client">
                     <div class="edit-pic-container-realtor-client">
@@ -62,12 +62,21 @@
                             </select>
                         </div>
 
-                        <!-- Show previous property name only -->
-                        <div class="edit-detail-row-realtor-client">
-                            <label>Property:</label>
-                            <div id="previousPropertyName" style="margin-bottom:5px; font-weight:500; color:#333;">
-                                <?php if(!empty($client_property_name)) echo esc_html($client_property_name); ?>
-                            </div>
+                        <!-- Property selection with previous value -->
+                        <div class="edit-detail-row-realtor-client" style="position:relative;">
+                            <label for="edit_realtor_client_property">Property:</label>
+
+                            <!-- Show current property name (pre-filled by JS when opening modal) -->
+                            <input type="text" id="edit_realtor_client_property" name="realtor_client_property"
+                                placeholder="Search or update property address..."
+                                autocomplete="off" style="width:100%;"
+                            >
+
+                            <!-- Hidden property ID field -->
+                            <input type="hidden" name="realtor_client_property_id" id="edit_realtor_client_property_id" value="">
+
+                            <!-- Suggestions dropdown -->
+                            <div id="edit_property_suggestions" class="suggestions-box"></div>
                         </div>
 
                     </div>
@@ -196,4 +205,21 @@ document.addEventListener('DOMContentLoaded', function() {
 .edit-submit-btn-realtor-client { background-color:#0052cc; border:none; color:white; padding:10px 25px; font-size:1.1rem; border-radius:8px; cursor:pointer; transition:background-color 0.25s ease; }
 .edit-submit-btn-realtor-client:hover { background-color:#003d99; }
 @media (max-width:600px){ .edit-content-realtor-client { flex-direction:column; } .edit-pic-container-realtor-client { margin:0 auto 25px auto; } }
+
+#edit_property_suggestions {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    z-index: 9999;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+.property-suggestion {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+.property-suggestion:hover { background: #f0f0f0; }
+
 </style>

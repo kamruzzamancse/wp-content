@@ -58,7 +58,7 @@ add_action('wp_ajax_fetch_clients_ajax', 'rt_fetch_clients_ajax');
 // =====================
 // Fetch Single Client
 // =====================
-function rt_fetch_realtor_client_ajax() {
+/* function rt_fetch_realtor_client_ajax() {
     rt_client_current_user_required();
     check_ajax_referer('rt_client_edit_nonce', 'nonce'); // FIXED
 
@@ -72,7 +72,50 @@ function rt_fetch_realtor_client_ajax() {
     if (!$client) wp_send_json_error('Client not found');
     wp_send_json_success($client);
 }
+add_action('wp_ajax_fetch_realtor_client_ajax', 'rt_fetch_realtor_client_ajax'); */
+
+// ======================
+// Register AJAX Handlers
+// ======================
+add_action('wp_ajax_fetch_clients_ajax', 'rt_fetch_clients_ajax');
 add_action('wp_ajax_fetch_realtor_client_ajax', 'rt_fetch_realtor_client_ajax');
+add_action('wp_ajax_create_realtor_client_ajax', 'rt_create_realtor_client_ajax');
+add_action('wp_ajax_update_realtor_client_ajax', 'rt_update_realtor_client_ajax');
+add_action('wp_ajax_delete_realtor_client_ajax', 'rt_delete_realtor_client_ajax');
+add_action('wp_ajax_search_properties','rt_search_properties_ajax');
+
+
+// ======================
+// Fetch single client with property info
+// ======================
+function rt_fetch_realtor_client_ajax() {
+    check_ajax_referer('rt_client_edit_nonce', 'nonce');
+    global $wpdb;
+
+    $client_id = intval($_POST['client_id']);
+    if(!$client_id) wp_send_json_error('Invalid client ID');
+
+    $table_clients = $wpdb->prefix . 'clients';
+    $table_properties = $wpdb->prefix . 'rentcast_properties';
+
+    $client = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT c.*, 
+                    p.listing_id AS property_listing_id,
+                    p.address AS property_title
+             FROM $table_clients c
+             LEFT JOIN $table_properties p
+             ON c.properties_id = p.id
+             WHERE c.client_id = %d",
+            $client_id
+        ),
+        ARRAY_A
+    );
+
+    if(!$client) wp_send_json_error('Client not found');
+
+    wp_send_json_success($client);
+}
 
 // =====================
 // Create Client with Property
@@ -197,15 +240,17 @@ add_action('wp_ajax_create_realtor_client_ajax', 'rt_create_realtor_client_ajax'
 // =====================
 function rt_search_properties_ajax() {
     rt_client_current_user_required();
-    check_ajax_referer('rt_client_create_nonce', 'nonce'); // CORRECT
+
+    $nonce = $_POST['nonce'] ?? '';
+    if ( !wp_verify_nonce($nonce, 'rt_client_create_nonce') && !wp_verify_nonce($nonce, 'rt_client_edit_nonce') ) {
+        wp_send_json_error('Invalid nonce');
+    }
 
     global $wpdb;
     $keyword = sanitize_text_field($_POST['keyword'] ?? '');
     $table = $wpdb->prefix . 'rentcast_properties';
 
-    if (!$keyword) {
-        wp_send_json_error('No keyword provided');
-    }
+    if (!$keyword) wp_send_json_error('No keyword provided');
 
     $results = $wpdb->get_results($wpdb->prepare(
         "SELECT id, address FROM $table WHERE address LIKE %s LIMIT 10",
@@ -225,83 +270,78 @@ function rt_search_properties_ajax() {
 }
 add_action('wp_ajax_search_properties', 'rt_search_properties_ajax');
 
-// =====================
-// Update Client
-// =====================
-function rt_update_realtor_client_ajax() {
-    rt_client_current_user_required();
-    check_ajax_referer('rt_client_edit_nonce', 'nonce'); // FIXED
 
+// ======================
+// Update Client
+// ======================
+function rt_update_realtor_client_ajax() {
+    // Verify nonce
+    check_ajax_referer('rt_client_edit_nonce', 'nonce');
+    global $wpdb;
+
+    // Get client ID
     $client_id = intval($_POST['realtor_client_id'] ?? 0);
     if (!$client_id) wp_send_json_error('Missing client ID');
 
-    global $wpdb;
-    $table = $wpdb->prefix . 'clients';
-    $client = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table} WHERE client_id=%d", $client_id));
-    if (!$client) wp_send_json_error('Client not found');
+    $table_clients = $wpdb->prefix . 'clients';
 
-    $full_name = sanitize_text_field($_POST['realtor_client_full_name'] ?? '');
-    $email = sanitize_email($_POST['realtor_client_email'] ?? '');
-    $status = sanitize_text_field($_POST['realtor_client_status'] ?? '');
-    $phone = sanitize_text_field($_POST['realtor_client_phone'] ?? '');
-    $note = sanitize_textarea_field($_POST['realtor_client_note'] ?? '');
+    // Fetch existing client to preserve property ID if none submitted
+    $existing_client = $wpdb->get_row($wpdb->prepare(
+        "SELECT properties_id FROM {$table_clients} WHERE client_id=%d",
+        $client_id
+    ));
 
-    // Keep property ID from DB; ignore any submitted property_id from frontend
-    $property_id = $client->properties_id;
+    // Determine property ID: use submitted value if valid, otherwise keep DB value or NULL
+    $prop_input = $_POST['realtor_client_property_id'] ?? '';
+    $properties_id = ($prop_input !== '' && is_numeric($prop_input)) 
+        ? intval($prop_input) 
+        : ($existing_client->properties_id ?? null);
 
-    $profile_url = $client->profile_picture;
-    if (!empty($_FILES['realtor_client_profile_picture']['name'])) {
-        require_once(ABSPATH . 'wp-admin/includes/file.php');
-        require_once(ABSPATH . 'wp-admin/includes/media.php');
-        require_once(ABSPATH . 'wp-admin/includes/image.php');
-        $upload = wp_handle_upload($_FILES['realtor_client_profile_picture'], ['test_form' => false]);
-        if (isset($upload['error'])) wp_send_json_error('Upload Error: ' . $upload['error']);
-        $profile_url = esc_url_raw($upload['url']);
-    }
+    // Log for debugging
+    error_log("Updating client ID: $client_id, properties_id: " . var_export($properties_id, true));
 
-    if (!empty($client->user_id)) {
-        $user_data = [
-            'ID' => $client->user_id,
-            'user_email' => $email,
-            'user_login' => $email,
-            'display_name' => $full_name
-        ];
-        if (!empty($_POST['realtor_client_password'])) {
-            $user_data['user_pass'] = sanitize_text_field($_POST['realtor_client_password']);
-        }
-        wp_update_user($user_data);
-    }
-
+    // Prepare data array
     $data = [
-        'full_name' => $full_name,
-        'email' => $email,
-        'phone' => $phone,
-        'note' => $note,
-        'status' => $status,
-        'profile_picture' => $profile_url,
-        'properties_id' => $property_id, // ID unchanged
-        'updated_at' => current_time('mysql'),
-        'updated_by' => get_current_user_id()
+        'full_name'      => sanitize_text_field($_POST['realtor_client_full_name'] ?? ''),
+        'email'          => sanitize_email($_POST['realtor_client_email'] ?? ''),
+        'phone'          => sanitize_text_field($_POST['realtor_client_phone'] ?? ''),
+        'note'           => sanitize_textarea_field($_POST['realtor_client_note'] ?? ''),
+        'status'         => sanitize_text_field($_POST['realtor_client_status'] ?? ''),
+        'lead_status'    => sanitize_text_field($_POST['realtor_lead_status'] ?? ''),
+        'properties_id'  => $properties_id
     ];
 
-    $updated = $wpdb->update($table, $data, ['client_id' => $client_id]);
+    // Format for update
+    $format = ['%s','%s','%s','%s','%s','%s','%d'];
 
-    // Fetch property name for response
-    $property_name = '';
-    if ($property_id) {
-        $property_table = $wpdb->prefix . 'rentcast_properties';
-        $prop = $wpdb->get_row($wpdb->prepare("SELECT address FROM {$property_table} WHERE id=%d", $property_id));
-        if ($prop) $property_name = $prop->address;
+    // Update the client
+    $updated = $wpdb->update(
+        $table_clients,
+        $data,
+        ['client_id' => $client_id],
+        $format,
+        ['%d']
+    );
+
+    if ($updated === false) {
+        wp_send_json_error('Update failed');
     }
 
-    if ($updated !== false) {
-        wp_send_json_success([
-            'message' => 'Client updated successfully',
-            'property_title' => $property_name
-        ]);
+    // Fetch property title for frontend
+    $property_title = '';
+    if ($properties_id) {
+        $property = $wpdb->get_row(
+            $wpdb->prepare("SELECT address FROM {$wpdb->prefix}rentcast_properties WHERE id=%d", $properties_id),
+            ARRAY_A
+        );
+        if ($property) $property_title = $property['address'];
     }
 
-    wp_send_json_error('Could not update client or nothing changed');
+    // Return success
+    wp_send_json_success([
+        'message' => 'Client updated successfully',
+        'property_title' => $property_title
+    ]);
 }
 add_action('wp_ajax_update_realtor_client_ajax', 'rt_update_realtor_client_ajax');
 
