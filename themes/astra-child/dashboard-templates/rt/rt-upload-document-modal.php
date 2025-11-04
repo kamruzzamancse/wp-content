@@ -4,10 +4,12 @@
 <div id="cl-upload-document-modal" class="clup-modal-overlay">
   <div class="clup-box">
     <button type="button" class="clup-close-btn">&times;</button>
-    <h1 class="clup-title">Upload / Edit Document</h1>
+    <h1 class="clup-title">Upload Document</h1>
 
     <form id="upload-document-form" class="clup-form" enctype="multipart/form-data">
       <input type="hidden" name="document_id" value="">
+      <input type="hidden" name="client_id" value="">
+      <input type="hidden" name="properties_id" value="">
 
       <!-- Document Title -->
       <div class="clup-row-single">

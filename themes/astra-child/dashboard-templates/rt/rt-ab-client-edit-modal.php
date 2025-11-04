@@ -9,8 +9,8 @@
 
             <form id="editRealtorClientForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" id="edit_realtor_client_id" name="realtor_client_id">
-                <!-- Keep property ID hidden -->
-                <input type="hidden" name="realtor_client_property_id" id="edit_realtor_client_property_id" value="">
+                <!-- Property ID hidden field - UPDATED -->
+                <input type="hidden" name="properties_id" id="edit_realtor_client_property_id" value="">
 
                 <div class="edit-content-realtor-client">
                     <div class="edit-pic-container-realtor-client">
@@ -62,21 +62,26 @@
                             </select>
                         </div>
 
-                        <!-- Property selection with previous value -->
+                        <!-- Property selection with previous value - VERIFIED -->
                         <div class="edit-detail-row-realtor-client" style="position:relative;">
                             <label for="edit_realtor_client_property">Property:</label>
 
-                            <!-- Show current property name (pre-filled by JS when opening modal) -->
-                            <input type="text" id="edit_realtor_client_property" name="realtor_client_property"
+                            <!-- Show current property name -->
+                            <input type="text" id="edit_realtor_client_property" 
                                 placeholder="Search or update property address..."
                                 autocomplete="off" style="width:100%;"
                             >
 
-                            <!-- Hidden property ID field -->
-                            <input type="hidden" name="realtor_client_property_id" id="edit_realtor_client_property_id" value="">
+                            <!-- Hidden property ID field - MUST HAVE NAME="properties_id" -->
+                            <input type="hidden" id="edit_realtor_client_property_id" name="properties_id" value="">
 
                             <!-- Suggestions dropdown -->
                             <div id="edit_property_suggestions" class="suggestions-box"></div>
+                            
+                            <!-- Display current property info -->
+                            <div id="currentPropertyInfo" style="font-size: 12px; color: #666; margin-top: 5px;">
+                                Current: <span id="currentPropertyText">No property selected</span>
+                            </div>
                         </div>
 
                     </div>
@@ -99,6 +104,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('editRealtorClientForm');
     const statusSelect = document.getElementById('edit_realtor_client_status');
     const leadStatusRow = document.getElementById('leadStatusRow');
+    
+    // Property search elements
+    const propertyInput = document.getElementById('edit_realtor_client_property');
+    const propertyIdInput = document.getElementById('edit_realtor_client_property_id');
+    const suggestionsBox = document.getElementById('edit_property_suggestions');
+    const currentPropertyText = document.getElementById('currentPropertyText');
 
     // Close modal
     if(closeBtn && editModal){
@@ -125,30 +136,114 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Submit update via AJAX
+    // ==========================
+    // Property Search Functionality - UPDATED
+    // ==========================
+    function setupPropertySearch() {
+        if (!propertyInput || !propertyIdInput || !suggestionsBox) return;
+
+        // Input event: search as user types
+        propertyInput.addEventListener('input', debounce(function () {
+            const keyword = this.value.trim();
+            if (keyword.length < 2) {
+                suggestionsBox.style.display = 'none';
+                suggestionsBox.innerHTML = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('action', 'search_properties');
+            formData.append('keyword', keyword);
+            formData.append('nonce', rtClientAjax.edit_nonce);
+
+            fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(result => {
+                    if (result.success && result.data.html) {
+                        suggestionsBox.innerHTML = result.data.html;
+                        suggestionsBox.style.display = 'block';
+                    } else {
+                        suggestionsBox.innerHTML = '<div class="property-suggestion">No results found</div>';
+                        suggestionsBox.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error('Property search error:', err);
+                    suggestionsBox.style.display = 'none';
+                });
+        }, 300));
+
+        // Click on suggestion - UPDATED
+        suggestionsBox.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('property-suggestion')) {
+                const propertyId = e.target.dataset.id;
+                const propertyAddress = e.target.textContent;
+                
+                if (propertyId && !isNaN(propertyId)) {
+                    // Set the hidden property ID field
+                    propertyIdInput.value = parseInt(propertyId, 10);
+                    // Update the display text
+                    propertyInput.value = propertyAddress;
+                    // Update current property info
+                    currentPropertyText.textContent = propertyAddress;
+                    // Hide suggestions
+                    suggestionsBox.style.display = 'none';
+                    
+                    console.log('✅ Property selected - ID:', propertyIdInput.value, 'Address:', propertyAddress);
+                }
+            }
+        });
+
+        // Close suggestions if clicked outside
+        document.addEventListener('click', function (e) {
+            if (!suggestionsBox.contains(e.target) && e.target !== propertyInput) {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+    }
+
+    // Initialize property search
+    setupPropertySearch();
+
+    // Submit update via AJAX - FIXED VERSION
     if(form){
         form.addEventListener('submit', async function(e){
             e.preventDefault();
             const clientId = document.getElementById('edit_realtor_client_id').value;
             if(!clientId) return alert('Missing client ID');
 
-            const formData = new FormData(form);
-            formData.append('action', 'update_realtor_client_ajax');
-            formData.append('nonce', rtClientAjax.edit_nonce);
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
 
             try {
-                const res = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+                const formData = new FormData(form);
+                formData.append('action', 'update_realtor_client_ajax');
+                formData.append('nonce', rtClientAjax.edit_nonce);
+
+                // DEBUG: Check property ID before sending
+                const propertyIdInput = document.getElementById('edit_realtor_client_property_id');
+                console.log('🔍 DEBUG - Property ID before submit:', propertyIdInput.value);
+                console.log('🔍 DEBUG - Property Input value:', document.getElementById('edit_realtor_client_property').value);
+
+                // Manually ensure properties_id is included
+                if (propertyIdInput && propertyIdInput.value) {
+                    formData.append('properties_id', propertyIdInput.value);
+                    console.log('✅ Manually appended properties_id:', propertyIdInput.value);
+                }
+
+                const res = await fetch(rtClientAjax.ajax_url, { 
+                    method: 'POST', 
+                    body: formData 
+                });
+                
                 const result = await res.json();
 
                 if(result.success){
                     alert('Client updated successfully!');
                     editModal.style.display='none';
-
-                    // Update previous property display
-                    if(result.data.property_title){
-                        const prevPropertyDiv = document.getElementById('previousPropertyName');
-                        if(prevPropertyDiv) prevPropertyDiv.textContent = result.data.property_title;
-                    }
 
                     // Refresh client list if function exists
                     if(typeof fetchClients === 'function'){
@@ -158,11 +253,89 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Error: ' + result.data);
                 }
             } catch(err){
+                console.error('Update error:', err);
                 alert('Network error: ' + err.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
             }
         });
     }
+
+    // Debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
 });
+
+// Global function to open edit modal with client data
+window.openEditClientModal = async function(clientId) {
+    const modal = document.getElementById('rmRealtorClientEditModal');
+    if (!modal) return;
+
+    modal.style.display = 'flex';
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'fetch_realtor_client_ajax');
+        formData.append('nonce', rtClientAjax.edit_nonce);
+        formData.append('client_id', clientId);
+
+        const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+        const result = await response.json();
+
+        if(result.success){
+            const client = result.data;
+            
+            // Fill form fields
+            document.getElementById('edit_realtor_client_id').value = client.client_id;
+            document.getElementById('edit_realtor_client_full_name').value = client.full_name;
+            document.getElementById('edit_realtor_client_email').value = client.email;
+            document.getElementById('edit_realtor_client_phone').value = client.phone;
+            document.getElementById('edit_realtor_client_notes').value = client.note;
+            document.getElementById('edit_realtor_client_status').value = client.status;
+            
+            // Set profile picture
+            const previewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
+            previewAvatar.src = client.profile_picture || '<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>';
+            
+            // Set property fields - UPDATED
+            const propertyInput = document.getElementById('edit_realtor_client_property');
+            const propertyIdInput = document.getElementById('edit_realtor_client_property_id');
+            const currentPropertyText = document.getElementById('currentPropertyText');
+            
+            if (client.property_title) {
+                propertyInput.value = client.property_title;
+                propertyIdInput.value = client.properties_id || '';
+                currentPropertyText.textContent = client.property_title;
+            } else {
+                propertyInput.value = '';
+                propertyIdInput.value = '';
+                currentPropertyText.textContent = 'No property selected';
+            }
+            
+            // Show lead status if applicable
+            const leadStatusRow = document.getElementById('leadStatusRow');
+            if (leadStatusRow) {
+                leadStatusRow.style.display = (client.status === 'lead') ? 'flex' : 'none';
+            }
+            if (client.lead_status) {
+                document.getElementById('edit_realtor_lead_status').value = client.lead_status;
+            }
+
+            console.log('✅ Edit modal populated successfully');
+            console.log('🏠 Property ID set to:', propertyIdInput.value);
+        } else {
+            console.error('❌ Failed to load client data for editing');
+        }
+    } catch (error) {
+        console.error('❌ Error loading client data for editing:', error);
+    }
+};
 </script>
 
 <style>

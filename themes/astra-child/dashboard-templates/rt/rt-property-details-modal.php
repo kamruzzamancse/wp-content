@@ -1,10 +1,10 @@
-<!-- Property Details Modal -->
-<?php 
-    $upload_dir = wp_upload_dir(); 
-    $image_url = $upload_dir['baseurl']; 
+<?php
+// URL to the child theme's assets/images folder
+$image_url = get_stylesheet_directory_uri();
 ?>
 
-<div id="propertyDetailsModal" class="property-modal">
+
+<div id="propertyDetailsModal" class="property-modal" style="display: none;">
     <div class="property-modal-content">
         <span class="close-property-modal">&times;</span>
 
@@ -12,109 +12,184 @@
             <div class="left-column">
                 <!-- Image Gallery -->
                 <div class="image-gallery-container">
-                    <div class="thumbnail-gallery">
-                        <img src="<?php echo esc_url( $image_url . '/2025/08/lakeview-standard-4.png' ); ?>" 
-                            onclick="changeImage(this.src, this)" 
-                            alt="Gallery Image 1">
-                        <img src="<?php echo esc_url( $image_url . '/2025/08/lakeview-standard-5.png' ); ?>" 
-                            onclick="changeImage(this.src, this)" 
-                            alt="Gallery Image 2">
-                        <img src="<?php echo esc_url( $image_url . '/2025/08/lakeview-standard-6.png' ); ?>" 
-                            onclick="changeImage(this.src, this)" 
-                            alt="Gallery Image 3">
+                    <div class="thumbnail-gallery" id="propertyGalleryThumbnails">
+                        <!-- Thumbnails will be dynamically added here -->
                     </div>
                     <div class="main-image-container">
-                        <img src="<?php echo esc_url( $image_url . '/2025/08/lakeview-standard.png' ); ?>" 
+                        <img src="<?php echo esc_url($image_url . '/assets/images/default-property.png'); ?>" 
                             id="mainPreview" 
                             class="main-image" 
                             alt="Main Image">
                     </div>
                 </div>
+                
                 <!-- Property Header -->
                 <div class="property-header">
-                    <h1 class="property-title">Lakeview Premium Apartment</h1>
-                    <p class="property-description">
-                        Discover luxury living at the heart of the city with this stunning Lakeview Premium Apartment, 
-                        offering breathtaking views of the lake and a modern, high-end finish throughout.
+                    <h1 class="property-title" id="propertyTitle">Property Title</h1>
+                    <p class="property-description" id="propertyDescription">
+                        Property description will appear here
                     </p>
                 </div>
                 
                 <!-- Property Features Grid -->
                 <div class="property-features-modal">
-
                     <!-- Address -->
                     <div class="feature-box">
                         <div class="feature-label"><span class="dashicons dashicons-location-alt"></span> Address</div>
-                        <div class="feature-value">Le Marais, Paris, France</div>
+                        <div class="feature-value" id="propertyAddress">—</div>
                     </div>
 
                     <!-- Price -->
-                    <div class="feature-box" id="price-feature">
-                        <div class="feature-label">
-                            <span class="dashicons dashicons-admin-site-alt3"></span> Price
-                            <select id="price-type-select" style="margin-left:10px;">
-                                <option value="sales">Sales</option>
-                                <option value="rental">Rental</option>
-                            </select>
-                            <button class="edit-btn" title="Edit Price">&#9998;</button>
-                        </div>
-                        <div class="feature-value" id="price-value">450,000</div>
+                    <div class="feature-box">
+                        <div class="feature-label"><span class="dashicons dashicons-admin-site-alt3"></span> Price</div>
+                        <div class="feature-value" id="price-value">—</div>
                     </div>
 
                     <!-- Bedrooms -->
                     <div class="feature-box">
                         <div class="feature-label"><span class="dashicons dashicons-admin-home"></span> Bedrooms</div>
-                        <div class="feature-value">3</div>
+                        <div class="feature-value" id="propertyBedrooms">—</div>
                     </div>
 
                     <!-- Bathrooms -->
                     <div class="feature-box">
                         <div class="feature-label"><span class="dashicons dashicons-admin-users"></span> Bathrooms</div>
-                        <div class="feature-value">2</div>
-                    </div>
-
-                    <!-- Year Built -->
-                    <div class="feature-box">
-                        <div class="feature-label"><span class="dashicons dashicons-calendar-alt"></span> Year Built</div>
-                        <div class="feature-value">2023</div>
+                        <div class="feature-value" id="propertyBathrooms">—</div>
                     </div>
 
                     <!-- Square Footage -->
                     <div class="feature-box">
                         <div class="feature-label"><span class="dashicons dashicons-layout"></span> Square Footage</div>
-                        <div class="feature-value">140 m²</div>
+                        <div class="feature-value" id="propertySquareFootage">—</div>
                     </div>
 
+                    <!-- Property ID -->
+                    <div class="feature-box">
+                        <div class="feature-label"><span class="dashicons dashicons-admin-multisite"></span> Property ID</div>
+                        <div class="feature-value" id="propertyListingId">—</div>
+                    </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
 
+<script>
+(function() {
+    console.log('🏠 Property modal script initializing...');
+    
+    // Global function to open property modal
+    window.openPropertyDetailsModal = function(propertyData) {
+        console.log('🎯 openPropertyDetailsModal executed with:', propertyData);
+        
+        const modal = document.getElementById('propertyDetailsModal');
+        if (!modal) {
+            console.error('❌ Property modal element not found!');
+            return;
+        }
+
+        // Show modal
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflow = 'hidden';
+        
+        // Set property details
+        document.getElementById('propertyTitle').textContent = propertyData.property_title || 'No Title Available';
+        document.getElementById('propertyAddress').textContent = propertyData.property_location || '—';
+        document.getElementById('propertyBedrooms').textContent = propertyData.bedrooms || '—';
+        document.getElementById('propertyBathrooms').textContent = propertyData.bathrooms || '—';
+        document.getElementById('propertySquareFootage').textContent = propertyData.sqft ? numberWithCommas(propertyData.sqft) + ' sqft' : '—';
+        document.getElementById('price-value').textContent = propertyData.property_price ? '$' + numberWithCommas(propertyData.property_price) : '—';
+        document.getElementById('propertyListingId').textContent = propertyData.property_listing_id || '—';
+        
+        // Set description
+        const description = propertyData.property_description || 
+                           `This property located at ${propertyData.property_location || 'unknown location'} features ${propertyData.bedrooms || 'unknown'} bedrooms and ${propertyData.bathrooms || 'unknown'} bathrooms.`;
+        document.getElementById('propertyDescription').textContent = description;
+
+        // Handle gallery images
+        const galleryContainer = document.getElementById('propertyGalleryThumbnails');
+        const mainImage = document.getElementById('mainPreview');
+        
+        if (galleryContainer) galleryContainer.innerHTML = '';
+        
+        // Use property image if available
+        if (propertyData.property_image_url) {
+            mainImage.src = propertyData.property_image_url;
+            
+            // Create thumbnail
+            const thumb = document.createElement('img');
+            thumb.src = propertyData.property_image_url;
+            thumb.alt = 'Property image';
+            
+            // Add click event for thumbnail
+            thumb.addEventListener('click', function() {
+                mainImage.src = propertyData.property_image_url;
+                document.querySelectorAll('.thumbnail-gallery img').forEach(img => {
+                    img.classList.remove('active');
+                });
+                this.classList.add('active');
+            });
+            
+            galleryContainer.appendChild(thumb);
+        } else {
+            // Use default image
+            mainImage.src = '<?php echo esc_url($image_url . "/assets/images/default-property.png"); ?>';
+        }
+
+        // Activate first thumbnail
+        const firstThumbnail = document.querySelector('.thumbnail-gallery img');
+        if (firstThumbnail) {
+            firstThumbnail.classList.add('active');
+        }
+
+        console.log('✅ Property modal populated successfully');
+    };
+
+    // Utility function to format numbers
+    function numberWithCommas(x) {
+        if (!x) return '0';
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Close modal functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const modal = document.getElementById('propertyDetailsModal');
+        const closeBtn = document.querySelector('.close-property-modal');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function() {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+            });
+        }
+
+        // Close when clicking outside
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+            }
+        });
+
+        // Close with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && modal.style.display === 'block') {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+            }
+        });
+    });
+
+    console.log('✅ Property modal system ready');
+})();
+</script>
+
 <style>
 /* Property Details Modal Styles */
-
-.edit-btn {
-    margin-left: auto;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    color: #FFF;
-    transition: color 0.3s;
-    padding: 5px;
-}
-
-.edit-btn:hover {
-    color: #FFF;
-}
-
-#save-price-btn {
-    padding: 5px 10px;
-    color: #FFF!important;
-}
-
 .property-modal {
     display: none;
     position: fixed;
@@ -260,14 +335,13 @@
     color: #333;
 }
 
-.dashicons-location { color: #e74c3c; }
-.dashicons-admin-home { color: #3498db; }
-.dashicons-money { color: #2ecc71; }
+/* Dashicons colors */
+.dashicons-location-alt { color: #e74c3c; }
+.dashicons-admin-site-alt3 { color: #3498db; }
+.dashicons-admin-home { color: #2ecc71; }
 .dashicons-admin-users { color: #9b59b6; }
-.dashicons-admin-tools { color: #1abc9c; }
-.dashicons-randomize { color: #f39c12; }
-.dashicons-admin-site { color: #d35400; }
-.dashicons-car { color: #27ae60; }
+.dashicons-layout { color: #1abc9c; }
+.dashicons-admin-multisite { color: #f39c12; }
 
 @media (max-width: 1024px) {
     .property-features-modal {
@@ -289,80 +363,3 @@
     .property-modal-content { border-radius: 0; margin: 0; min-height: 100vh; max-height: 100vh; }
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('propertyDetailsModal');
-    const viewButtons = document.querySelectorAll('.view-details-btn');
-    const closeBtn = document.querySelector('.close-property-modal');
-
-    function changeImage(src, clickedElement) {
-        document.getElementById('mainPreview').src = src;
-        document.querySelectorAll('.thumbnail-gallery img').forEach(thumb => thumb.classList.remove('active'));
-        clickedElement.classList.add('active');
-    }
-
-    document.querySelectorAll('.thumbnail-gallery img').forEach(thumb => {
-        thumb.addEventListener('click', function() { changeImage(this.src, this); });
-    });
-
-    viewButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            document.documentElement.style.overflow = 'hidden';
-
-            const addressBookModal = document.getElementById('clientDetailsModal');
-            if (addressBookModal) addressBookModal.style.display = 'none';
-
-            const firstThumbnail = document.querySelector('.thumbnail-gallery img');
-            if (firstThumbnail && !firstThumbnail.classList.contains('active')) firstThumbnail.classList.add('active');
-        });
-    });
-
-    closeBtn.addEventListener('click', function() {
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-    });
-
-    window.addEventListener('click', function(event) {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-        }
-    });
-
-    // Price Editing for Sales & Rental
-    const priceFeature = document.getElementById('price-feature');
-    const editBtn = priceFeature.querySelector('.edit-btn');
-    const priceValueDiv = document.getElementById('price-value');
-    const priceSelect = document.getElementById('price-type-select');
-
-    let prices = { sales: 450000, rental: 1600 }; // default values
-
-    editBtn.addEventListener('click', function() {
-        const type = priceSelect.value;
-        const currentPrice = prices[type];
-        priceValueDiv.innerHTML = `
-            <input type="number" id="price-input" value="${currentPrice}" style="width: 100px; margin-right:5px;" />
-            <button id="save-price-btn">Save</button>
-        `;
-        const saveBtn = document.getElementById('save-price-btn');
-        const priceInput = document.getElementById('price-input');
-
-        saveBtn.addEventListener('click', function() {
-            const newPrice = priceInput.value;
-            prices[type] = newPrice;
-            priceValueDiv.textContent = newPrice;
-        });
-    });
-
-    // Update displayed price when switching type
-    priceSelect.addEventListener('change', function() {
-        const type = priceSelect.value;
-        priceValueDiv.textContent = prices[type];
-    });
-});
-</script>

@@ -28,6 +28,7 @@ $includes = [
     'rt-settings-support-ajax.php',
     'cl-settings-support-ajax.php',
     'rentcast-properties.php',
+    'rentcast-cron.php',
 ];
 
 foreach ($includes as $file) {
@@ -44,6 +45,7 @@ function rt_enqueue_client_scripts() {
     $is_allowed_tab = in_array($current_tab, ['address-book', 'clients', '']);
 
     if ($is_allowed_page && $is_allowed_tab) {
+
         // SheetJS for XLSX import/export
         wp_enqueue_script(
             'sheetjs',
@@ -55,25 +57,31 @@ function rt_enqueue_client_scripts() {
 
         // Custom Address Book JS
         $script_path = get_stylesheet_directory() . '/assets/js/rt-ab-client.js';
-        $script_uri = get_stylesheet_directory_uri() . '/assets/js/rt-ab-client.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ab-client.js';
+
         wp_enqueue_script(
             'rt-ab-client-js',
             $script_uri,
             ['jquery', 'sheetjs'],
-            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            file_exists($script_path) ? filemtime($script_path) : time(), // cache-busting for updates
             true
         );
 
-        // Localize AJAX variables & nonces
+        // Localize AJAX variables & default assets
         wp_localize_script('rt-ab-client-js', 'rtClientAjax', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'create_nonce' => wp_create_nonce('rt_client_create_nonce'),
-            'edit_nonce'   => wp_create_nonce('rt_client_edit_nonce'),
-            'delete_nonce' => wp_create_nonce('rt_client_delete_nonce'),
-            'export_nonce' => wp_create_nonce('rt_client_export_nonce'),
-            'import_nonce' => wp_create_nonce('rt_client_import_nonce'),
-            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
-            'default_property_image' => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg',
+            'ajax_url'               => admin_url('admin-ajax.php'),
+            'create_nonce'           => wp_create_nonce('rt_client_create_nonce'),
+            'edit_nonce'             => wp_create_nonce('rt_client_edit_nonce'),
+            'delete_nonce'           => wp_create_nonce('rt_client_delete_nonce'),
+            'export_nonce'           => wp_create_nonce('rt_client_export_nonce'),
+            'import_nonce'           => wp_create_nonce('rt_client_import_nonce'),
+
+            // Default fallbacks for missing images
+            'default_avatar'         => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
+            'default_property_image' => get_stylesheet_directory_uri() . '/assets/images/default-property.png',
+
+            // (Optional) Add log flag to help debugging
+            'debug' => true,
         ]);
     }
 }
@@ -87,7 +95,8 @@ add_action('wp_ajax_fetch_realtor_client_ajax', 'rt_fetch_realtor_client_ajax');
 add_action('wp_ajax_create_realtor_client_ajax', 'rt_create_realtor_client_ajax');
 add_action('wp_ajax_update_realtor_client_ajax', 'rt_update_realtor_client_ajax');
 add_action('wp_ajax_delete_realtor_client_ajax', 'rt_delete_realtor_client_ajax');
-add_action('wp_ajax_search_properties','rt_search_properties_ajax');
+add_action('wp_ajax_search_properties', 'rt_search_properties_ajax');
+
 
 // ======================
 // Enqueue JS & Localize AJAX for Realtors
@@ -127,7 +136,7 @@ function rt_enqueue_realtor_scripts() {
             'export_nonce'            => wp_create_nonce('am_realtor_export_nonce'),
             'import_nonce'            => wp_create_nonce('am_realtor_import_nonce'),
             'default_avatar'          => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
-            'default_property_image'  => get_stylesheet_directory_uri() . '/assets/images/default-property.jpg',
+            'default_property_image'  => get_stylesheet_directory_uri() . '/assets/images/default-property.png',
         ]);
     }
 }
@@ -246,7 +255,7 @@ function mdk_enqueue_profile_scripts() {
     // Address Book Page (Create + Edit + Delete Clients)
     // ------------------------------
 
-    if ($tab === 'documents') {
+    if ($tab === 'documents' || $tab === 'address-book') {
         // -------------------------
         // Document Type Script
         // -------------------------

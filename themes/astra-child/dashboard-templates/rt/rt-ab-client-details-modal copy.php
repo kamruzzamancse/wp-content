@@ -64,11 +64,8 @@ include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
 document.addEventListener("DOMContentLoaded", function () {
     console.log("Upload Document modal logic loaded");
 
-    let currentClientId = null;
-    let currentPropertiesId = null;
-
     // ==========================
-    // Open Upload Modal - UPDATED
+    // Open Upload Modal
     // ==========================
     document.body.addEventListener("click", function (e) {
         const btn = e.target.closest(".cld-upload-btn");
@@ -76,13 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         e.preventDefault();
         console.log("Upload Document button clicked");
-
-        // Store current client and properties IDs for form submission
-        if (window.currentClientData) {
-            currentClientId = window.currentClientData.client_id;
-            currentPropertiesId = window.currentClientData.properties_id;
-            console.log("📋 Setting IDs - Client:", currentClientId, "Properties:", currentPropertiesId);
-        }
 
         const modalId = btn.dataset.modal || "cl-upload-document-modal";
         const modal = document.getElementById(modalId);
@@ -152,51 +142,31 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // ==========================
-    // Save Button (Form Submit) - UPDATED
+    // Save Button (Form Submit)
     // ==========================
     const uploadForm = document.getElementById("upload-document-form");
     if (uploadForm) {
         uploadForm.addEventListener("submit", function (e) {
             e.preventDefault();
 
-            console.log("💾 Save clicked - Client ID:", currentClientId, "Properties ID:", currentPropertiesId);
+            console.log("Save clicked (form submitted)");
+            // এখানে AJAX বা backend submit logic যাবে
+            // Example:
+            // const formData = new FormData(uploadForm);
+            // fetch("your-ajax-url", { method: "POST", body: formData })
 
-            // Create FormData with client and properties IDs
-            const formData = new FormData(uploadForm);
-            formData.append('action', 'rt_add_document');
-            formData.append('nonce', rtClientAjax.edit_nonce);
-            formData.append('client_id', currentClientId || '');
-            formData.append('properties_id', currentPropertiesId || '');
-
-            // AJAX submission
-            fetch(rtClientAjax.ajax_url, {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log("✅ Document saved successfully");
-                    alert('Document saved successfully!');
-                    
-                    // Close modal and reset form
-                    const modal = uploadForm.closest(".clup-modal-overlay");
-                    if (modal) {
-                        modal.classList.remove("active");
-                        modal.style.display = "none";
-                        uploadForm.reset();
-                        const label = uploadForm.querySelector("#selected-file-name");
-                        if (label) label.textContent = "";
-                    }
-                } else {
-                    console.error("❌ Save failed:", data.data);
-                    alert('Error: ' + data.data);
-                }
-            })
-            .catch(error => {
-                console.error("❌ AJAX error:", error);
-                alert('Network error. Please try again.');
-            });
+            // For now, just close modal after a short delay
+            const modal = uploadForm.closest(".clup-modal-overlay");
+            if (modal) {
+                setTimeout(() => {
+                    modal.classList.remove("active");
+                    modal.style.display = "none";
+                    uploadForm.reset();
+                    const label = uploadForm.querySelector("#selected-file-name");
+                    if (label) label.textContent = "";
+                    console.log("Modal closed after save");
+                }, 500);
+            }
         });
     }
 });
@@ -208,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const clientModal = document.getElementById('clientDetailsModal');
     const closeModalBtn = document.getElementById('closeClientDetailsModal');
-    window.currentClientData = null; // Make it global for upload modal access
+    let currentClientData = null;
 
     // Close modal functions
     if (closeModalBtn) {
@@ -229,14 +199,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function handleViewPropertyClick() {
         console.log('🖱️ View Details button clicked');
         
-        if (!window.currentClientData) {
+        if (!currentClientData) {
             console.error('❌ No client data available');
             alert('No client data loaded yet.');
             return;
         }
 
         // Check if property data exists
-        if (!window.currentClientData.property_listing_id) {
+        if (!currentClientData.property_listing_id) {
             alert('No property associated with this client.');
             return;
         }
@@ -247,8 +217,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        console.log('✅ Opening property modal with data:', window.currentClientData);
-        window.openPropertyDetailsModal(window.currentClientData);
+        console.log('✅ Opening property modal with data:', currentClientData);
+        window.openPropertyDetailsModal(currentClientData);
     }
 
     // Initialize view button
@@ -309,8 +279,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const client = result.data;
             console.log('📊 Client data loaded:', client);
 
-            // Store data globally for upload modal access
-            window.currentClientData = client;
+            // Store data globally
+            currentClientData = client;
             
             // Update UI with client data
             updateClientUI(client);
@@ -349,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('clientName').textContent = client.full_name || '—';
         document.getElementById('clientCompany').textContent = client.company || '—';
 
-        // Client details table
+        // Client details table - REMOVED BUDGET AND LEAD STATUS
         document.getElementById('clientNameCell').textContent = client.full_name || '—';
         document.getElementById('clientEmailCell').textContent = client.email || '—';
         document.getElementById('clientPhoneCell').textContent = client.phone || '—';

@@ -38,9 +38,9 @@
 <div class="cld-task-section">
     <div class="cld-task-header">
         <h2 class="header-title">Documents</h2>
-        <button class="cld-upload-btn" data-modal="cl-upload-document-modal">
+        <!-- <button class="cld-upload-btn" data-modal="cl-upload-document-modal">
             Upload Document <span class="dashicons dashicons-media-document"></span>
-        </button>
+        </button> -->
     </div>
 
     <div class="documents-section">
