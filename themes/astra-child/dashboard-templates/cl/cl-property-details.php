@@ -102,7 +102,10 @@ $site_url   = site_url();
             <div class="feature-box" id="price-feature">
                 <div class="feature-label"><span class="dashicons dashicons-admin-site-alt3"></span> Price</div>
                 <div class="feature-value" id="price-value">
-                    <?php echo $property->price ? '$' . number_format((float)$property->price) : 'N/A'; ?>
+                    <?php 
+                        echo 'Rent: ' . ($property->price ? '$' . number_format((float)$property->price) . '/Month' : 'N/A');
+                        echo '<br> Value: N/A';
+                    ?>
                 </div>
             </div>
 
