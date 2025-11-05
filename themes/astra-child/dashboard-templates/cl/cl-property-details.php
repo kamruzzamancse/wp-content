@@ -100,13 +100,18 @@ $site_url   = site_url();
             </div>
 
             <div class="feature-box" id="price-feature">
-                <div class="feature-label"><span class="dashicons dashicons-admin-site-alt3"></span> Price</div>
+                <div class="feature-label"><span class="dashicons dashicons-money-alt"></span> Rent</div>
                 <div class="feature-value" id="price-value">
                     <?php 
-                        echo 'Rent: ' . ($property->price ? '$' . number_format((float)$property->price) . '/Month' : 'N/A');
-                        echo '<br> Value: N/A';
+                        echo ($property->price ? '$' . number_format((float)$property->price) . '/Month' : 'N/A');
+                        
                     ?>
                 </div>
+            </div>
+
+            <div class="feature-box">
+                <div class="feature-label"><span class="dashicons dashicons-admin-site-alt3"></span> Value</div>
+                <div class="feature-value"><?php echo ''; ?></div>
             </div>
 
             <div class="feature-box">
@@ -117,11 +122,6 @@ $site_url   = site_url();
             <div class="feature-box">
                 <div class="feature-label"><span class="dashicons dashicons-admin-users"></span> Bathrooms</div>
                 <div class="feature-value"><?php echo esc_html($property->bathrooms ?? 'N/A'); ?></div>
-            </div>
-
-            <div class="feature-box">
-                <div class="feature-label"><span class="dashicons dashicons-calendar-alt"></span> Year Built</div>
-                <div class="feature-value">N/A</div>
             </div>
 
             <div class="feature-box">

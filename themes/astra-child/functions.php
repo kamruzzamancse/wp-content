@@ -29,12 +29,46 @@ $includes = [
     'cl-settings-support-ajax.php',
     'rentcast-properties.php',
     'rentcast-cron.php',
+    'rt-ap-assign-property-ajax.php',
 ];
 
 foreach ($includes as $file) {
     $path = get_stylesheet_directory() . '/includes/' . $file;
     if (file_exists($path)) require_once $path;
 }
+
+// ======================
+// Enqueue JS & Localize AJAX for Assign Property
+// ======================
+function enqueue_rt_ap_assign_property_scripts() {
+    // Only load on Realtor Dashboard page with "assign-property" tab
+    if (is_page('realtor-dashboard') && isset($_GET['tab']) && $_GET['tab'] === 'assign-property') {
+
+        $script_path = get_stylesheet_directory() . '/assets/js/rt-ap-assign-property.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ap-assign-property.js';
+
+        wp_enqueue_script(
+            'rt-ap-assign-property-js',
+            $script_uri,
+            ['jquery'],
+            file_exists($script_path) ? filemtime($script_path) : time(),
+            true
+        );
+
+        wp_localize_script('rt-ap-assign-property-js', 'rtAssignPropertyAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_ap_assign_property_nonce'),
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_rt_ap_assign_property_scripts');
+
+// ======================
+// Register AJAX Handlers for Assign Properties
+// ======================
+add_action('wp_ajax_search_clients', 'search_clients_ajax');
+add_action('wp_ajax_search_properties', 'search_properties_ajax');
+add_action('wp_ajax_assign_property_to_client', 'assign_property_to_client');
 
 // ======================
 // Enqueue JS & Localize AJAX for Address Book

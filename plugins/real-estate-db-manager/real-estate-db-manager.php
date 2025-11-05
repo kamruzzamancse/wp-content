@@ -137,6 +137,20 @@ function redbm_create_tables() {
         CONSTRAINT fk_document_type FOREIGN KEY (type_id) REFERENCES {$wpdb->prefix}document_types(id) ON DELETE CASCADE
     ) $charset_collate;";
 
+    // Assigned Property table
+    $tables[] = "CREATE TABLE {$wpdb->prefix}assigned_property (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        client_id BIGINT(20) UNSIGNED NOT NULL,
+        property_id BIGINT(20) UNSIGNED NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        created_by BIGINT(20) UNSIGNED DEFAULT NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        updated_by BIGINT(20) UNSIGNED DEFAULT NULL,
+        deleted_at DATETIME DEFAULT NULL,
+        deleted_by BIGINT(20) UNSIGNED DEFAULT NULL,
+        PRIMARY KEY (id)
+    ) $charset_collate;";
+
     // Run queries
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     foreach ($tables as $sql) {
