@@ -36,7 +36,7 @@ add_action('after_setup_theme', 'create_rentcast_properties_table');
 // ==============================
 // Fetch API & Save to DB (Updated)
 // ==============================
-function fetch_rentcast_properties_to_db($city = 'Orlando', $limit = 5) {
+function fetch_rentcast_properties_to_db($city = 'Orlando', $limit = 1) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'rentcast_properties';
     $api_key = "7a7c73a68ffc46abae4f32d560e54bf2";

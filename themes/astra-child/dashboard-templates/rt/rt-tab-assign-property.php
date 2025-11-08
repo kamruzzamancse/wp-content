@@ -45,27 +45,24 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
         </thead>
         <tbody id="assigned-list">
             <?php
-            $results = $wpdb->get_results(
-                $wpdb->prepare("
-                    SELECT a.id, c.full_name, p.address, a.created_at
-                    FROM {$assigned_table} a
-                    LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
-                    LEFT JOIN {$properties_table} p ON a.property_id = p.id
-                    WHERE a.deleted_at IS NULL
-                    ORDER BY a.created_at DESC
-                ")
-            );
+            $results = $wpdb->get_results("
+                SELECT a.id, c.full_name, p.address, a.created_at, a.client_id, a.property_id
+                FROM {$assigned_table} a
+                LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
+                LEFT JOIN {$properties_table} p ON a.property_id = p.id
+                WHERE a.deleted_at IS NULL
+                ORDER BY a.created_at DESC
+            ");
 
             if ($results) {
                 foreach ($results as $row) {
-                    echo "<tr data-id='" . esc_attr($row->id) . "'>
+                    echo "<tr data-id='" . esc_attr($row->id) . "' data-client-id='" . esc_attr($row->client_id) . "' data-property-id='" . esc_attr($row->property_id) . "'>
                             <td>" . esc_html($row->full_name) . "</td>
                             <td>" . esc_html($row->address) . "</td>
                             <td>" . esc_html($row->created_at) . "</td>
                             <td>
-                                <button class='button view-assignment'>View</button>
-                                <button class='button edit-assignment'>Edit</button>
-                                <button class='button delete-assignment'>Delete</button>
+                                <button class='button edit-assignment' data-assignment-id='" . esc_attr($row->id) . "' data-client-id='" . esc_attr($row->client_id) . "' data-property-id='" . esc_attr($row->property_id) . "' title='Edit Assignment'>✏️</button>
+                                <button class='button delete-assignment' data-assignment-id='" . esc_attr($row->id) . "' title='Delete Assignment'>🗑️</button>
                             </td>
                         </tr>";
                 }
@@ -76,6 +73,43 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
         </tbody>
     </table>
 </div>
+
+<!-- Edit Assignment Modal -->
+<div id="edit-assignment-modal" class="clup-modal-overlay">
+  <div class="clup-box">
+    <button type="button" class="clup-close-btn">&times;</button>
+    <h1 class="clup-title">Edit Assignment</h1>
+
+    <form id="edit-assignment-form" class="clup-form">
+      <input type="hidden" name="assignment_id" id="edit-assignment-id" value="">
+      
+      <!-- Client Search for Edit -->
+      <div class="assign-field">
+        <label for="edit-client-search">Search Client:</label>
+        <input type="text" id="edit-client-search" placeholder="Type client name..." autocomplete="off">
+        <input type="hidden" id="edit-client-id" name="client_id">
+        <div id="edit-client-suggestions" class="suggestion-box"></div>
+      </div>
+
+      <!-- Property Search for Edit -->
+      <div class="assign-field">
+        <label for="edit-property-search">Search Property:</label>
+        <input type="text" id="edit-property-search" placeholder="Type property address..." autocomplete="off">
+        <input type="hidden" id="edit-property-id" name="property_id">
+        <div id="edit-property-suggestions" class="suggestion-box"></div>
+      </div>
+
+      <div class="clup-actions">
+        <button type="submit" class="clup-btn clup-upload">Update Assignment</button>
+        <button type="button" class="clup-btn clup-cancel" style="background: #6c757d; margin-left: 10px;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<?php 
+include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
+?>
 
 <style>
 /* ===== Assign Property Page Styling ===== */
@@ -99,7 +133,7 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
 .assign-form {
   display: flex;
   align-items: flex-end;
-  justify-content: flex-end; /* ✅ align everything to the right */
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 20px;
@@ -109,7 +143,7 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
 .assign-field {
   display: flex;
   flex-direction: column;
-  width: 200px; /* fixed width */
+  width: 200px;
   position: relative;
 }
 
@@ -189,7 +223,7 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
   border-bottom: 2px solid #ddd;
   font-weight: 600;
   color: #fff;
-  background: #2271b1; /* header background color */
+  background: #2271b1;
 }
 
 .assign-property-container tbody td {
@@ -221,32 +255,234 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
   text-align: center;
 }
 
-/* --- Action Buttons --- */
+/* --- Action Buttons - Clean Icons Only --- */
 .assign-property-container .button {
-  font-size: 13px;
-  border-radius: 5px;
-  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  padding: 0;
   cursor: pointer;
-  transition: background-color 0.25s, transform 0.2s;
+  margin: 0 2.5px;
+  font-size: 16px;
 }
 
-.assign-property-container .button.view-assignment {
-  background-color: #17a2b8;
-  color: #fff;
-  border: none;
+.assign-property-container tbody td:last-child {
+  text-align: center;
 }
-.assign-property-container .button.edit-assignment {
-  background-color: #ffc107;
+
+/* --- Edit Assignment Modal Styles --- */
+#edit-assignment-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  overflow-y: auto;
+}
+
+#edit-assignment-modal .clup-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+#edit-assignment-modal .assign-field {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.clup-cancel {
+  background: #6c757d !important;
+}
+
+.clup-cancel:hover {
+  background: #5a6268 !important;
+}
+
+/* --- Upload Document Modal Styles --- */
+#cl-upload-document-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  overflow-y: auto;
+}
+
+.clup-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.clup-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  z-index: 10;
+}
+
+.clup-close-btn:hover {
   color: #000;
-  border: none;
-}
-.assign-property-container .button.delete-assignment {
-  background-color: #dc3545;
-  color: #fff;
-  border: none;
 }
 
-/* --- Responsive Table --- */
+.clup-title {
+  padding: 20px;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #222;
+  border-bottom: 1px solid #eee;
+}
+
+.clup-form {
+  padding: 20px;
+}
+
+.clup-row-single {
+  margin-bottom: 20px;
+}
+
+.clup-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.clup-field input[type="text"],
+.clup-field select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.clup-field input[type="text"]:focus,
+.clup-field select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.clup-upload-box {
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  margin-bottom: 20px;
+  transition: border-color 0.3s ease;
+}
+
+.clup-upload-box:hover {
+  border-color: #007bff;
+}
+
+.clup-upload-content .clup-upload-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.clup-upload-content p {
+  margin: 0 0 5px 0;
+  font-weight: 600;
+  color: #333;
+}
+
+.clup-upload-content span {
+  color: #666;
+  font-size: 12px;
+  display: block;
+  margin-bottom: 15px;
+}
+
+.clup-browse {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.clup-browse:hover {
+  background: #0056b3;
+}
+
+#selected-file-name {
+  color: #007bff;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+.clup-actions {
+  text-align: right;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.clup-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.clup-upload {
+  background: #007bff;
+  color: white;
+}
+
+.clup-upload:hover {
+  background: #0056b3;
+}
+
+/* --- Responsive Design --- */
 @media screen and (max-width: 768px) {
   .assign-property-container table,
   .assign-property-container thead,
@@ -287,14 +523,14 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
 
   .assign-property-container td:last-child {
     border-bottom: none;
+    text-align: center;
   }
 
-  .assign-property-container td .button {
-    width: 100%;
-    margin-top: 6px;
+  .assign-property-container td:last-child .button {
+    display: inline-block;
+    margin: 0 5px;
   }
 
-  /* Make form stack vertically on mobile */
   .assign-form {
     justify-content: flex-start;
   }
@@ -302,6 +538,18 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
   #assign-btn {
     width: 100%;
   }
-}
 
+  .clup-box {
+    width: 95%;
+    margin: 20px auto;
+  }
+  
+  .clup-form {
+    padding: 15px;
+  }
+  
+  .clup-upload-box {
+    padding: 20px;
+  }
+}
 </style>

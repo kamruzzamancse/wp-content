@@ -15,7 +15,7 @@ add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
 // Include Required Files
 // ======================
 $includes = [
-    'am-rt-realtor-ajax.php',        // <-- AJAX handlers
+    'am-rt-realtor-ajax.php',
     'rt-db-active-client-ajax.php',
     'rt-db-lead-client-ajax.php',
     'rt-ab-client-ajax.php',
@@ -38,7 +38,7 @@ foreach ($includes as $file) {
 }
 
 // ======================
-// Enqueue JS & Localize AJAX for Assign Property
+// Enqueue JS & Localize AJAX for Assign Property - FIXED NONCE ISSUE
 // ======================
 function enqueue_rt_ap_assign_property_scripts() {
     // Only load on Realtor Dashboard page with "assign-property" tab
@@ -51,14 +51,20 @@ function enqueue_rt_ap_assign_property_scripts() {
             'rt-ap-assign-property-js',
             $script_uri,
             ['jquery'],
-            file_exists($script_path) ? filemtime($script_path) : time(),
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
             true
         );
 
+        // Create fresh nonce for each page load
+        $nonce = wp_create_nonce('rt_ap_assign_property_nonce');
+        
         wp_localize_script('rt-ap-assign-property-js', 'rtAssignPropertyAjax', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('rt_ap_assign_property_nonce'),
+            'nonce'    => $nonce,
+            'debug'    => true
         ]);
+        
+        error_log("Nonce generated for property search: " . $nonce);
     }
 }
 add_action('wp_enqueue_scripts', 'enqueue_rt_ap_assign_property_scripts');
@@ -66,9 +72,9 @@ add_action('wp_enqueue_scripts', 'enqueue_rt_ap_assign_property_scripts');
 // ======================
 // Register AJAX Handlers for Assign Properties
 // ======================
-add_action('wp_ajax_search_clients', 'search_clients_ajax');
+/* add_action('wp_ajax_search_clients', 'search_clients_ajax');
 add_action('wp_ajax_search_properties', 'search_properties_ajax');
-add_action('wp_ajax_assign_property_to_client', 'assign_property_to_client');
+add_action('wp_ajax_assign_property_to_client', 'assign_property_to_client'); */
 
 // ======================
 // Enqueue JS & Localize AJAX for Address Book

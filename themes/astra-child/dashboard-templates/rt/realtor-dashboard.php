@@ -37,6 +37,7 @@ if (!function_exists('load_realtor_dashboard_data')) {
             case 'address-book':
             case 'documents':
             case 'assign-property':
+            case 'assign-task':
             case 'messages': 
             case 'settings':
             case 'notifications':
@@ -86,6 +87,9 @@ get_header();
                     break;
                 case 'assign-property':
                     include locate_template('dashboard-templates/rt/rt-tab-assign-property.php');
+                    break;
+                case 'assign-property':
+                    include locate_template('dashboard-templates/rt/rt-tab-assign-task.php');
                     break;
                 case 'messages':
                     include locate_template('dashboard-templates/rt/rt-tab-messages.php');

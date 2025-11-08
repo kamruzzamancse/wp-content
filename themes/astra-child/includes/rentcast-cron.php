@@ -17,7 +17,7 @@ if (!wp_next_scheduled('rentcast_update_cron')) {
 
 // Hook the function
 add_action('rentcast_update_cron', function() {
-    fetch_rentcast_properties_to_db('Orlando', 5); // limit 5
+    fetch_rentcast_properties_to_db('Orlando', 1); // limit 1
 });
 
 // Clear cron on theme switch
@@ -28,5 +28,5 @@ add_action('switch_theme', function(){
 
 // Optional: manual trigger for system cron (CLI)
 if (defined('WP_CLI') && WP_CLI) {
-    fetch_rentcast_properties_to_db('Orlando', 5);
+    fetch_rentcast_properties_to_db('Orlando', 1);
 }
