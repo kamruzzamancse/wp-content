@@ -70,13 +70,6 @@ function enqueue_rt_ap_assign_property_scripts() {
 add_action('wp_enqueue_scripts', 'enqueue_rt_ap_assign_property_scripts');
 
 // ======================
-// Register AJAX Handlers for Assign Properties
-// ======================
-/* add_action('wp_ajax_search_clients', 'search_clients_ajax');
-add_action('wp_ajax_search_properties', 'search_properties_ajax');
-add_action('wp_ajax_assign_property_to_client', 'assign_property_to_client'); */
-
-// ======================
 // Enqueue JS & Localize AJAX for Address Book
 // ======================
 function rt_enqueue_client_scripts() {
