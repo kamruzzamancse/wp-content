@@ -1,489 +1,258 @@
-<div class="cld-task-section">
-    <div class="cld-task-header">
-        <h2 class="header-title">Documents</h2>
-        <button class="cld-upload-btn" data-modal="cl-upload-document-modal">
-            Upload Document <span class="dashicons dashicons-media-document"></span>
-        </button>
-    </div>
+<?php
+if (!defined('ABSPATH')) exit;
 
-    <table class="cld-task-table">
+global $wpdb;
+
+$clients_table        = $wpdb->prefix . 'clients';
+$properties_table     = $wpdb->prefix . 'rentcast_properties';
+$assigned_table       = $wpdb->prefix . 'assigned_property';
+$assigned_task_table  = $wpdb->prefix . 'assigned_tasks';
+$documents_table      = $wpdb->prefix . 'documents';
+$reply_docs_table     = $wpdb->prefix . 'reply_docs';
+
+$current_user_id = get_current_user_id();
+?>
+
+<div class="documents-container">
+
+    <h3>Documents</h3>
+    <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>
-                <th>#</th>
-                <th>Property Name</th>
-                <th>Task</th>
-                <th>Upload Docs</th>
+                <th>Property</th>
+                <th>Assigned Docs</th>
+                <th>Assigned Date</th>
+                <th>Reply Docs</th>
+                <th>Reply Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody>
-            <!-- Row 1 -->
-            <tr>
-                <td data-label="#SL">01</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=1" alt="User" class="cld-avatar">
-                        <span>Afsana Hamid Mim</span>
-                    </div>
-                </td>
-                <td data-label="Task">Inspection Report</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Lease_Agreement.pdf</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
-            <!-- Row 2 -->
-            <tr>
-                <td data-label="#SL">02</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=2" alt="User" class="cld-avatar">
-                        <span>John Doe</span>
-                    </div>
-                </td>
-                <td data-label="Task">Payment Verification</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Payment_Slip.pdf</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
-            <!-- Row 3 -->
-            <tr>
-                <td data-label="#SL">03</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=3" alt="User" class="cld-avatar">
-                        <span>Sophia Rahman</span>
-                    </div>
-                </td>
-                <td data-label="Task">Property Visit</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Property_Images.zip</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
-            <!-- Row 4 -->
-            <tr>
-                <td data-label="#SL">04</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=4" alt="User" class="cld-avatar">
-                        <span>Michael Smith</span>
-                    </div>
-                </td>
-                <td data-label="Task">Document Review</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Final_Document.pdf</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
-            <!-- Row 5 -->
-            <tr>
-                <td data-label="#SL">05</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=5" alt="User" class="cld-avatar">
-                        <span>Liam Johnson</span>
-                    </div>
-                </td>
-                <td data-label="Task">Inspection Report</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Lease_Agreement.pdf</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
-            <!-- Row 6 -->
-            <tr>
-                <td data-label="#SL">06</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=6" alt="User" class="cld-avatar">
-                        <span>Emma Wilson</span>
-                    </div>
-                </td>
-                <td data-label="Task">Final Handover</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Handover_Form.pdf</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
-            <!-- Row 7 -->
-            <tr>
-                <td data-label="#SL">07</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=7" alt="User" class="cld-avatar">
-                        <span>Olivia Brown</span>
-                    </div>
-                </td>
-                <td data-label="Task">Lease Agreement</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Lease_Docs.pdf</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
-            <!-- Row 8 -->
-            <tr>
-                <td data-label="#SL">08</td>
-                <td data-label="Property Name">
-                    <div class="cld-user-info">
-                        <img src="https://i.pravatar.cc/40?img=8" alt="User" class="cld-avatar">
-                        <span>Noah Davis</span>
-                    </div>
-                </td>
-                <td data-label="Task">Payment Verification</td>
-                <td data-label="Upload Docs"><span class="cld-doc"><img src="https://img.icons8.com/color/24/pdf.png"/> Payment_Slip.pdf</span></td>
-                <td data-label="Actions">
-                    <!-- View -->
-                    <a href="javascript:void(0)" class="cld-action" data-modal="cldoc-modal-1" title="View">
-                        <span class="dashicons dashicons-visibility"></span>
-                    </a>
-                    <!-- Edit -->
-                    <a href="javascript:void(0)" class="cld-action cld-edit" data-modal="cl-create-document-modal" title="Edit">
-                        <span class="dashicons dashicons-edit"></span>
-                    </a>
-                    <!-- Delete -->
-                    <a href="javascript:void(0)" class="cld-action cld-delete" title="Delete">
-                        <span class="dashicons dashicons-trash"></span>
-                    </a>
-                </td>
-            </tr>
+        <tbody id="assigned-list">
+
+        <?php
+        $results = $wpdb->get_results($wpdb->prepare("
+            SELECT a.id, a.client_id, a.property_id, a.created_at,
+                   c.full_name, p.address
+            FROM {$assigned_table} a
+            LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
+            LEFT JOIN {$properties_table} p ON a.property_id = p.id
+            WHERE a.deleted_at IS NULL
+              AND c.user_id = %d
+            ORDER BY a.created_at DESC
+        ", $current_user_id));
+
+        if ($results) {
+            foreach ($results as $row) {
+
+                // Assigned Task & Document
+                $task = $wpdb->get_row($wpdb->prepare("
+                    SELECT t.id AS task_id, t.document_id, t.created_at
+                    FROM {$assigned_task_table} t
+                    WHERE t.client_id = %d AND t.properties_id = %d
+                    ORDER BY t.id DESC LIMIT 1
+                ", $row->client_id, $row->property_id));
+
+                $assigned_doc_name = '';
+                $assigned_doc_date = '';
+                if ($task && $task->document_id) {
+                    $doc = $wpdb->get_row($wpdb->prepare("
+                        SELECT title, file_name
+                        FROM {$documents_table}
+                        WHERE id = %d
+                    ", $task->document_id));
+
+                    if ($doc) {
+                        $short = basename($doc->file_name);
+                        $assigned_doc_name = '<a href="'.esc_url($doc->file_name).'" target="_blank">'.$short.'</a>';
+                        $assigned_doc_date = esc_html($task->created_at);
+                    }
+                }
+
+                // Reply Document
+                $reply = null;
+                $reply_doc_name = '';
+                $reply_doc_date = '';
+                $reply_doc_id_attr = '';
+
+                if ($task) {
+                    $reply = $wpdb->get_row($wpdb->prepare("
+                        SELECT r.id, r.document_id, r.created_at
+                        FROM {$reply_docs_table} r
+                        WHERE r.assigned_task_id = %d AND r.deleted_at IS NULL
+                        ORDER BY r.id DESC LIMIT 1
+                    ", $task->task_id));
+
+                    if ($reply && $reply->document_id) {
+                        $reply_doc = $wpdb->get_row($wpdb->prepare("
+                            SELECT title, file_name
+                            FROM {$documents_table}
+                            WHERE id = %d
+                        ", $reply->document_id));
+
+                        if ($reply_doc) {
+                            $short = basename($reply_doc->file_name);
+                            $reply_doc_name = '<a href="'.esc_url($reply_doc->file_name).'" target="_blank">'.$short.'</a>';
+                            $reply_doc_date = esc_html($reply->created_at);
+                        }
+
+                        $reply_doc_id_attr = 'data-reply-doc-id="'.esc_attr($reply->id).'"';
+                    }
+                }
+
+                echo '<tr data-id="'.esc_attr($row->id).'"
+                          data-client-id="'.esc_attr($row->client_id).'"
+                          data-property-id="'.esc_attr($row->property_id).'">
+
+                        <td>'.$row->address.'</td>
+                        <td>'.$assigned_doc_name.'</td>
+                        <td>'.$assigned_doc_date.'</td>
+                        <td>'.$reply_doc_name.'</td>
+                        <td>'.$reply_doc_date.'</td>
+
+                        <td>
+                            <button class="button upload-document-trigger"
+                                data-assignment-id="'.$row->id.'"
+                                data-client-id="'.$row->client_id.'"
+                                data-property-id="'.$row->property_id.'"
+                                data-assigned-task-id="'.($task ? $task->task_id : 0).'">
+                                <span class="dashicons dashicons-upload"></span>
+                            </button>
+
+                            <button class="button delete-assignment"
+                                data-assignment-id="'.$row->id.'"
+                                '.$reply_doc_id_attr.'>
+                                <span class="dashicons dashicons-trash"></span>
+                            </button>
+                        </td>
+                      </tr>';
+            }
+        } else {
+            echo '<tr><td colspan="6">No assignments found.</td></tr>';
+        }
+        ?>
+
         </tbody>
     </table>
 </div>
 
-<?php 
-    include locate_template('dashboard-templates/cl/cl-realtor-details-modal.php');
-    include locate_template('dashboard-templates/cl/cl-upload-document-modal.php');
-    include locate_template('dashboard-templates/cl/cl-create-document-modal.php');
-?>
+<?php include locate_template('dashboard-templates/cl/cl-upload-document-modal.php'); ?>
 
 <style>
-/* Container */
-.cld-task-section {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    margin-bottom: 20px;
-}
-/* Header */
-.cld-task-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-.cld-upload-btn {
-    background: #fff;
-    border: 1px solid #0073e6;
-    padding: 6px 14px;
-    border-radius: 6px;
-    font-size: 14px;
-    cursor: pointer;
-    color: #0073e6;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.cld-upload-btn:hover {
-    color: #FFF!important;
-    background: #0073e6;
-}
-/* Table */
-.cld-task-table {
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    border-radius: 10px 10px 0 0;
-    overflow: hidden;
-}
-.cld-task-table thead th {
-    background: #3273c4;
-    color: #fff;
-    padding: 12px;
-    text-align: left;
-    font-weight: 500;
-}
-.cld-task-table thead th:first-child {
-    border-top-left-radius: 10px;
-}
-.cld-task-table thead th:last-child {
-    border-top-right-radius: 10px;
-}
-.cld-task-table tbody td {
-    padding: 10px;
-    vertical-align: middle;
-}
-/* Avatar + Name */
-.cld-user-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.cld-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-}
-/* Status */
-.cld-status {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 6px;
-}
-.cld-pending { background: #ffcc00; }
-.cld-complete { background: #28a745; }
-.cld-incomplete { background: #dc3545; }
-/* Documents */
-.cld-doc {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-/* Actions */
-.cld-action {
-    cursor: pointer;
-    font-size: 16px;
-}
-/* Narrow down #SL and Actions columns */
-.cld-task-table th:first-child,
-.cld-task-table td:first-child {
-    width: 60px;
-    text-align: center;
-}
-.cld-task-table th:last-child,
-.cld-task-table td:last-child {
-    width: 100px;
-    text-align: center;
+/* ===== Assign Task Page Styling ===== */
+.documents-container {
+  padding: 20px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  font-family: Arial, sans-serif;
 }
 
-/* Bottom border for last row */
-.cld-task-table tbody tr:last-child td {
-    border-bottom: 1px solid #eaeaea;
+.documents-container table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px 10px 0 0;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
-/* ---------- Mobile Card View ---------- */
-@media (max-width: 768px) {
-  .cld-task-table,
-  .cld-task-table thead,
-  .cld-task-table tbody,
-  .cld-task-table th,
-  .cld-task-table td,
-  .cld-task-table tr {
+.documents-container thead th {
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #ddd;
+  font-weight: 600;
+  color: #fff;
+  background: #2271b1;
+}
+
+.documents-container tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.documents-container tbody tr:hover {
+  background-color: #f5f9ff;
+}
+
+.documents-container tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.documents-container table th:first-child {
+  border-top-left-radius: 10px;
+}
+.documents-container table th:last-child {
+  border-top-right-radius: 10px;
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+  text-align: center;
+}
+
+/* action icons */
+.documents-container .button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  margin: 0 2.5px;
+  font-size: 16px;
+}
+
+.documents-container tbody td:last-child {
+  text-align: center;
+}
+
+/* Mobile responsiveness */
+@media screen and (max-width: 768px) {
+  .documents-container table,
+  .documents-container thead,
+  .documents-container tbody,
+  .documents-container th,
+  .documents-container tr {
     display: block;
     width: 100%;
   }
-  .cld-task-table thead {
+
+  .documents-container thead {
     display: none;
   }
-  .cld-task-table tr {
-    background: #fff;
+
+  .documents-container tr {
     margin-bottom: 15px;
-    border: 1px solid #eaeaea;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 5px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 12px;
+    background: #f9f9ff;
   }
-  .cld-task-table td {
+
+  .documents-container td {
     display: flex;
-    justify-content: flex-start;
-    align-items: center;
+    flex-direction: column;
+    width: 100%;
     padding: 8px 0;
     border: none;
-    position: relative;
-    text-align: left;
+    border-bottom: 1px solid #eee;
   }
-  .cld-task-table td::before {
+
+  .documents-container td::before {
     content: attr(data-label);
     font-weight: 600;
     color: #333;
-    min-width: 120px;
-    flex-shrink: 0;
-    margin-right: 8px;
+    margin-bottom: 4px;
   }
-  .cld-task-table th:first-child,
-  .cld-task-table td:first-child {
-    text-align: left;
-   }
-   .cld-task-section {
-        padding: 10px;
-    }
+
+  .documents-container td:last-child {
+    border-bottom: none;
+    text-align: center;
+  }
 }
 </style>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    // ---------- Open modal ----------
-    const modalTriggers = document.querySelectorAll("[data-modal]");
-    modalTriggers.forEach(trigger => {
-        trigger.addEventListener("click", function () {
-            const target = document.getElementById(this.getAttribute("data-modal"));
-            if (target) target.classList.add("show");
-        });
-    });
-
-    // ---------- Close modal via X button ----------
-    const closeButtons = document.querySelectorAll(".clup-close-btn");
-    closeButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
-            this.closest(".clup-modal-overlay").classList.remove("show");
-        });
-    });
-
-    // ---------- Close modal via Cancel button ----------
-    const cancelButtons = document.querySelectorAll(".clup-cancel");
-    cancelButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
-            this.closest(".clup-modal-overlay").classList.remove("show");
-        });
-    });
-
-    // ---------- Close modal by clicking outside ----------
-    const modals = document.querySelectorAll(".clup-modal-overlay");
-    modals.forEach(modal => {
-        modal.addEventListener("click", function (e) {
-            if (e.target === modal) modal.classList.remove("show");
-        });
-    });
-
-    // ---------- File upload browse button ----------
-    const browseButtons = document.querySelectorAll(".clup-browse");
-    browseButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
-            const modal = btn.closest(".clup-modal-overlay");
-            if (!modal) return;
-            const fileInput = modal.querySelector(".clup-file-input");
-            if (fileInput) fileInput.click();
-        });
-    });
-
-    const fileInputs = document.querySelectorAll(".clup-file-input");
-    fileInputs.forEach(input => {
-        input.addEventListener("change", function () {
-            if (input.files.length > 0) {
-                const fileName = input.files[0].name;
-                alert("Selected file: " + fileName);
-            }
-        });
-    });
-
-    // ---------- Edit button ----------
-    const editButtons = document.querySelectorAll(".cld-edit");
-    editButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
-            const modal = document.getElementById("cl-create-document-modal");
-            if (modal) {
-                modal.classList.add("show"); // <-- Updated to use class
-
-                // Change modal title
-                modal.querySelector(".clup-title").textContent = "Edit Document";
-
-                // Change button text
-                modal.querySelector(".clup-create").textContent = "Update Document";
-
-                // Prefill form with existing row data
-                const row = btn.closest("tr");
-                if (row) {
-                    const title = row.querySelector("td[data-label='Task']")?.innerText || "";
-                    modal.querySelector("input[type='text']").value = title;
-                }
-            }
-        });
-    });
-
-    // ---------- Delete button ----------
-    const deleteButtons = document.querySelectorAll(".cld-delete");
-    deleteButtons.forEach(btn => {
-        btn.addEventListener("click", function () {
-            if (confirm("Are you sure you want to delete this document?")) {
-                const row = btn.closest("tr");
-                if (row) row.remove();
-            }
-        });
-    });
-
-});
-</script>
-
-

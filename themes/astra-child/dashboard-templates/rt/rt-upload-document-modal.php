@@ -1,6 +1,6 @@
 <?php if (!defined('ABSPATH')) exit; ?>
 
-<div id="cl-upload-document-modal" class="clup-modal-overlay">
+<div id="rt-upload-document-modal" class="clup-modal-overlay">
     <div class="clup-box">
         <button type="button" class="clup-close-btn">&times;</button>
         <h1 class="clup-title">Upload Document</h1><br>

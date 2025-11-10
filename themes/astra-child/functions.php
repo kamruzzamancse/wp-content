@@ -31,12 +31,40 @@ $includes = [
     'rentcast-cron.php',
     'rt-ap-assign-property-ajax.php',
     'rt-ap-assign-task-ajax.php',
+    'cl-reply-docs-ajax.php',
 ];
 
 foreach ($includes as $file) {
     $path = get_stylesheet_directory() . '/includes/' . $file;
     if (file_exists($path)) require_once $path;
 }
+
+// ======================
+// Enqueue JS & Localize AJAX for Reply Docs
+// ======================
+function enqueue_rt_reply_docs_scripts() {
+    if (is_page('client-dashboard') && isset($_GET['tab']) && $_GET['tab'] === 'documents') {
+
+        $script_path = get_stylesheet_directory() . '/assets/js/cl-reply-docs.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/cl-reply-docs.js';
+
+        wp_enqueue_script(
+            'cl-reply-docs-js',
+            $script_uri,
+            ['jquery'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        $nonce = wp_create_nonce('cl_reply_docs_nonce');
+
+        wp_localize_script('cl-reply-docs-js', 'rtReplyDocsAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => $nonce,
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_rt_reply_docs_scripts');
 
 // ======================
 // Enqueue JS & Localize AJAX for Assign Task

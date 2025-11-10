@@ -15,7 +15,7 @@ jQuery(document).ready(function($){
         var clientId = $(this).data('client-id');
         var propertyId = $(this).data('property-id');
 
-        $('#cl-upload-document-modal').addClass('show');
+        $('#rt-upload-document-modal').addClass('show');
         $('#upload-document-form input[name="client_id"]').val(clientId);
         $('#upload-document-form input[name="properties_id"]').val(propertyId);
 
@@ -25,7 +25,7 @@ jQuery(document).ready(function($){
 
     // Close modal
     $(document).on('click', '.clup-close-btn', function(){
-        $('#cl-upload-document-modal').removeClass('show');
+        $('#rt-upload-document-modal').removeClass('show');
         $('#upload-document-form')[0].reset();
         $('#selected-file-name').text('');
         $('#upload-message').remove();
@@ -81,4 +81,42 @@ jQuery(document).ready(function($){
             }
         });
     });
+
+    // DELETE ASSIGNMENT (soft delete)
+    $(document).on('click', '.delete-assignment', function() {
+
+        var taskId = $(this).data('task-id');
+        if (!taskId) {
+            alert("Invalid task ID");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to delete this assignment?")) return;
+
+        $.ajax({
+            url: rtAssignTaskAjax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'rt_delete_assignment',
+                nonce: rtAssignTaskAjax.nonce,
+                task_id: taskId
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert(response.data.message);
+                    $('button[data-task-id="' + taskId + '"]').closest('tr').fadeOut(300, function(){
+                        $(this).remove();
+                    });
+                } else {
+                    alert(response.data.message || "Assignment could not be deleted.");
+                }
+            },
+            error: function(xhr) {
+                console.log(xhr.responseText);
+                alert("AJAX error occurred.");
+            }
+        });
+    });
+
+
 });

@@ -167,3 +167,59 @@ function rt_upload_document_handler() {
     wp_send_json_success(['message' => 'Document uploaded successfully.']);
     wp_die();
 }
+
+/*
+|--------------------------------------------------------------------------
+| AJAX: Soft Delete Assigned Task
+| Table: wp_assigned_tasks
+|--------------------------------------------------------------------------
+*/
+
+// Register AJAX handler
+add_action('wp_ajax_rt_delete_assignment', 'rt_delete_assignment_handler');
+
+function rt_delete_assignment_handler() {
+    global $wpdb;
+
+    // Verify nonce
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'rt_ap_assign_task_nonce')) {
+        wp_send_json_error(['message' => 'Security check failed']);
+        wp_die();
+    }
+
+    $task_id = intval($_POST['task_id'] ?? 0); // <-- use task_id
+    if (!$task_id) {
+        wp_send_json_error(['message' => 'Invalid task ID']);
+        wp_die();
+    }
+
+    $assigned_table = $wpdb->prefix . 'assigned_tasks';
+
+    $row = $wpdb->get_row(
+        $wpdb->prepare("SELECT id FROM $assigned_table WHERE id=%d AND deleted_at IS NULL LIMIT 1", $task_id)
+    );
+
+    if (!$row) {
+        wp_send_json_error(['message' => 'Assignment not found or already deleted']);
+        wp_die();
+    }
+
+    $now  = current_time('mysql');
+    $user = get_current_user_id();
+
+    $updated = $wpdb->update(
+        $assigned_table,
+        ['deleted_at' => $now, 'deleted_by' => $user],
+        ['id' => $task_id],
+        ['%s', '%d'],
+        ['%d']
+    );
+
+    if ($updated === false) {
+        wp_send_json_error(['message' => 'Failed to delete assignment']);
+        wp_die();
+    }
+
+    wp_send_json_success(['message' => 'Assignment deleted successfully']);
+    wp_die();
+}

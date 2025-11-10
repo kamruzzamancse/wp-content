@@ -3,12 +3,11 @@ if (!defined('ABSPATH')) exit;
 
 global $wpdb;
 
-$clients_table    = $wpdb->prefix . 'clients';
-$properties_table = $wpdb->prefix . 'rentcast_properties';
-$assigned_table   = $wpdb->prefix . 'assigned_property';
-$assigned_task_table = $wpdb->prefix . 'assigned_tasks';
-$documents_table     = $wpdb->prefix . 'documents';
-
+$clients_table        = $wpdb->prefix . 'clients';
+$properties_table     = $wpdb->prefix . 'rentcast_properties';
+$assigned_table       = $wpdb->prefix . 'assigned_property';
+$assigned_task_table  = $wpdb->prefix . 'assigned_tasks';
+$documents_table      = $wpdb->prefix . 'documents';
 ?>
 
 <div class="assign-task-container">
@@ -29,9 +28,9 @@ $documents_table     = $wpdb->prefix . 'documents';
 
         <tbody id="assigned-list">
         <?php
-
+        // Fetch assignments
         $results = $wpdb->get_results("
-            SELECT a.id, a.client_id, a.property_id, a.created_at,
+            SELECT a.id AS assignment_id, a.client_id, a.property_id, a.created_at,
                    c.full_name, p.address
             FROM {$assigned_table} a
             LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
@@ -43,59 +42,65 @@ $documents_table     = $wpdb->prefix . 'documents';
         if ($results) {
             foreach ($results as $row) {
 
-                // Fetch assigned task (document info)
-                $task = $wpdb->get_row($wpdb->prepare("
-                    SELECT t.document_id, t.created_at
-                    FROM {$assigned_task_table} t
-                    WHERE t.client_id = %d AND t.properties_id = %d
-                    ORDER BY t.id DESC LIMIT 1
-                ", $row->client_id, $row->property_id));
-
+                // Initialize variables
                 $doc_name = '';
                 $doc_date = '';
+                $task_id  = 0;
 
-                if ($task && $task->document_id) {
-                    $doc = $wpdb->get_row($wpdb->prepare("
-                        SELECT title, file_name
-                        FROM {$documents_table}
-                        WHERE id = %d
-                    ", $task->document_id));
+                // Fetch latest assigned task for this client + property
+                $task = $wpdb->get_row($wpdb->prepare("
+                    SELECT t.id AS task_id, t.document_id, t.created_at
+                    FROM {$assigned_task_table} t
+                    WHERE t.client_id = %d AND t.properties_id = %d AND t.deleted_at IS NULL
+                    ORDER BY t.id DESC
+                    LIMIT 1
+                ", $row->client_id, $row->property_id));
 
-                    if ($doc) {
-                        // Only filename extracted (not full URL)
-                        $file_short = basename($doc->file_name);
-                        $doc_name = '<a href="'.esc_url($doc->file_name).'" target="_blank">'.$file_short.'</a>';
-                        $doc_date = esc_html($task->created_at);
+                if ($task) {
+                    $task_id = $task->task_id;
+
+                    // Fetch document info
+                    if ($task->document_id) {
+                        $doc = $wpdb->get_row($wpdb->prepare("
+                            SELECT title, file_name
+                            FROM {$documents_table}
+                            WHERE client_id = %d AND id = %d AND deleted_at IS NULL
+                        ", $row->client_id, $task->document_id));
+
+                        if ($doc) {
+                            $file_short = basename($doc->file_name);
+                            $doc_name = '<a href="'.esc_url($doc->file_name).'" target="_blank">'.$file_short.'</a>';
+                            $doc_date = esc_html($task->created_at);
+                        }
                     }
                 }
 
-                echo '<tr data-id="'.esc_attr($row->id).'" data-client-id="'.esc_attr($row->client_id).'" data-property-id="'.esc_attr($row->property_id).'">
-                        <td>'.$row->full_name.'</td>
-                        <td>'.$row->address.'</td>
+                echo '<tr data-assignment-id="'.esc_attr($row->assignment_id).'" data-task-id="'.esc_attr($task_id).'" data-client-id="'.esc_attr($row->client_id).'" data-property-id="'.esc_attr($row->property_id).'">
+                        <td>'.esc_html($row->full_name).'</td>
+                        <td>'.esc_html($row->address).'</td>
                         <td>'.$doc_name.'</td>
                         <td>'.$doc_date.'</td>
                         <td></td>
                         <td></td>
                         <td>
                             <button class="button upload-document-trigger" 
-                                data-assignment-id="'.$row->id.'"
-                                data-client-id="'.$row->client_id.'"
-                                data-property-id="'.$row->property_id.'">
+                                data-assignment-id="'.esc_attr($row->assignment_id).'"
+                                data-task-id="'.esc_attr($task_id).'"
+                                data-client-id="'.esc_attr($row->client_id).'"
+                                data-property-id="'.esc_attr($row->property_id).'">
                                 <span class="dashicons dashicons-upload"></span>
                             </button>
 
                             <button class="button delete-assignment" 
-                                data-assignment-id="'.$row->id.'">
+                                data-task-id="'.esc_attr($task_id).'">
                                 <span class="dashicons dashicons-trash"></span>
                             </button>
                         </td>
                       </tr>';
             }
-
         } else {
             echo '<tr><td colspan="7">No assignments found.</td></tr>';
         }
-
         ?>
         </tbody>
     </table>
