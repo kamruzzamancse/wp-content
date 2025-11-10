@@ -1,17 +1,5 @@
-[08-Nov-2025 16:36:56 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1450
-[08-Nov-2025 16:36:56 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1453
-[08-Nov-2025 16:37:50 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1450
-[08-Nov-2025 16:37:50 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1453
-[08-Nov-2025 16:38:03 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1450
-[08-Nov-2025 16:38:03 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1453
-[08-Nov-2025 16:40:55 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1450
-[08-Nov-2025 16:40:55 UTC] PHP Warning:  Cannot modify header information - headers already sent by (output started at E:\xampp\htdocs\mary\wp-includes\class-wp-styles.php:290) in E:\xampp\htdocs\mary\wp-includes\pluggable.php on line 1453
-
-
-Dear Mary,
-
-Due to some complexities, we were unable to complete the work today. We expect to finish it tomorrow and will inform you once it is done.
-
-We apologize for the inconvenience and appreciate your patience.
-
-Best regards,
+[09-Nov-2025 11:54:58 UTC] Nonce generated for property search: dbd78d0590
+[09-Nov-2025 11:57:59 UTC] Nonce generated for property search: c45d7d4a1e
+[10-Nov-2025 03:28:19 UTC] Cron reschedule event error for hook: rentcast_update_cron, Error code: invalid_schedule, Error message: Event schedule does not exist., Data: {"schedule":"every_hour","args":[],"interval":3600}
+[10-Nov-2025 03:28:20 UTC] PHP Notice:  Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121
+[10-Nov-2025 03:28:35 UTC] PHP Notice:  Function _load_textdomain_just_in_time was called <strong>incorrectly</strong>. Translation loading for the <code>all-in-one-wp-migration</code> domain was triggered too early. This is usually an indicator for some code in the plugin or theme running too early. Translations should be loaded at the <code>init</code> action or later. Please see <a href="https://developer.wordpress.org/advanced-administration/debug/debug-wordpress/">Debugging in WordPress</a> for more information. (This message was added in version 6.7.0.) in C:\xampp\htdocs\mary\wp-includes\functions.php on line 6121

@@ -30,12 +30,40 @@ $includes = [
     'rentcast-properties.php',
     'rentcast-cron.php',
     'rt-ap-assign-property-ajax.php',
+    'rt-ap-assign-task-ajax.php',
 ];
 
 foreach ($includes as $file) {
     $path = get_stylesheet_directory() . '/includes/' . $file;
     if (file_exists($path)) require_once $path;
 }
+
+// ======================
+// Enqueue JS & Localize AJAX for Assign Task
+// ======================
+function enqueue_rt_ap_assign_task_scripts() {
+    if (is_page('realtor-dashboard') && isset($_GET['tab']) && $_GET['tab'] === 'assign-task') {
+
+        $script_path = get_stylesheet_directory() . '/assets/js/rt-ap-assign-task.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ap-assign-task.js';
+
+        wp_enqueue_script(
+            'rt-ap-assign-task-js',
+            $script_uri,
+            ['jquery'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        $nonce = wp_create_nonce('rt_ap_assign_task_nonce');
+
+       wp_localize_script('rt-ap-assign-task-js', 'rtAssignTaskAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_ap_assign_task_nonce'),
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_rt_ap_assign_task_scripts');
 
 // ======================
 // Enqueue JS & Localize AJAX for Assign Property - FIXED NONCE ISSUE

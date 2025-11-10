@@ -88,7 +88,7 @@ get_header();
                 case 'assign-property':
                     include locate_template('dashboard-templates/rt/rt-tab-assign-property.php');
                     break;
-                case 'assign-property':
+                case 'assign-task':
                     include locate_template('dashboard-templates/rt/rt-tab-assign-task.php');
                     break;
                 case 'messages':

@@ -1,18 +1,18 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-// Add custom 1-hour interval
+// Add custom 24-hour interval
 add_filter('cron_schedules', function($schedules){
-    $schedules['every_hour'] = [
-        'interval' => 3600, // 1 hour = 3600 seconds
-        'display'  => __('Every 1 Hour')
+    $schedules['every_24_hours'] = [
+        'interval' => 86400, // 24 hours = 86400 seconds
+        'display'  => __('Every 24 Hours')
     ];
     return $schedules;
 });
 
 // Schedule event if not scheduled
 if (!wp_next_scheduled('rentcast_update_cron')) {
-    wp_schedule_event(time(), 'every_hour', 'rentcast_update_cron');
+    wp_schedule_event(time(), 'every_24_hours', 'rentcast_update_cron');
 }
 
 // Hook the function
