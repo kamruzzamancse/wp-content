@@ -80,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Store current client and properties IDs for form submission
         if (window.currentClientData) {
             currentClientId = window.currentClientData.client_id;
-            currentPropertiesId = window.currentClientData.properties_id;
+            currentPropertiesId = window.currentClientData.property_id;
             console.log("📋 Setting IDs - Client:", currentClientId, "Properties:", currentPropertiesId);
         }
 
@@ -166,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function () {
             formData.append('action', 'rt_add_document');
             formData.append('nonce', rtClientAjax.edit_nonce);
             formData.append('client_id', currentClientId || '');
-            formData.append('properties_id', currentPropertiesId || '');
+            formData.append('property_id', currentPropertiesId || '');
 
             // AJAX submission
             fetch(rtClientAjax.ajax_url, {
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log("✅ Document saved successfully");
+                    console.log("Document saved successfully");
                     alert('Document saved successfully!');
                     
                     // Close modal and reset form

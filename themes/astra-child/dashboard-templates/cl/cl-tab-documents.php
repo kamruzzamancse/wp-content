@@ -48,7 +48,7 @@ $current_user_id = get_current_user_id();
                 $task = $wpdb->get_row($wpdb->prepare("
                     SELECT t.id AS task_id, t.document_id, t.created_at
                     FROM {$assigned_task_table} t
-                    WHERE t.client_id = %d AND t.properties_id = %d
+                    WHERE t.client_id = %d AND t.property_id = %d
                     ORDER BY t.id DESC LIMIT 1
                 ", $row->client_id, $row->property_id));
 

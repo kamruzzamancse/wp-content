@@ -28,7 +28,7 @@ function rt_handle_document_upload($file_field) {
 }
 
 // ---------------------
-// Add Document - UPDATED with properties_id
+// Add Document - UPDATED with property_id
 // ---------------------
 add_action('wp_ajax_rt_add_document', 'rt_add_document_callback');
 function rt_add_document_callback() {
@@ -39,7 +39,7 @@ function rt_add_document_callback() {
     $title = sanitize_text_field($_POST['title'] ?? '');
     $type_id = intval($_POST['type_id'] ?? 0);
     $client_id = intval($_POST['client_id'] ?? 0);
-    $properties_id = intval($_POST['properties_id'] ?? 0);
+    $property_id = intval($_POST['property_id'] ?? 0);
 
     if (!$title || !$type_id || empty($_FILES['file_name']['name'])) {
         wp_send_json_error('Title, document type and file are required.');
@@ -52,7 +52,7 @@ function rt_add_document_callback() {
         'title'         => $title,
         'type_id'       => $type_id,
         'client_id'     => $client_id ?: NULL,
-        'properties_id' => $properties_id ?: NULL,
+        'property_id' => $property_id ?: NULL,
         'file_name'     => $uploaded_path,
         'created_at'    => current_time('mysql'),
         'created_by'    => get_current_user_id()
@@ -68,7 +68,7 @@ function rt_add_document_callback() {
 }
 
 // ---------------------
-// Update Document - UPDATED with properties_id
+// Update Document - UPDATED with property_id
 // ---------------------
 add_action('wp_ajax_rt_update_document', 'rt_update_document_callback');
 function rt_update_document_callback() {
@@ -80,7 +80,7 @@ function rt_update_document_callback() {
     $title = sanitize_text_field($_POST['title'] ?? '');
     $type_id = intval($_POST['type_id'] ?? 0);
     $client_id = intval($_POST['client_id'] ?? 0);
-    $properties_id = intval($_POST['properties_id'] ?? 0);
+    $property_id = intval($_POST['property_id'] ?? 0);
 
     if (!$id || !$title || !$type_id) {
         wp_send_json_error('Invalid data.');
@@ -90,7 +90,7 @@ function rt_update_document_callback() {
         'title'         => $title,
         'type_id'       => $type_id,
         'client_id'     => $client_id ?: NULL,
-        'properties_id' => $properties_id ?: NULL,
+        'property_id' => $property_id ?: NULL,
         'updated_at'    => current_time('mysql'),
         'updated_by'    => get_current_user_id()
     ];

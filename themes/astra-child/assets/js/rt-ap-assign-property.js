@@ -158,7 +158,7 @@ jQuery(document).ready(function($) {
             
             const uploadModal = $('#cl-upload-document-modal');
             if (uploadModal.length) {
-                $('input[name="properties_id"]').val(assignmentId);
+                $('input[name="property_id"]').val(assignmentId);
                 uploadModal.show();
                 $('#upload-document-form')[0].reset();
                 $('#selected-file-name').hide();
@@ -199,7 +199,7 @@ jQuery(document).ready(function($) {
             e.preventDefault();
             
             const formData = new FormData(this);
-            const assignmentId = $('input[name="properties_id"]').val();
+            const assignmentId = $('input[name="property_id"]').val();
 
             $.ajax({
                 url: rtAssignPropertyAjax.ajax_url,

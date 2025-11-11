@@ -23,9 +23,9 @@ function rt_upload_document_handler() {
     $title          = sanitize_text_field($_POST['title'] ?? '');
     $type_id        = intval($_POST['type_id'] ?? 0);
     $client_id      = intval($_POST['client_id'] ?? 0);
-    $properties_id  = intval($_POST['properties_id'] ?? 0);
+    $property_id  = intval($_POST['property_id'] ?? 0);
 
-    if (empty($title) || empty($type_id) || empty($client_id) || empty($properties_id)) {
+    if (empty($title) || empty($type_id) || empty($client_id) || empty($property_id)) {
         wp_send_json_error(['message' => 'Please fill all required fields.']);
     }
 
@@ -69,14 +69,14 @@ function rt_upload_document_handler() {
 
     /*
     ===========================================================
-    CHECK IF DOCUMENT EXISTS (client_id + properties_id)
+    CHECK IF DOCUMENT EXISTS (client_id + property_id)
     ===========================================================
     */
     $existing_doc = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT id FROM $documents_table 
-             WHERE client_id=%d AND properties_id=%d LIMIT 1",
-            $client_id, $properties_id
+             WHERE client_id=%d AND property_id=%d LIMIT 1",
+            $client_id, $property_id
         )
     );
 
@@ -108,7 +108,7 @@ function rt_upload_document_handler() {
                 'title'         => $title,
                 'type_id'       => $type_id,
                 'client_id'     => $client_id,
-                'properties_id' => $properties_id,
+                'property_id' => $property_id,
                 'file_name'     => $file_url,
                 'created_at'    => $now,
                 'created_by'    => $current_user
@@ -124,14 +124,14 @@ function rt_upload_document_handler() {
 
     /*
     ===========================================================
-    CHECK IF ASSIGNED TASK EXISTS (client_id + properties_id)
+    CHECK IF ASSIGNED TASK EXISTS (client_id + property_id)
     ===========================================================
     */
     $existing_assign = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT id FROM $assigned_table 
-             WHERE client_id=%d AND properties_id=%d LIMIT 1",
-            $client_id, $properties_id
+             WHERE client_id=%d AND property_id=%d LIMIT 1",
+            $client_id, $property_id
         )
     );
 
@@ -154,7 +154,7 @@ function rt_upload_document_handler() {
             $assigned_table,
             [
                 'client_id'     => $client_id,
-                'properties_id' => $properties_id,
+                'property_id' => $property_id,
                 'document_id'   => $document_id,
                 'created_at'    => $now,
                 'created_by'    => $current_user

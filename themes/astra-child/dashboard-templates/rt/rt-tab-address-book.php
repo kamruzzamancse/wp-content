@@ -147,26 +147,15 @@ include locate_template('dashboard-templates/rt/rt-ab-client-details-modal.php')
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-
-  // =========================
-  // Elements
-  // =========================
   const exportModal = document.getElementById('abExportModal');
   const importModal = document.getElementById('abImportModal');
   const exportStatus = document.getElementById('abExportStatus');
   const importStatus = document.getElementById('abImportStatus');
-
   const importFileInput = document.getElementById('abImportFileInput');
   const importStartBtn = document.getElementById('abImportStart');
 
-  // =========================
-  // Helper Functions
-  // =========================
   const closeModal = (modal) => { modal.style.display = 'none'; };
-  const showNotification = (msg, type='success') => {
-    // Replace with your actual notification function
-    console.log(type.toUpperCase(), msg);
-  };
+  const showNotification = (msg, type='success') => { console.log(type.toUpperCase(), msg); };
 
   const refreshClientsTable = async () => {
     if (typeof window.fetchClients === 'function') {
@@ -180,9 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // =========================
   // Modal Open/Close
-  // =========================
   document.getElementById('openAbExportModal')?.addEventListener('click', () => exportModal.style.display = 'flex');
   document.getElementById('abExportClose')?.addEventListener('click', () => closeModal(exportModal));
   document.getElementById('abExportCancel')?.addEventListener('click', () => closeModal(exportModal));
@@ -193,9 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('abImportCancel')?.addEventListener('click', () => closeModal(importModal));
   importModal?.addEventListener('click', e => { if (e.target === importModal) closeModal(importModal); });
 
-  // =========================
   // Enable import button on file select
-  // =========================
   importFileInput?.addEventListener('change', () => {
     if (importFileInput.files && importFileInput.files.length > 0) {
       importStartBtn.disabled = false;
@@ -206,14 +191,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // =========================
   // Export Clients
-  // =========================
   document.getElementById('abExportStart')?.addEventListener('click', async () => {
     const format = document.querySelector('input[name="ab_export_format"]:checked')?.value || 'csv';
     const scope = document.querySelector('input[name="ab_export_scope"]:checked')?.value || 'current';
     const columns = Array.from(document.querySelectorAll('input[name="ab_export_columns"]:checked')).map(el => el.value);
-
     exportStatus.textContent = 'Exporting...';
 
     try {
@@ -227,9 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
       if (!response.ok) throw new Error('Network response not ok');
       const data = await response.json();
-
       if (!data.success) throw new Error(data.data?.message || data.data || 'Export failed');
-
       const clients = data.data.clients || [];
 
       if (format === 'csv') {
@@ -274,9 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // =========================
-  // Import Clients - FIXED VERSION
-  // =========================
+  // Import Clients
   importStartBtn?.addEventListener('click', async () => {
       if (!importFileInput.files || importFileInput.files.length === 0) {
           importStatus.textContent = 'Please select a file.';
@@ -292,34 +270,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
           const formData = new FormData();
-          formData.append('action', 'import_clients_ajax'); // Fixed action name
+          formData.append('action', 'import_clients_ajax');
           formData.append('nonce', rtClientAjax.import_nonce);
           formData.append('clients_file', file);
           formData.append('duplicate_handling', duplicateHandling);
 
-          const response = await fetch(rtClientAjax.ajax_url, { 
-              method: 'POST', 
-              body: formData 
-          });
-
-          if (!response.ok) {
-              throw new Error('Network response not ok: ' + response.status);
-          }
+          const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+          if (!response.ok) throw new Error('Network response not ok: ' + response.status);
 
           const data = await response.json();
-
           if (data.success) {
               const message = data.data?.message || 'Import successful!';
               importStatus.textContent = message;
               showNotification(message);
-
-              // Refresh table
               await refreshClientsTable();
-
-              // Reset and close
               importFileInput.value = '';
               setTimeout(() => closeModal(importModal), 1500);
-
           } else {
               const errMsg = data.data?.message || data.data || 'Unknown error occurred';
               importStatus.textContent = 'Import failed: ' + errMsg;
@@ -335,7 +301,6 @@ document.addEventListener('DOMContentLoaded', () => {
           importStartBtn.textContent = 'Import';
       }
   });
-
 });
 </script>
 

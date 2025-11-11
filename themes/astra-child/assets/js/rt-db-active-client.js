@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     pagination.appendChild(btn);
                 }
             } else {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No active clients found</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No active clients found</td></tr>`;
             }
         } catch (err) {
             console.error('Fetch clients error', err);

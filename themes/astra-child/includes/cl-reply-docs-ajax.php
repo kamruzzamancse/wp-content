@@ -18,12 +18,12 @@ function cl_upload_reply_doc_handler() {
     $reply_docs_table  = $wpdb->prefix . 'reply_docs';
 
     $client_id        = intval($_POST['client_id'] ?? 0);
-    $properties_id    = intval($_POST['properties_id'] ?? 0);
+    $property_id    = intval($_POST['property_id'] ?? 0);
     $assigned_task_id = intval($_POST['assigned_task_id'] ?? 0);
     $title            = sanitize_text_field($_POST['title'] ?? '');
     $type_id          = intval($_POST['type_id'] ?? 0);
 
-    if (!$client_id || !$properties_id || !$assigned_task_id || !$title || !$type_id) {
+    if (!$client_id || !$property_id || !$assigned_task_id || !$title || !$type_id) {
         wp_send_json_error(['message' => 'Please fill all required fields.']);
         wp_die();
     }
@@ -58,8 +58,8 @@ function cl_upload_reply_doc_handler() {
 
     // Check existing document (client+property)
     $existing_doc = $wpdb->get_row($wpdb->prepare("
-        SELECT id FROM $documents_table WHERE client_id=%d AND properties_id=%d AND deleted_at IS NULL LIMIT 1
-    ", $client_id, $properties_id));
+        SELECT id FROM $documents_table WHERE client_id=%d AND property_id=%d AND deleted_at IS NULL LIMIT 1
+    ", $client_id, $property_id));
 
     if ($existing_doc) {
         $wpdb->update(
@@ -84,7 +84,7 @@ function cl_upload_reply_doc_handler() {
                 'title'        => $title,
                 'type_id'      => $type_id,
                 'client_id'    => $client_id,
-                'properties_id'=> $properties_id,
+                'property_id'=> $property_id,
                 'file_name'    => $file_url,
                 'doc_type'     => 'reply',
                 'created_at'   => $now,
@@ -103,8 +103,8 @@ function cl_upload_reply_doc_handler() {
     // Check existing reply doc
     $existing_reply = $wpdb->get_row($wpdb->prepare("
         SELECT id FROM $reply_docs_table
-        WHERE client_id=%d AND properties_id=%d AND assigned_task_id=%d AND deleted_at IS NULL LIMIT 1
-    ", $client_id, $properties_id, $assigned_task_id));
+        WHERE client_id=%d AND property_id=%d AND assigned_task_id=%d AND deleted_at IS NULL LIMIT 1
+    ", $client_id, $property_id, $assigned_task_id));
 
     if ($existing_reply) {
         $wpdb->update(
@@ -124,7 +124,7 @@ function cl_upload_reply_doc_handler() {
             [
                 'assigned_task_id' => $assigned_task_id,
                 'client_id'        => $client_id,
-                'properties_id'    => $properties_id,
+                'property_id'    => $property_id,
                 'document_id'      => $document_id,
                 'created_at'       => $now,
                 'created_by'       => $current_user

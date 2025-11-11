@@ -55,6 +55,15 @@
                                 <option value="active">Active</option>
                             </select>
                         </div>
+
+                        <!-- Property Search -->
+                        <div class="create-detail-row-realtor-client" style="position:relative;">
+                            <label for="create_realtor_client_property">Select Property:</label>
+                            <input type="text" id="create_realtor_client_property" name="realtor_client_property" placeholder="Search property address..." autocomplete="off">
+                            <!-- property_id field added explicitly -->
+                            <input type="hidden" id="create_realtor_client_property_id" name="property_id">
+                            <div id="property_suggestions" class="suggestions-box"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -76,6 +85,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('createRealtorClientForm');
     const profileInput = document.getElementById('create_realtor_client_profile_picture');
     const previewAvatar = document.getElementById('createRealtorClientPreviewAvatar');
+    const propertyInput = document.getElementById('create_realtor_client_property');
+    const propertyIdInput = document.getElementById('create_realtor_client_property_id');
+    const suggestionsBox = document.getElementById('property_suggestions');
 
     // Open modal
     if(addContactBtn && createModal){
@@ -105,7 +117,48 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // AJAX submit
+    // Property search AJAX
+    if(propertyInput){
+        propertyInput.addEventListener('keyup', function(){
+            const keyword = this.value.trim();
+            if(keyword.length > 1){
+                const data = new FormData();
+                data.append('action','search_properties');
+                data.append('keyword', keyword);
+                data.append('nonce', rtClientAjax.create_nonce);
+                
+                fetch(rtClientAjax.ajax_url, {
+                    method:'POST',
+                    body:data
+                })
+                .then(res => res.json())
+                .then(result => {
+                    if(result.success){
+                        suggestionsBox.innerHTML = result.data.html;
+                        suggestionsBox.style.display = 'block';
+                    } else {
+                        suggestionsBox.innerHTML = '<div class="property-suggestion">No results found</div>';
+                        suggestionsBox.style.display = 'block';
+                    }
+                });
+            } else {
+                suggestionsBox.style.display = 'none';
+            }
+        });
+    }
+
+    // Click suggestion
+    document.addEventListener('click', function(e){
+        if(e.target && e.target.classList.contains('property-suggestion')){
+            propertyInput.value = e.target.textContent;
+            propertyIdInput.value = e.target.dataset.id;
+            suggestionsBox.style.display = 'none';
+        } else if(!e.target.closest('#property_suggestions') && e.target !== propertyInput){
+            suggestionsBox.style.display = 'none';
+        }
+    });
+
+    // AJAX submit - UPDATED to include property_id explicitly
     if(form){
         form.addEventListener('submit', async function(e){
             e.preventDefault();
@@ -115,8 +168,19 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.textContent = 'Creating...';
 
             const formData = new FormData(form);
+            
+            // Add property_id explicitly to ensure it's sent
+            const propertyId = document.getElementById('create_realtor_client_property_id').value;
+            formData.append('property_id', propertyId);
+            formData.append('realtor_client_property_id', propertyId);
+            
             formData.append('action', 'create_realtor_client_ajax');
             formData.append('nonce', rtClientAjax.create_nonce);
+
+            // Debug: log form data
+            for (let [key, value] of formData.entries()) {
+                console.log('Form Data:', key + ': ' + value);
+            }
 
             try {
                 const response = await fetch(rtClientAjax.ajax_url, {
@@ -129,6 +193,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Client created successfully!');
                     form.reset();
                     previewAvatar.src = rtClientAjax.default_avatar;
+                    propertyIdInput.value = '';
                     createModal.style.display = 'none';
                     
                     // Refresh clients table if function exists
@@ -171,5 +236,8 @@ document.addEventListener('DOMContentLoaded', function() {
 .create-detail-row-realtor-client { margin-bottom:18px; display:flex; flex-direction:column; }
 .create-submit-btn-realtor-client { background-color:#0052cc; border:none; color:white; padding:10px 25px; font-size:1.1rem; border-radius:8px; cursor:pointer; transition: background-color 0.25s ease; }
 .create-submit-btn-realtor-client:hover { background-color:#003d99; }
+.suggestions-box{ border:1px solid #ccc; max-height:200px; overflow-y:auto; position:absolute; background:#fff; width:100%; z-index:999; display:none;}
+.property-suggestion{ padding:5px; cursor:pointer;}
+.property-suggestion:hover{ background:#f0f0f0;}
 @media (max-width:600px){ .create-content-realtor-client { flex-direction:column; } .create-pic-container-realtor-client { margin:0 auto 25px auto; } }
 </style>

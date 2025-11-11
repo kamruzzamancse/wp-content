@@ -7,7 +7,7 @@ jQuery(document).ready(function($){
 
         $('#cl-upload-document-modal').addClass('show');
         $('#cl-upload-document-form input[name="client_id"]').val(clientId);
-        $('#cl-upload-document-form input[name="properties_id"]').val(propertyId);
+        $('#cl-upload-document-form input[name="property_id"]').val(propertyId);
         $('#cl-upload-document-form input[name="assigned_task_id"]').val(assignedTaskId);
 
         $('#cl-selected-file-name').text('');

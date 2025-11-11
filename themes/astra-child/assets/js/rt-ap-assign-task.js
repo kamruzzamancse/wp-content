@@ -17,7 +17,7 @@ jQuery(document).ready(function($){
 
         $('#rt-upload-document-modal').addClass('show');
         $('#upload-document-form input[name="client_id"]').val(clientId);
-        $('#upload-document-form input[name="properties_id"]').val(propertyId);
+        $('#upload-document-form input[name="property_id"]').val(propertyId);
 
         // Clear previous messages
         $('#upload-message').remove();

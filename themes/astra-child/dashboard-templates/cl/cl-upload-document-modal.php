@@ -8,7 +8,7 @@
         <form id="cl-upload-document-form" class="clup-form" enctype="multipart/form-data">
             <input type="hidden" name="document_id" value="">
             <input type="hidden" name="client_id" value="">
-            <input type="hidden" name="properties_id" value="">
+            <input type="hidden" name="property_id" value="">
             <input type="hidden" name="assigned_task_id" value="">
 
             <div class="clup-row-single">

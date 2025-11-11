@@ -44,7 +44,7 @@ function redbm_create_tables() {
     $tables[] = "CREATE TABLE {$wpdb->prefix}clients (
         client_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         user_id BIGINT(20) UNSIGNED NULL,
-        properties_id BIGINT(20) UNSIGNED NULL,
+        property_id BIGINT(20) UNSIGNED NULL,
         full_name VARCHAR(255) NOT NULL,
         email VARCHAR(255) NOT NULL,
         phone VARCHAR(50),
@@ -84,11 +84,11 @@ function redbm_create_tables() {
     $tables[] = "CREATE TABLE {$wpdb->prefix}saved_properties (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         client_id BIGINT(20) UNSIGNED NOT NULL,
-        properties_id BIGINT(20) UNSIGNED NOT NULL,
+        property_id BIGINT(20) UNSIGNED NOT NULL,
         saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         KEY client_id (client_id),
-        KEY properties_id (properties_id)
+        KEY property_id (property_id)
     ) $charset_collate;";
 
     // Inquiries table (client ↔ realtor ↔ property)
@@ -96,7 +96,7 @@ function redbm_create_tables() {
         inquiry_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         client_id BIGINT(20) UNSIGNED NOT NULL,
         realtor_id BIGINT(20) UNSIGNED NOT NULL,
-        properties_id BIGINT(20) UNSIGNED NOT NULL,
+        property_id BIGINT(20) UNSIGNED NOT NULL,
         message TEXT NOT NULL,
         reply TEXT,
         status ENUM('open','closed') DEFAULT 'open',
@@ -104,7 +104,7 @@ function redbm_create_tables() {
         PRIMARY KEY (inquiry_id),
         KEY client_id (client_id),
         KEY realtor_id (realtor_id),
-        KEY properties_id (properties_id)
+        KEY property_id (property_id)
     ) $charset_collate;";
 
     // Document Types Table
@@ -141,7 +141,7 @@ function redbm_create_tables() {
     $tables[] = "CREATE TABLE {$wpdb->prefix}assigned_property (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         client_id BIGINT(20) UNSIGNED NOT NULL,
-        properties_id BIGINT(20) UNSIGNED NOT NULL,
+        property_id BIGINT(20) UNSIGNED NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         created_by BIGINT(20) UNSIGNED DEFAULT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -154,7 +154,7 @@ function redbm_create_tables() {
     $tables[] = "CREATE TABLE {$wpdb->prefix}assigned_tasks (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         client_id BIGINT(20) UNSIGNED NOT NULL,
-        properties_id BIGINT(20) UNSIGNED NOT NULL,
+        property_id BIGINT(20) UNSIGNED NOT NULL,
         document_id BIGINT(20) UNSIGNED DEFAULT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         created_by BIGINT(20) UNSIGNED DEFAULT NULL,
