@@ -339,7 +339,7 @@ function rt_export_clients_ajax() {
 add_action('wp_ajax_export_clients_ajax', 'rt_export_clients_ajax');
 
 // =====================
-// Import Clients (CSV) - Improved with WP user creation & Option B behavior
+// Import Clients (CSV/XLSX) - Improved with WP user creation & Option B behavior
 // =====================
 function rt_import_clients_ajax() {
     rt_client_current_user_required();
@@ -357,19 +357,51 @@ function rt_import_clients_ajax() {
     $filename = $_FILES['clients_file']['name'];
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-    if ($ext !== 'csv') {
-        wp_send_json_error('Unsupported file type. Please use CSV format.');
+    // Support both CSV and XLSX
+    if ($ext === 'csv') {
+        $clients = rt_parse_csv_file($file);
+    } elseif ($ext === 'xlsx') {
+        if (!class_exists('\PhpOffice\PhpSpreadsheet\IOFactory')) {
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            // Adjust path if PhpSpreadsheet is installed via composer
+            require_once WP_CONTENT_DIR . '/vendor/autoload.php';
+        }
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+            $sheet = $spreadsheet->getActiveSheet();
+            $data = $sheet->toArray(null, true, true, true);
+            $clients = [];
+
+            // Normalize header row
+            $headers = array_map('strtolower', array_map('trim', $data[1] ?? []));
+            unset($data[1]);
+
+            foreach ($data as $row) {
+                $client = [];
+                $i = 0;
+                foreach ($headers as $key => $header) {
+                    $value = trim($row[$key]);
+                    if (!empty($header)) {
+                        $client[$header] = $value;
+                    }
+                }
+                $clients[] = $client;
+            }
+        } catch (Exception $e) {
+            wp_send_json_error('Failed to read Excel file: ' . $e->getMessage());
+        }
+    } else {
+        wp_send_json_error('Unsupported file type. Please use CSV or Excel (.xlsx) format.');
     }
 
-    $clients = rt_parse_csv_file($file);
     if (empty($clients)) {
-        wp_send_json_error('No valid data found in CSV file.');
+        wp_send_json_error('No valid data found in uploaded file.');
     }
 
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
     $current_user_id = get_current_user_id();
-    $duplicate_handling = sanitize_text_field($_POST['duplicate_handling'] ?? 'skip'); // 'skip' or 'update' or 'create' etc.
+    $duplicate_handling = sanitize_text_field($_POST['duplicate_handling'] ?? 'skip'); // 'skip' or 'update' or 'create'
 
     $inserted = 0;
     $updated = 0;
@@ -379,14 +411,12 @@ function rt_import_clients_ajax() {
     foreach ($clients as $index => $row) {
         $row_num = $index + 1;
 
-        // Normalize common column names
         $full_name = sanitize_text_field($row['full_name'] ?? $row['name'] ?? $row['client_name'] ?? '');
         $email     = sanitize_email($row['email'] ?? '');
         $phone     = sanitize_text_field($row['phone'] ?? $row['mobile'] ?? $row['phone_number'] ?? '');
         $note      = sanitize_textarea_field($row['note'] ?? $row['notes'] ?? '');
         $status    = sanitize_text_field($row['status'] ?? 'active');
 
-        // Basic validation
         if (empty($full_name) || empty($email)) {
             $errors[] = "Row {$row_num}: Missing required fields (name or email).";
             $skipped++;
@@ -398,7 +428,6 @@ function rt_import_clients_ajax() {
             continue;
         }
 
-        // OPTION B: If email already exists in wp_users => skip this row and report error
         $existing_wp_user_id = email_exists($email);
         if ($existing_wp_user_id) {
             $errors[] = "Row {$row_num}: User with this email already exists in wp_users (email: {$email}).";
@@ -406,7 +435,6 @@ function rt_import_clients_ajax() {
             continue;
         }
 
-        // Check phone uniqueness in clients table (if phone provided)
         if (!empty($phone)) {
             $phone_exists = $wpdb->get_var($wpdb->prepare(
                 "SELECT client_id FROM {$table} WHERE phone = %s AND deleted_at IS NULL",
@@ -419,13 +447,11 @@ function rt_import_clients_ajax() {
             }
         }
 
-        // Check existing client by email in wp_clients
         $existing_client_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT client_id, user_id FROM {$table} WHERE email = %s AND deleted_at IS NULL",
+            "SELECT client_id FROM {$table} WHERE email = %s AND deleted_at IS NULL",
             $email
         ));
 
-        // If client exists and duplicate handling is 'update', update client record
         if ($existing_client_id && $duplicate_handling === 'update') {
             $update_data = [
                 'full_name'   => $full_name,
@@ -435,8 +461,7 @@ function rt_import_clients_ajax() {
                 'updated_at'  => current_time('mysql'),
                 'updated_by'  => $current_user_id
             ];
-            $format = ['%s','%s','%s','%s','%s','%d'];
-            $res = $wpdb->update($table, $update_data, ['client_id' => $existing_client_id], $format, ['%d']);
+            $res = $wpdb->update($table, $update_data, ['client_id' => $existing_client_id]);
             if ($res !== false) {
                 $updated++;
             } else {
@@ -445,15 +470,12 @@ function rt_import_clients_ajax() {
             continue;
         }
 
-        // If client exists and duplicate handling is 'skip' (default), skip row
         if ($existing_client_id && $duplicate_handling !== 'update') {
             $errors[] = "Row {$row_num}: Client already exists (email: {$email}), skipped.";
             $skipped++;
             continue;
         }
 
-        // At this point: email is NOT present in wp_users and no conflicting phone (or phone empty)
-        // Create WP user for this client
         $password = wp_generate_password(12, false);
         $user_id = wp_create_user($email, $password, $email);
         if (is_wp_error($user_id)) {
@@ -462,17 +484,14 @@ function rt_import_clients_ajax() {
             continue;
         }
 
-        // Update WP user display name
         wp_update_user([
             'ID' => $user_id,
             'display_name' => $full_name,
             'first_name' => $full_name
         ]);
-        // Optionally set role
         $wp_user = new WP_User($user_id);
         $wp_user->set_role('client');
 
-        // Insert into wp_clients
         $insert_data = [
             'full_name'     => $full_name,
             'email'         => $email,
@@ -483,11 +502,9 @@ function rt_import_clients_ajax() {
             'created_at'    => current_time('mysql'),
             'created_by'    => $current_user_id
         ];
-        $format = ['%s','%s','%s','%s','%s','%d','%s','%d'];
 
-        $insert_res = $wpdb->insert($table, $insert_data, $format);
+        $insert_res = $wpdb->insert($table, $insert_data);
         if ($insert_res === false) {
-            // If DB insert fails, cleanup the created WP user to avoid orphan user
             wp_delete_user($user_id);
             $errors[] = "Row {$row_num}: Failed to insert client record into DB for {$email}. DB error: " . $wpdb->last_error;
             $skipped++;

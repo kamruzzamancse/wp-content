@@ -145,6 +145,9 @@ include locate_template('dashboard-templates/rt/rt-ab-client-details-modal.php')
   </div>
 </div>
 
+<!-- XLSX library (required for Excel parsing) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const exportModal = document.getElementById('abExportModal');
@@ -153,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const importStatus = document.getElementById('abImportStatus');
   const importFileInput = document.getElementById('abImportFileInput');
   const importStartBtn = document.getElementById('abImportStart');
+  const importPreview = document.getElementById('abImportPreview');
 
   const closeModal = (modal) => { modal.style.display = 'none'; };
   const showNotification = (msg, type='success') => { console.log(type.toUpperCase(), msg); };
@@ -169,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Modal Open/Close
+  // ===== MODAL OPEN/CLOSE =====
   document.getElementById('openAbExportModal')?.addEventListener('click', () => exportModal.style.display = 'flex');
   document.getElementById('abExportClose')?.addEventListener('click', () => closeModal(exportModal));
   document.getElementById('abExportCancel')?.addEventListener('click', () => closeModal(exportModal));
@@ -180,18 +184,53 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('abImportCancel')?.addEventListener('click', () => closeModal(importModal));
   importModal?.addEventListener('click', e => { if (e.target === importModal) closeModal(importModal); });
 
-  // Enable import button on file select
-  importFileInput?.addEventListener('change', () => {
-    if (importFileInput.files && importFileInput.files.length > 0) {
+  // ===== ENABLE IMPORT BUTTON =====
+  importFileInput?.addEventListener('change', async () => {
+    importPreview.innerHTML = 'Loading preview...';
+    importStatus.textContent = '';
+    importStartBtn.disabled = true;
+
+    if (!importFileInput.files || importFileInput.files.length === 0) {
+      importPreview.textContent = 'No file selected';
+      return;
+    }
+
+    const file = importFileInput.files[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    try {
+      if (ext === 'csv') {
+        const text = await file.text();
+        const rows = text.split('\n').slice(0, 5).map(r => r.split(','));
+        importPreview.innerHTML = `
+          <table class="ab-preview-table">
+            ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+          </table>
+        `;
+      } else if (ext === 'xlsx') {
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
+        const previewRows = rows.slice(0, 5);
+        importPreview.innerHTML = `
+          <table class="ab-preview-table">
+            ${previewRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+          </table>
+        `;
+      } else {
+        importPreview.textContent = 'Unsupported file format.';
+        return;
+      }
+
+      importStatus.textContent = `Selected file: ${file.name}`;
       importStartBtn.disabled = false;
-      importStatus.textContent = `Selected file: ${importFileInput.files[0].name}`;
-    } else {
-      importStartBtn.disabled = true;
-      importStatus.textContent = 'No file selected';
+    } catch (err) {
+      importPreview.textContent = 'Failed to preview file: ' + err.message;
     }
   });
 
-  // Export Clients
+  // ===== EXPORT CLIENTS =====
   document.getElementById('abExportStart')?.addEventListener('click', async () => {
     const format = document.querySelector('input[name="ab_export_format"]:checked')?.value || 'csv';
     const scope = document.querySelector('input[name="ab_export_scope"]:checked')?.value || 'current';
@@ -254,52 +293,64 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Import Clients
+  // ===== IMPORT CLIENTS =====
   importStartBtn?.addEventListener('click', async () => {
-      if (!importFileInput.files || importFileInput.files.length === 0) {
-          importStatus.textContent = 'Please select a file.';
-          return;
+    if (!importFileInput.files || importFileInput.files.length === 0) {
+      importStatus.textContent = 'Please select a file.';
+      return;
+    }
+
+    let file = importFileInput.files[0];
+    const duplicateHandling = document.querySelector('input[name="ab_import_duplicate"]:checked')?.value || 'skip';
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    importStartBtn.disabled = true;
+    importStartBtn.textContent = 'Importing...';
+    importStatus.textContent = 'Importing...';
+
+    try {
+      // Convert XLSX → CSV if PHP backend only supports CSV
+      if (ext === 'xlsx') {
+        importStatus.textContent = 'Converting Excel to CSV...';
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+        const csv = XLSX.utils.sheet_to_csv(firstSheet);
+        const csvBlob = new Blob([csv], { type: 'text/csv' });
+        file = new File([csvBlob], file.name.replace('.xlsx', '.csv'), { type: 'text/csv' });
       }
 
-      const file = importFileInput.files[0];
-      const duplicateHandling = document.querySelector('input[name="ab_import_duplicate"]:checked')?.value || 'skip';
+      const formData = new FormData();
+      formData.append('action', 'import_clients_ajax');
+      formData.append('nonce', rtClientAjax.import_nonce);
+      formData.append('clients_file', file);
+      formData.append('duplicate_handling', duplicateHandling);
 
-      importStartBtn.disabled = true;
-      importStartBtn.textContent = 'Importing...';
-      importStatus.textContent = 'Importing...';
+      const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
+      if (!response.ok) throw new Error('Network response not ok: ' + response.status);
 
-      try {
-          const formData = new FormData();
-          formData.append('action', 'import_clients_ajax');
-          formData.append('nonce', rtClientAjax.import_nonce);
-          formData.append('clients_file', file);
-          formData.append('duplicate_handling', duplicateHandling);
-
-          const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-          if (!response.ok) throw new Error('Network response not ok: ' + response.status);
-
-          const data = await response.json();
-          if (data.success) {
-              const message = data.data?.message || 'Import successful!';
-              importStatus.textContent = message;
-              showNotification(message);
-              await refreshClientsTable();
-              importFileInput.value = '';
-              setTimeout(() => closeModal(importModal), 1500);
-          } else {
-              const errMsg = data.data?.message || data.data || 'Unknown error occurred';
-              importStatus.textContent = 'Import failed: ' + errMsg;
-              showNotification('Import failed: ' + errMsg, 'error');
-          }
-
-      } catch (error) {
-          console.error('Import error:', error);
-          importStatus.textContent = 'Import failed: ' + error.message;
-          showNotification('Import failed: ' + error.message, 'error');
-      } finally {
-          importStartBtn.disabled = false;
-          importStartBtn.textContent = 'Import';
+      const data = await response.json();
+      if (data.success) {
+        const message = data.data?.message || 'Import successful!';
+        importStatus.textContent = message;
+        showNotification(message);
+        await refreshClientsTable();
+        importFileInput.value = '';
+        importPreview.innerHTML = 'No file selected';
+        setTimeout(() => closeModal(importModal), 1500);
+      } else {
+        const errMsg = data.data?.message || data.data || 'Unknown error occurred';
+        importStatus.textContent = 'Import failed: ' + errMsg;
+        showNotification('Import failed: ' + errMsg, 'error');
       }
+    } catch (error) {
+      console.error('Import error:', error);
+      importStatus.textContent = 'Import failed: ' + error.message;
+      showNotification('Import failed: ' + error.message, 'error');
+    } finally {
+      importStartBtn.disabled = false;
+      importStartBtn.textContent = 'Import';
+    }
   });
 });
 </script>

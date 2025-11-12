@@ -3,12 +3,12 @@ if (!defined('ABSPATH')) exit;
 
 global $wpdb;
 
-$clients_table        = $wpdb->prefix . 'clients';
-$properties_table     = $wpdb->prefix . 'rentcast_properties';
-$assigned_table       = $wpdb->prefix . 'assigned_property';
-$assigned_task_table  = $wpdb->prefix . 'assigned_tasks';
-$documents_table      = $wpdb->prefix . 'documents';
-$reply_docs_table     = $wpdb->prefix . 'reply_docs';
+$clients_table             = $wpdb->prefix . 'clients';
+$rentcast_properties_table = $wpdb->prefix . 'rentcast_properties';
+$assigned_property_table   = $wpdb->prefix . 'assigned_property';
+$assigned_tasks_table      = $wpdb->prefix . 'assigned_tasks';
+$documents_table           = $wpdb->prefix . 'documents';
+$reply_docs_table          = $wpdb->prefix . 'reply_docs';
 
 $current_user_id = get_current_user_id();
 ?>
@@ -33,9 +33,9 @@ $current_user_id = get_current_user_id();
         $results = $wpdb->get_results($wpdb->prepare("
             SELECT a.id, a.client_id, a.property_id, a.created_at,
                    c.full_name, p.address
-            FROM {$assigned_table} a
+            FROM {$assigned_property_table} a
             LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
-            LEFT JOIN {$properties_table} p ON a.property_id = p.id
+            LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
             WHERE a.deleted_at IS NULL
               AND c.user_id = %d
             ORDER BY a.created_at DESC
@@ -47,7 +47,7 @@ $current_user_id = get_current_user_id();
                 // Assigned Task & Document
                 $task = $wpdb->get_row($wpdb->prepare("
                     SELECT t.id AS task_id, t.document_id, t.created_at
-                    FROM {$assigned_task_table} t
+                    FROM {$assigned_tasks_table} t
                     WHERE t.client_id = %d AND t.property_id = %d
                     ORDER BY t.id DESC LIMIT 1
                 ", $row->client_id, $row->property_id));

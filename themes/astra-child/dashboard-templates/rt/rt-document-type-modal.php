@@ -6,7 +6,7 @@
     <button class="clup-close-btn" aria-label="Close modal">&times;</button>
 
     <!-- Modal Header -->
-    <h1 id="cl-add-doc-type-title" class="clup-title">Add Document Type</h1>
+    <h1 id="cl-add-doc-type-title" class="clup-title">Add Document Type</h1> <br>
 
     <!-- Form -->
     <form id="add-doc-type-form" class="clup-form" novalidate>

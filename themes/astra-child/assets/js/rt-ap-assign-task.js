@@ -1,4 +1,5 @@
 jQuery(document).ready(function($){
+
     // Trigger browse input
     $(document).on('click', '.clup-browse', function(){
         $(this).siblings('.clup-file-input').click();
@@ -19,17 +20,21 @@ jQuery(document).ready(function($){
         $('#upload-document-form input[name="client_id"]').val(clientId);
         $('#upload-document-form input[name="property_id"]').val(propertyId);
 
-        // Clear previous messages
-        $('#upload-message').remove();
+        // Clear old states
+        $('#upload-document-form')[0].reset();
+        $('#selected-file-name').text('');
     });
 
     // Close modal
     $(document).on('click', '.clup-close-btn', function(){
+        closeUploadModal();
+    });
+
+    function closeUploadModal() {
         $('#rt-upload-document-modal').removeClass('show');
         $('#upload-document-form')[0].reset();
         $('#selected-file-name').text('');
-        $('#upload-message').remove();
-    });
+    }
 
     // Submit form via AJAX
     $('#upload-document-form').on('submit', function(e){
@@ -45,42 +50,32 @@ jQuery(document).ready(function($){
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response){
-                console.log(response); // Debugging
+            success: async function(response){
+                console.log(response);
 
-                // Remove old message if exists
-                $('#upload-message').remove();
+                if (response.success) {
+                    alert(response.data.message); // ✅ Alert shown outside modal
+                    closeUploadModal();
 
-                var messageHTML = '<div id="upload-message" style="margin-top:10px; padding:10px; border-radius:5px; font-weight:bold;"></div>';
-                $('#upload-document-form').prepend(messageHTML);
+                    // ✅ Refresh assigned task table dynamically (without full reload)
+                    if (typeof refreshAssignedTaskTable === 'function') {
+                        await refreshAssignedTaskTable();
+                    } else {
+                        // fallback: reload tbody from server via AJAX
+                        $('#assigned-list').load(location.href + ' #assigned-list > *');
+                    }
 
-                if(response.success){
-                    $('#upload-message').css({
-                        'background': '#d4edda',
-                        'color': '#155724',
-                        'border': '1px solid #c3e6cb'
-                    }).text(response.data.message);
-
-                    // Optionally reset form
-                    $('#upload-document-form')[0].reset();
-                    $('#selected-file-name').text('');
                 } else {
-                    $('#upload-message').css({
-                        'background': '#f8d7da',
-                        'color': '#721c24',
-                        'border': '1px solid #f5c6cb'
-                    }).text(response.data.message || 'Something went wrong.');
+                    alert(response.data.message || 'Something went wrong.');
                 }
             },
             error: function(xhr){
                 console.log(xhr.responseText);
-
-                $('#upload-message').remove();
-                var messageHTML = '<div id="upload-message" style="margin-top:10px; padding:10px; border-radius:5px; font-weight:bold; background:#f8d7da; color:#721c24; border:1px solid #f5c6cb;">AJAX error occurred.</div>';
-                $('#upload-document-form').prepend(messageHTML);
+                alert('AJAX error occurred.');
             }
         });
     });
+
 
     // DELETE ASSIGNMENT (soft delete)
     $(document).on('click', '.delete-assignment', function() {
@@ -101,12 +96,20 @@ jQuery(document).ready(function($){
                 nonce: rtAssignTaskAjax.nonce,
                 task_id: taskId
             },
-            success: function(response) {
+            success: async function(response) {
                 if (response.success) {
                     alert(response.data.message);
                     $('button[data-task-id="' + taskId + '"]').closest('tr').fadeOut(300, function(){
                         $(this).remove();
                     });
+
+                    // Refresh table after deletion
+                    if (typeof refreshAssignedTaskTable === 'function') {
+                        await refreshAssignedTaskTable();
+                    } else {
+                        $('#assigned-list').load(location.href + ' #assigned-list > *');
+                    }
+
                 } else {
                     alert(response.data.message || "Assignment could not be deleted.");
                 }
@@ -118,5 +121,12 @@ jQuery(document).ready(function($){
         });
     });
 
+
+    // Optional: helper function to refresh assigned table dynamically
+    window.refreshAssignedTaskTable = async function() {
+        $('#assigned-list').addClass('loading');
+        await $('#assigned-list').load(location.href + ' #assigned-list > *');
+        $('#assigned-list').removeClass('loading');
+    };
 
 });

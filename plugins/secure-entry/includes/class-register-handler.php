@@ -64,6 +64,7 @@ class Enhanced_Register_Handler {
                         'user_id'        => $user_id,
                         'full_name'      => $data['first_name'] . ' ' . $data['last_name'],
                         'phone'          => $data['phone'] ?? '',
+                        'email'          => $data['email'],
                         'agency_name'    => $data['agency_name'] ?? '',
                         'license_number' => $data['license_number'] ?? '',
                         'rating_avg'     => 0,
@@ -78,6 +79,7 @@ class Enhanced_Register_Handler {
                         'user_id'            => $user_id,
                         'full_name'          => $data['first_name'] . ' ' . $data['last_name'],
                         'phone'              => $data['phone'] ?? '',
+                        'email'              => $data['email'],
                         'budget'             => $data['budget'] ?? '',
                         'preferred_location' => $data['preferred_location'] ?? '',
                         'created_at'         => current_time('mysql')

@@ -1,9 +1,11 @@
-jQuery(document).ready(function($){
-    // Open modal
-    $(document).on('click', '.upload-document-trigger', function(){
-        var clientId        = $(this).data('client-id');
-        var propertyId      = $(this).data('property-id');
-        var assignedTaskId  = $(this).data('assigned-task-id');
+jQuery(document).ready(function ($) {
+    // ======================
+    // Open Upload Modal
+    // ======================
+    $(document).on('click', '.upload-document-trigger', function () {
+        var clientId = $(this).data('client-id');
+        var propertyId = $(this).data('property-id');
+        var assignedTaskId = $(this).data('assigned-task-id');
 
         $('#cl-upload-document-modal').addClass('show');
         $('#cl-upload-document-form input[name="client_id"]').val(clientId);
@@ -11,33 +13,37 @@ jQuery(document).ready(function($){
         $('#cl-upload-document-form input[name="assigned_task_id"]').val(assignedTaskId);
 
         $('#cl-selected-file-name').text('');
-        $('#upload-message').remove();
     });
 
-    // Close modal
-    $(document).on('click', '.clup-close-btn', function(){
+    // ======================
+    // Close Modal
+    // ======================
+    $(document).on('click', '.clup-close-btn', function () {
         $('#cl-upload-document-modal').removeClass('show');
         $('#cl-upload-document-form')[0].reset();
         $('#cl-selected-file-name').text('');
-        $('#upload-message').remove();
     });
 
-    // Browse file
-    $(document).on('click', '.clup-browse', function(){
+    // ======================
+    // Browse File
+    // ======================
+    $(document).on('click', '.clup-browse', function () {
         $(this).siblings('.clup-file-input').click();
     });
 
-    $(document).on('change', '.clup-file-input', function(){
+    $(document).on('change', '.clup-file-input', function () {
         var fileName = $(this).val().split('\\').pop();
         $('#cl-selected-file-name').text(fileName);
     });
 
-    // Submit form via AJAX
-    $('#cl-upload-document-form').on('submit', function(e){
+    // ======================
+    // Upload Document via AJAX
+    // ======================
+    $('#cl-upload-document-form').on('submit', function (e) {
         e.preventDefault();
 
         if (!$('input[name="file_name"]').val()) {
-            alert("Please select a file.");
+            alert("Please select a file before uploading.");
             return;
         }
 
@@ -51,38 +57,38 @@ jQuery(document).ready(function($){
             data: formData,
             processData: false,
             contentType: false,
-            success: function(response){
-                $('#upload-message').remove();
-                var html = '<div id="upload-message" style="margin-top:10px; padding:10px; border-radius:5px; font-weight:bold;"></div>';
-                $('#cl-upload-document-form').prepend(html);
+            beforeSend: function () {
+                $('.clup-upload').prop('disabled', true).text('Uploading...');
+            },
+            success: function (response) {
+                $('.clup-upload').prop('disabled', false).text('Save');
 
-                if(response.success){
-                    $('#upload-message').css({
-                        'background':'#d4edda',
-                        'color':'#155724',
-                        'border':'1px solid #c3e6cb'
-                    }).text(response.data.message);
+                if (response.success) {
+                    alert(response.data.message || 'Document uploaded successfully.');
 
+                    // Close modal
+                    $('#cl-upload-document-modal').removeClass('show');
                     $('#cl-upload-document-form')[0].reset();
                     $('#cl-selected-file-name').text('');
+
+                    // Refresh table without reloading page
+                    refreshDocumentsTable();
                 } else {
-                    $('#upload-message').css({
-                        'background':'#f8d7da',
-                        'color':'#721c24',
-                        'border':'1px solid #f5c6cb'
-                    }).text(response.data.message || 'Something went wrong.');
+                    alert(response.data.message || 'Something went wrong while uploading.');
                 }
             },
-            error: function(xhr){
+            error: function (xhr) {
+                $('.clup-upload').prop('disabled', false).text('Save');
                 console.log(xhr.responseText);
-                $('#upload-message').remove();
-                $('#cl-upload-document-form').prepend('<div id="upload-message" style="margin-top:10px; padding:10px; border-radius:5px; font-weight:bold; background:#f8d7da; color:#721c24; border:1px solid #f5c6cb;">AJAX error occurred.</div>');
+                alert('AJAX error occurred while uploading.');
             }
         });
     });
 
-    // Delete reply document via AJAX
-    $(document).on('click', '.delete-assignment', function(){
+    // ======================
+    // Delete Reply Document via AJAX
+    // ======================
+    $(document).on('click', '.delete-assignment', function () {
         var button = $(this);
         var replyDocId = button.data('reply-doc-id');
 
@@ -101,19 +107,45 @@ jQuery(document).ready(function($){
                 reply_doc_id: replyDocId,
                 nonce: rtReplyDocsAjax.nonce
             },
-            success: function(response){
-                if(response.success){
-                    button.closest('tr').find('td:nth-child(4), td:nth-child(5)').html('');
-                    button.removeAttr('data-reply-doc-id');
-                    alert(response.data.message);
+            success: function (response) {
+                if (response.success) {
+                    alert(response.data.message || 'Reply document deleted successfully.');
+                    // Refresh table after delete
+                    refreshDocumentsTable();
                 } else {
                     alert(response.data.message || 'Delete failed.');
                 }
             },
-            error: function(xhr){
+            error: function (xhr) {
                 console.log(xhr.responseText);
-                alert('AJAX error occurred.');
+                alert('AJAX error occurred while deleting.');
             }
         });
     });
+
+    // ======================
+    // Refresh Table Function
+    // ======================
+    function refreshDocumentsTable() {
+        $.ajax({
+            url: rtReplyDocsAjax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'rt_refresh_documents_table',
+                nonce: rtReplyDocsAjax.nonce
+            },
+            success: function (response) {
+                if (response.success && response.data.html) {
+                    // Replace only the tbody content
+                    $('#assigned-list').html(response.data.html);
+                } else {
+                    console.error('Failed to refresh table data.');
+                }
+            },
+            error: function (xhr) {
+                console.log(xhr.responseText);
+                alert('Error refreshing document table.');
+            }
+        });
+    }
 });

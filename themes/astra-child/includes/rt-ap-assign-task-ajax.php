@@ -20,9 +20,9 @@ function rt_upload_document_handler() {
     $assigned_table  = $wpdb->prefix . 'assigned_tasks';
 
     // Sanitize fields
-    $title          = sanitize_text_field($_POST['title'] ?? '');
-    $type_id        = intval($_POST['type_id'] ?? 0);
-    $client_id      = intval($_POST['client_id'] ?? 0);
+    $title        = sanitize_text_field($_POST['title'] ?? '');
+    $type_id      = intval($_POST['type_id'] ?? 0);
+    $client_id    = intval($_POST['client_id'] ?? 0);
     $property_id  = intval($_POST['property_id'] ?? 0);
 
     if (empty($title) || empty($type_id) || empty($client_id) || empty($property_id)) {
@@ -52,15 +52,7 @@ function rt_upload_document_handler() {
         }
 
         $file_url = $upload['url'];
-
         remove_all_filters('upload_dir');
-
-        if (isset($upload['error'])) {
-            wp_send_json_error(['message' => 'File upload error: ' . $upload['error']]);
-            wp_die();
-        }
-
-        $file_url = $upload['url'];
 
     } else {
         wp_send_json_error(['message' => 'Please select a file.']);
@@ -108,7 +100,7 @@ function rt_upload_document_handler() {
                 'title'         => $title,
                 'type_id'       => $type_id,
                 'client_id'     => $client_id,
-                'property_id' => $property_id,
+                'property_id'   => $property_id,
                 'file_name'     => $file_url,
                 'created_at'    => $now,
                 'created_by'    => $current_user
@@ -129,7 +121,7 @@ function rt_upload_document_handler() {
     */
     $existing_assign = $wpdb->get_row(
         $wpdb->prepare(
-            "SELECT id FROM $assigned_table 
+            "SELECT id, deleted_at, deleted_by FROM $assigned_table 
              WHERE client_id=%d AND property_id=%d LIMIT 1",
             $client_id, $property_id
         )
@@ -137,24 +129,33 @@ function rt_upload_document_handler() {
 
     if ($existing_assign) {
         // UPDATE existing assignment
+        // NEW: Reset deleted_at and deleted_by if they were not NULL
+        $update_data = [
+            'document_id' => $document_id,
+            'updated_at'  => $now,
+            'updated_by'  => $current_user,
+        ];
+
+        if (!is_null($existing_assign->deleted_at) || !is_null($existing_assign->deleted_by)) {
+            $update_data['deleted_at'] = null;
+            $update_data['deleted_by'] = null;
+        }
+
         $wpdb->update(
             $assigned_table,
-            [
-                'document_id' => $document_id,
-                'updated_at'  => $now,
-                'updated_by'  => $current_user
-            ],
+            $update_data,
             ['id' => $existing_assign->id],
-            ['%d','%s','%d'],
+            ['%d','%s','%d','%s','%d'],
             ['%d']
         );
+
     } else {
         // INSERT new assignment
         $wpdb->insert(
             $assigned_table,
             [
                 'client_id'     => $client_id,
-                'property_id' => $property_id,
+                'property_id'   => $property_id,
                 'document_id'   => $document_id,
                 'created_at'    => $now,
                 'created_by'    => $current_user
@@ -169,25 +170,22 @@ function rt_upload_document_handler() {
 }
 
 /*
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 | AJAX: Soft Delete Assigned Task
-| Table: wp_assigned_tasks
-|--------------------------------------------------------------------------
+|----------------------------------------------------------------------
 */
 
-// Register AJAX handler
 add_action('wp_ajax_rt_delete_assignment', 'rt_delete_assignment_handler');
 
 function rt_delete_assignment_handler() {
     global $wpdb;
 
-    // Verify nonce
     if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'rt_ap_assign_task_nonce')) {
         wp_send_json_error(['message' => 'Security check failed']);
         wp_die();
     }
 
-    $task_id = intval($_POST['task_id'] ?? 0); // <-- use task_id
+    $task_id = intval($_POST['task_id'] ?? 0);
     if (!$task_id) {
         wp_send_json_error(['message' => 'Invalid task ID']);
         wp_die();
