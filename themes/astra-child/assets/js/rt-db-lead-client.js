@@ -197,13 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const result = await ajaxFetch(fd);
                 if (result.success) {
                     showNotification('Lead converted to client!');
-                    fetchLeads({
-                        page: 1,
-                        rows: parseInt(document.getElementById('leadsRows').value, 10),
-                        search: document.getElementById('leadsSearch').value.trim(),
-                        bodyId,
-                        paginationId: 'leadsPagination'
-                    });
+                    setTimeout(() => location.reload(), 500);
                 } else showNotification('Error: ' + (result.data || 'Unknown error'), 'error');
             });
         });
@@ -239,37 +233,35 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             if (isProcessing) return;
             isProcessing = true;
-
+    
             const submitBtn = this.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Creating...';
-
+    
             const fd = new FormData(this);
             fd.append('action', 'create_dashboard_lead_ajax');
             fd.append('nonce', rtDashboardAjax.create_nonce);
-
-            const result = await ajaxFetch(fd);
-            if (result.success) {
-                showNotification('Lead created successfully!');
-                this.reset();
-
-                const modal = document.getElementById('rtDbLeadCreateModal');
-                if (modal) modal.style.display = 'none';
-
-                fetchLeads({
-                    page: 1,
-                    rows: parseInt(document.getElementById('leadsRows').value, 10),
-                    search: document.getElementById('leadsSearch').value.trim(),
-                    bodyId: 'leadsBody',
-                    paginationId: 'leadsPagination'
-                });
-            } else showNotification('Error: ' + (result.data || 'Unknown error'), 'error');
-
+    
+            try {
+                const result = await ajaxFetch(fd);
+                if (result.success) {
+                    alert('Lead created successfully!');
+                    this.reset();
+                    const modal = document.getElementById('rtDbLeadCreateModal');
+                    if (modal) modal.style.display = 'none';
+                    setTimeout(() => location.reload(), 100); // Force reload after alert
+                } else {
+                    showNotification('Error: ' + (result.data || 'Unknown error'), 'error');
+                }
+            } catch (err) {
+                showNotification('Network or JS error: ' + err.message, 'error');
+            }
+    
             submitBtn.disabled = false;
             submitBtn.textContent = 'Add Lead';
             isProcessing = false;
         });
-    });
+    });    
 
     // ---------------------------
     // Edit Lead Form

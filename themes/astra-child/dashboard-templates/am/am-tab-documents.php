@@ -38,9 +38,6 @@
 <div class="cld-task-section">
     <div class="cld-task-header">
         <h2 class="header-title">Documents</h2>
-        <button class="cld-upload-btn" data-modal="cl-upload-document-modal">
-            Upload Document <span class="dashicons dashicons-media-document"></span>
-        </button>
     </div>
 
     <div class="documents-section">
@@ -48,69 +45,91 @@
             <thead>
                 <tr>
                     <th style="width:50px; background:#2271b1; color:#fff;">#</th>
+                    <th style="background:#2271b1; color:#fff;">Client Name</th> <!-- New Column -->
                     <th style="background:#2271b1; color:#fff;">Document Title</th>
                     <th style="background:#2271b1; color:#fff;">Document Type</th>
-                    <th style="background:#2271b1; color:#fff;">File</th>
-                    <th style="width:120px; background:#2271b1; color:#fff;">Actions</th>
+                    <th style="background:#2271b1; color:#fff;">Document</th>
+                    <th style="background:#2271b1; color:#fff;">Assigned/Replied</th>
+                    <th style="width:80px; background:#2271b1; color:#fff;">Action</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
                 global $wpdb;
-                $table_docs  = $wpdb->prefix . 'documents';
-                $table_types = $wpdb->prefix . 'document_types';
+                $table_docs     = $wpdb->prefix . 'documents';
+                $table_types    = $wpdb->prefix . 'document_types';
+                $table_clients  = $wpdb->prefix . 'clients';
+                $assigned_table = $wpdb->prefix . 'assigned_tasks';
 
+                // Query documents with client name
                 $documents = $wpdb->get_results("
-                    SELECT d.id, d.title, d.file_name, d.type_id, dt.type_name
+                    SELECT d.id, d.title, d.file_name, d.type_id, d.doc_type, dt.type_name, c.full_name AS client_name
                     FROM $table_docs d
                     LEFT JOIN $table_types dt ON d.type_id = dt.id
+                    LEFT JOIN $table_clients c ON d.client_id = c.client_id
                     WHERE d.deleted_at IS NULL
                     ORDER BY d.created_at DESC
                 ");
 
                 if ($documents):
-                    foreach ($documents as $index => $doc): ?>
+                    foreach ($documents as $index => $doc):
+                        $upload_dir = wp_upload_dir();
+                        $file_path  = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $doc->file_name);
+                        $file_url   = $doc->file_name;
+                        $file_name  = basename($doc->file_name);
+
+                        // Assigned/Replied status
+                        $assigned_status = $doc->doc_type ?: 'Assigned';
+                        $assignment = $wpdb->get_row($wpdb->prepare("
+                            SELECT created_at, updated_at 
+                            FROM $assigned_table
+                            WHERE document_id=%d AND deleted_at IS NULL
+                            ORDER BY id DESC
+                            LIMIT 1
+                        ", $doc->id));
+
+                        if ($assignment) {
+                            $assigned_date = $assignment->created_at;
+                            $reply_date    = $assignment->updated_at;
+                            if ($reply_date && $reply_date !== $assigned_date) {
+                                $assigned_status = "Replied on " . date('d M Y', strtotime($reply_date));
+                            } else {
+                                $assigned_status = "Assigned on " . date('d M Y', strtotime($assigned_date));
+                            }
+                        }
+                ?>
                         <tr data-id="<?php echo esc_attr($doc->id); ?>">
                             <td><?php echo $index + 1; ?></td>
+                            <td><?php echo esc_html($doc->client_name ?: '—'); ?></td> <!-- Client Name -->
                             <td><?php echo esc_html($doc->title); ?></td>
                             <td data-type-id="<?php echo esc_attr($doc->type_id); ?>">
                                 <?php echo esc_html($doc->type_name); ?>
                             </td>
                             <td>
-                                <?php 
-                                $upload_dir = wp_upload_dir();
-                                $file_name  = ltrim($doc->file_name, '/');
-                                $file_url   = trailingslashit($upload_dir['baseurl']) . $file_name;
-                                $file_path  = trailingslashit($upload_dir['basedir']) . $file_name;
-
-                                if (file_exists($file_path)) : ?>
+                                <?php if (file_exists($file_path)) : ?>
                                     <a href="<?php echo esc_url($file_url); ?>" target="_blank">
-                                        <?php echo esc_html(basename($file_name)); ?>
+                                        <?php echo esc_html($file_name); ?>
                                     </a>
                                 <?php else: ?>
                                     <span style="color:red;">File missing</span>
                                 <?php endif; ?>
                             </td>
+                            <td><?php echo esc_html($assigned_status); ?></td>
                             <td>
-                                <?php if (file_exists($file_path)) : ?>
-                                    <a href="<?php echo esc_url($file_url); ?>"
-                                       download="<?php echo esc_attr(basename($file_name)); ?>"
-                                       class="download-doc"
-                                       title="Download"
-                                       style="cursor:pointer; margin-right:5px;">⬇️</a>
+                                <?php if (file_exists($file_path)): ?>
+                                    <a href="<?php echo esc_url($file_url); ?>" download="<?php echo esc_attr($file_name); ?>"
+                                    class="download-doc" title="Download" style="cursor:pointer; margin-right:5px;">⬇️</a>
                                 <?php endif; ?>
-
-                                <span class="edit-doc" title="Edit" style="cursor:pointer; margin-right:5px;">✏️</span>
-                                <span class="delete-doc" title="Delete" style="cursor:pointer;">🗑️</span>
                             </td>
                         </tr>
-                    <?php endforeach;
+                <?php endforeach;
                 else: ?>
-                    <tr><td colspan="5" style="text-align:center;">No Documents Found</td></tr>
+                    <tr><td colspan="7" style="text-align:center;">No Documents Found</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
     </div>
+
 </div>
 
 <?php 
@@ -585,5 +604,28 @@ document.addEventListener('DOMContentLoaded', function() {
     padding-left: 20px;
     color: #FFF!important;
 }
+
+/* Actions column center alignment */
+.doc-types-table td:last-child,
+.documents-table td:last-child {
+    display: flex;             /* enable flex layout */
+    justify-content: center;   /* horizontal center */
+    align-items: center;       /* vertical center */
+    gap: 10px;                 /* spacing between icons/buttons */
+    text-align: center;        /* fallback for text */
+}
+
+/* Mobile/Responsive view adjustments */
+@media (max-width: 768px) {
+    .doc-types-table td[data-label="Actions"],
+    .documents-table td[data-label="Actions"] {
+        display: flex;
+        justify-content: center;  /* horizontal center */
+        align-items: center;      /* vertical center */
+        gap: 10px;
+        padding: 10px 0;          /* optional spacing */
+    }
+}
+
 
 </style>

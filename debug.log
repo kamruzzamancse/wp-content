@@ -851,3 +851,99 @@ Stack trace:
 [12-Nov-2025 08:48:04 UTC] Nonce generated for property search: 345dcf5a81
 [12-Nov-2025 09:15:23 UTC] Nonce generated for property search: 345dcf5a81
 [12-Nov-2025 09:16:06 UTC] Nonce generated for property search: 345dcf5a81
+[13-Nov-2025 13:32:26 UTC] WordPress database error Unknown column 'd.doc_type' in 'field list' for query 
+                    SELECT d.id, d.title, d.file_name, d.type_id, d.doc_type, dt.type_name
+                    FROM wp_documents d
+                    LEFT JOIN wp_document_types dt ON d.type_id = dt.id
+                    WHERE d.deleted_at IS NULL
+                    ORDER BY d.created_at DESC
+                 made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/rt/realtor-dashboard.php'), include('/themes/astra-child/dashboard-templates/rt/rt-tab-documents.php')
+[13-Nov-2025 13:32:34 UTC] Nonce generated for property search: 08f7d47de6
+[13-Nov-2025 13:32:54 UTC] Nonce generated for property search: 08f7d47de6
+[13-Nov-2025 13:34:15 UTC] WordPress database error Table 'mary.wp_reply_docs' doesn't exist for query 
+                        SELECT r.id, r.document_id, r.created_at
+                        FROM wp_reply_docs r
+                        WHERE r.assigned_task_id = 1 AND r.deleted_at IS NULL
+                        ORDER BY r.id DESC LIMIT 1
+                     made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/cl/client-dashboard.php'), include('/themes/astra-child/dashboard-templates/cl/cl-tab-documents.php')
+[13-Nov-2025 13:34:41 UTC] WordPress database error Unknown column 'doc_type' in 'where clause' for query 
+        SELECT id FROM wp_documents 
+        WHERE client_id=1 AND property_id=89 AND doc_type='replied' AND deleted_at IS NULL LIMIT 1
+     made by do_action('wp_ajax_cl_upload_reply_doc'), WP_Hook->do_action, WP_Hook->apply_filters, cl_upload_reply_doc_handler
+[13-Nov-2025 13:34:41 UTC] WordPress database error Unknown column 'doc_type' in 'field list' for query INSERT INTO `wp_documents` (`title`, `type_id`, `client_id`, `property_id`, `file_name`, `doc_type`, `created_at`, `created_by`) VALUES ('Sadi Reply-1', 4, 1, 89, 'http://localhost/mary/wp-content/uploads/client-reply-documents/kamruzzamans-CV-4.pdf', 'replied', '2025-11-13 13:34:41', 26) made by do_action('wp_ajax_cl_upload_reply_doc'), WP_Hook->do_action, WP_Hook->apply_filters, cl_upload_reply_doc_handler
+[13-Nov-2025 13:39:30 UTC] WordPress database error Unknown column 'doc_type' in 'where clause' for query 
+        SELECT id FROM wp_documents 
+        WHERE client_id=1 AND property_id=89 AND doc_type='replied' AND deleted_at IS NULL LIMIT 1
+     made by do_action('wp_ajax_cl_upload_reply_doc'), WP_Hook->do_action, WP_Hook->apply_filters, cl_upload_reply_doc_handler
+[13-Nov-2025 13:39:30 UTC] WordPress database error Unknown column 'doc_type' in 'field list' for query INSERT INTO `wp_documents` (`title`, `type_id`, `client_id`, `property_id`, `file_name`, `doc_type`, `created_at`, `created_by`) VALUES ('Sadi Reply-1', 4, 1, 89, 'http://localhost/mary/wp-content/uploads/client-reply-documents/kamruzzamans-CV-5.pdf', 'replied', '2025-11-13 13:39:30', 26) made by do_action('wp_ajax_cl_upload_reply_doc'), WP_Hook->do_action, WP_Hook->apply_filters, cl_upload_reply_doc_handler
+[13-Nov-2025 18:33:19 UTC] WordPress database error Unknown column 'doc_type' in 'where clause' for query 
+        SELECT id FROM wp_documents 
+        WHERE client_id=1 AND property_id=89 AND doc_type='replied' AND deleted_at IS NULL LIMIT 1
+     made by do_action('wp_ajax_cl_upload_reply_doc'), WP_Hook->do_action, WP_Hook->apply_filters, cl_upload_reply_doc_handler
+[13-Nov-2025 18:33:20 UTC] WordPress database error Unknown column 'doc_type' in 'field list' for query INSERT INTO `wp_documents` (`title`, `type_id`, `client_id`, `property_id`, `file_name`, `doc_type`, `created_at`, `created_by`) VALUES ('Sadi reply-1', 4, 1, 89, 'http://localhost/mary/wp-content/uploads/client-reply-documents/kamruzzamans-CV-6.pdf', 'replied', '2025-11-13 18:33:19', 26) made by do_action('wp_ajax_cl_upload_reply_doc'), WP_Hook->do_action, WP_Hook->apply_filters, cl_upload_reply_doc_handler
+[13-Nov-2025 18:51:47 UTC] Nonce generated for property search: 6fa7802461
+[13-Nov-2025 18:58:16 UTC] === IMPORT REALTORS DEBUG START ===
+[13-Nov-2025 18:58:16 UTC] File uploaded: realtors-export-2025-11-13.csv
+[13-Nov-2025 18:58:16 UTC] File extension: csv
+[13-Nov-2025 18:58:19 UTC] Import finished - Inserted: 1, Updated: 0, Errors: 0
+[13-Nov-2025 19:07:05 UTC] === IMPORT REALTORS DEBUG START ===
+[13-Nov-2025 19:07:05 UTC] File uploaded: realtors-export-2025-11-13.xlsx
+[13-Nov-2025 19:07:05 UTC] File extension: xlsx
+[13-Nov-2025 19:07:05 UTC] Unsupported file type: xlsx
+[13-Nov-2025 19:07:18 UTC] === IMPORT REALTORS DEBUG START ===
+[13-Nov-2025 19:07:18 UTC] File uploaded: realtors-export-2025-11-13.xlsx
+[13-Nov-2025 19:07:18 UTC] File extension: xlsx
+[13-Nov-2025 19:07:18 UTC] Unsupported file type: xlsx
+[13-Nov-2025 19:57:18 UTC] === IMPORT REALTORS DEBUG START ===
+[13-Nov-2025 19:57:18 UTC] File uploaded: realtors-export-2025-11-13.xlsx
+[13-Nov-2025 19:57:18 UTC] File extension: xlsx
+[13-Nov-2025 19:57:18 UTC] PHP Warning:  include_once(E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes/SimpleXLSX.php): Failed to open stream: No such file or directory in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php on line 329
+[13-Nov-2025 19:57:18 UTC] PHP Warning:  include_once(): Failed opening 'E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes/SimpleXLSX.php' for inclusion (include_path='E:\xampp\php\PEAR') in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php on line 329
+[13-Nov-2025 19:57:18 UTC] PHP Fatal error:  Uncaught Error: Class "SimpleXLSX" not found in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php:330
+Stack trace:
+#0 E:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(324): rt_import_realtors_ajax('')
+#1 E:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#2 E:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#3 E:\xampp\htdocs\mary\wp-admin\admin-ajax.php(192): do_action('wp_ajax_import_...')
+#4 {main}
+  thrown in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php on line 330
+[13-Nov-2025 19:57:36 UTC] === IMPORT REALTORS DEBUG START ===
+[13-Nov-2025 19:57:36 UTC] File uploaded: realtors-export-2025-11-13.csv
+[13-Nov-2025 19:57:36 UTC] File extension: csv
+[13-Nov-2025 19:57:36 UTC] CSV parsed successfully: 1 rows found.
+[13-Nov-2025 19:57:36 UTC] First row parsed: Array
+(
+    [full_name] => Nahar
+    [email] => nahar@gmail.com
+    [phone] => 1258745582
+    [agency_name] => D Group
+    [license_number] => 654123
+    [rating_avg] => 4
+)
+
+[13-Nov-2025 19:57:40 UTC] Import finished - Inserted: 1, Updated: 0, Errors: 0
+[13-Nov-2025 20:04:26 UTC] === IMPORT REALTORS DEBUG START ===
+[13-Nov-2025 20:04:26 UTC] File uploaded: realtors-export-2025-11-13.xlsx
+[13-Nov-2025 20:04:26 UTC] File extension: xlsx
+[13-Nov-2025 20:04:26 UTC] PHP Warning:  include_once(E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes/SimpleXLSX.php): Failed to open stream: No such file or directory in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php on line 329
+[13-Nov-2025 20:04:26 UTC] PHP Warning:  include_once(): Failed opening 'E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes/SimpleXLSX.php' for inclusion (include_path='E:\xampp\php\PEAR') in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php on line 329
+[13-Nov-2025 20:04:26 UTC] PHP Fatal error:  Uncaught Error: Class "SimpleXLSX" not found in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php:330
+Stack trace:
+#0 E:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(324): rt_import_realtors_ajax('')
+#1 E:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#2 E:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#3 E:\xampp\htdocs\mary\wp-admin\admin-ajax.php(192): do_action('wp_ajax_import_...')
+#4 {main}
+  thrown in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\am-rt-realtor-ajax.php on line 330
+[13-Nov-2025 20:58:51 UTC] CSV parsed successfully: 2 rows found.
+[13-Nov-2025 21:04:49 UTC] PHP Warning:  require_once(E:\xampp\htdocs\mary/wp-content/vendor/autoload.php): Failed to open stream: No such file or directory in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php on line 367
+[13-Nov-2025 21:04:49 UTC] PHP Fatal error:  Uncaught Error: Failed opening required 'E:\xampp\htdocs\mary/wp-content/vendor/autoload.php' (include_path='E:\xampp\php\PEAR') in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php:367
+Stack trace:
+#0 E:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(324): rt_import_clients_ajax('')
+#1 E:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#2 E:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#3 E:\xampp\htdocs\mary\wp-admin\admin-ajax.php(192): do_action('wp_ajax_import_...')
+#4 {main}
+  thrown in E:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php on line 367
+[13-Nov-2025 23:54:40 UTC] Nonce generated for property search: 268cca13cc
+[13-Nov-2025 23:55:48 UTC] Nonce generated for property search: 268cca13cc

@@ -285,24 +285,19 @@ function rt_export_realtors_ajax() {
 add_action('wp_ajax_export_realtors_ajax','rt_export_realtors_ajax');
 
 // =====================
-// Import Realtors AJAX
+// Import Realtors AJAX (CSV/XLSX compatible) - Fully Robust Version
 // =====================
 function rt_import_realtors_ajax() {
-
-    // Debug Start
-    error_log('=== IMPORT REALTORS DEBUG START ===');
 
     rt_realtor_current_user_required();
 
     // Verify nonce
     if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'am_realtor_import_nonce')) {
-        error_log('Nonce verification failed');
         wp_send_json_error('Security verification failed');
     }
 
     // Check if file uploaded
     if (!isset($_FILES['realtors_file']) || empty($_FILES['realtors_file']['tmp_name'])) {
-        error_log('No file uploaded or file is empty');
         wp_send_json_error('No file uploaded or file is empty');
     }
 
@@ -310,20 +305,74 @@ function rt_import_realtors_ajax() {
     $filename = $_FILES['realtors_file']['name'];
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-    error_log('File uploaded: ' . $filename);
-    error_log('File extension: ' . $ext);
+    $realtors = [];
 
-    if ($ext !== 'csv') {
-        error_log('Unsupported file type: ' . $ext);
-        wp_send_json_error('Only CSV files are supported. Please convert Excel to CSV.');
+    // --- Parse CSV ---
+    if ($ext === 'csv') {
+        $realtors = rt_parse_realtor_csv_file($file);
+    }
+    // --- Parse XLSX ---
+    elseif ($ext === 'xlsx') {
+
+        if (!class_exists('\PhpOffice\PhpSpreadsheet\IOFactory')) {
+            if (file_exists(WP_CONTENT_DIR . '/vendor/autoload.php')) {
+                require_once WP_CONTENT_DIR . '/vendor/autoload.php';
+            } else {
+                wp_send_json_error('PhpSpreadsheet library not found. Install via Composer or include manually.');
+            }
+        }
+
+        try {
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
+            $sheet = $spreadsheet->getActiveSheet();
+            $sheetData = $sheet->toArray(null, true, true, false);
+
+            // Remove completely empty rows
+            $sheetData = array_filter($sheetData, function($row) {
+                return count(array_filter($row, fn($cell) => $cell !== null && $cell !== '')) > 0;
+            });
+
+            if (empty($sheetData)) wp_send_json_error('Excel file is empty');
+
+            // Normalize header row
+            $rawHeaders = array_shift($sheetData);
+            $headers = [];
+            $headerCounts = [];
+            foreach ($rawHeaders as $h) {
+                $h = strtolower(trim((string)$h));
+                $h = str_replace([' ', '-', '__'], '_', $h);
+                if (isset($headerCounts[$h])) {
+                    $headerCounts[$h]++;
+                    $h .= '_' . $headerCounts[$h];
+                } else {
+                    $headerCounts[$h] = 0;
+                }
+                $headers[] = $h;
+            }
+
+            // Map rows
+            foreach ($sheetData as $rowNum => $row) {
+                $row = array_map(fn($cell) => trim((string)$cell), $row);
+                $row = array_pad($row, count($headers), '');
+                $row = array_slice($row, 0, count($headers));
+                $realtors[] = array_combine($headers, $row);
+            }
+
+        } catch (Exception $e) {
+            wp_send_json_error('Failed to read Excel file: ' . $e->getMessage());
+        }
+
+    } else {
+        wp_send_json_error('Only CSV or Excel (.xlsx) files are supported.');
     }
 
-    $realtors = rt_parse_realtor_csv_file($file);
     if (empty($realtors)) {
-        error_log('No valid data found in CSV file');
-        wp_send_json_error('No valid data found in CSV file.');
+        wp_send_json_error('No valid data found in uploaded file.');
     }
 
+    // --------------------
+    // Insert/Update Realtors
+    // --------------------
     global $wpdb;
     $table = $wpdb->prefix . 'realtors';
     $current_user_id = get_current_user_id();
@@ -343,7 +392,7 @@ function rt_import_realtors_ajax() {
             $rating_avg = floatval($r['rating_avg'] ?? 0);
 
             if (!$full_name || !$email || !is_email($email)) {
-                $errors[] = "Row " . ($index + 1) . ": Missing or invalid full name/email";
+                $errors[] = "Row " . ($index + 2) . ": Missing or invalid full name/email";
                 continue;
             }
 
@@ -354,7 +403,7 @@ function rt_import_realtors_ajax() {
 
             if ($existing_id) {
                 if ($duplicate_handling === 'update') {
-                    $result = $wpdb->update(
+                    $wpdb->update(
                         $table,
                         [
                             'full_name' => $full_name,
@@ -366,13 +415,13 @@ function rt_import_realtors_ajax() {
                             'updated_by' => $current_user_id
                         ],
                         ['realtor_id' => $existing_id],
-                        ['%s', '%s', '%s', '%s', '%f', '%s', '%d'],
+                        ['%s','%s','%s','%s','%f','%s','%d'],
                         ['%d']
                     );
-                    if ($result !== false) $updated++;
-                    continue; // skip creation
+                    $updated++;
+                    continue;
                 } elseif ($duplicate_handling === 'skip') {
-                    continue; // skip this row
+                    continue;
                 }
             }
 
@@ -389,7 +438,7 @@ function rt_import_realtors_ajax() {
                     'created_at' => current_time('mysql'),
                     'created_by' => $current_user_id
                 ],
-                ['%s', '%s', '%s', '%s', '%s', '%f', '%s', '%d']
+                ['%s','%s','%s','%s','%s','%f','%s','%d']
             );
 
             if ($result !== false) {
@@ -408,23 +457,20 @@ function rt_import_realtors_ajax() {
                         ]);
                         $wp_user = new WP_User($user_id);
                         $wp_user->set_role('realtor');
-
-                        $wpdb->update($table, ['user_id' => $user_id], ['realtor_id' => $new_realtor_id], ['%d'], ['%d']);
+                        $wpdb->update($table, ['user_id'=>$user_id], ['realtor_id'=>$new_realtor_id], ['%d'], ['%d']);
                     }
                 }
             } else {
-                $errors[] = "Row " . ($index + 1) . ": Failed to insert realtor";
+                $errors[] = "Row " . ($index + 2) . ": Failed to insert realtor";
             }
 
         } catch (Exception $e) {
-            $errors[] = "Row " . ($index + 1) . ": " . $e->getMessage();
+            $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
         }
     }
 
     $message = "Import completed. {$inserted} new, {$updated} updated.";
     if (!empty($errors)) $message .= " " . count($errors) . " errors occurred.";
-
-    error_log('Import finished - Inserted: ' . $inserted . ', Updated: ' . $updated . ', Errors: ' . count($errors));
 
     wp_send_json_success([
         'message' => $message,
@@ -435,34 +481,47 @@ function rt_import_realtors_ajax() {
         'errors' => array_slice($errors, 0, 10)
     ]);
 }
+add_action('wp_ajax_import_realtors_ajax','rt_import_realtors_ajax');
+
 
 // =====================
-// CSV Parser for Realtors
+// Parse Realtor CSV File - Updated Version
 // =====================
 function rt_parse_realtor_csv_file($file_path) {
-    $realtors = [];
-    if (!file_exists($file_path)) return $realtors;
+    $rows = [];
+    if (!file_exists($file_path) || !is_readable($file_path)) {
+        error_log('CSV file not readable or missing.');
+        return $rows;
+    }
 
-    if (($handle = fopen($file_path, "r")) !== false) {
-        $headers = fgetcsv($handle);
-        if ($headers === false) return $realtors;
-        $headers = array_map(function($h) {
-            return strtolower(trim(preg_replace('/^\xEF\xBB\xBF/','',$h)));
-        }, $headers);
+    if (($handle = fopen($file_path, 'r')) !== false) {
+        $header = fgetcsv($handle, 0, ',');
+        if (!$header) {
+            error_log('CSV header row missing.');
+            fclose($handle);
+            return $rows;
+        }
 
-        while (($row = fgetcsv($handle)) !== false) {
-            if (empty(array_filter($row))) continue;
-            if (count($row) !== count($headers)) {
-                if (count($row) < count($headers)) $row = array_pad($row, count($headers), '');
-                else $row = array_slice($row, 0, count($headers));
+        // Normalize headers
+        $normalized_header = array_map(function ($h) {
+            $h = trim(strtolower($h));
+            $h = str_replace([' ', '-', '__'], '_', $h);
+            return $h;
+        }, $header);
+
+        $row_num = 0;
+        while (($data = fgetcsv($handle, 0, ',')) !== false) {
+            $row_num++;
+            if (count($data) !== count($normalized_header)) {
+                error_log("Row {$row_num}: column count mismatch, skipping.");
+                continue;
             }
-            $data = array_combine($headers, $row);
-            $data = array_map('trim', $data);
-            if (!empty($data['full_name']) && !empty($data['email'])) $realtors[] = $data;
+            $row = array_combine($normalized_header, array_map('trim', $data));
+            $rows[] = $row;
         }
         fclose($handle);
     }
-    return $realtors;
-}
 
-add_action('wp_ajax_import_realtors_ajax', 'rt_import_realtors_ajax');
+    error_log('CSV parsed successfully: ' . count($rows) . ' rows found.');
+    return $rows;
+}

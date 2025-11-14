@@ -49,7 +49,7 @@
                     <th style="background:#2271b1; color:#fff;">Document Type</th>
                     <th style="background:#2271b1; color:#fff;">Document</th>
                     <th style="background:#2271b1; color:#fff;">Assigned/Replied</th>
-                    <th style="width:120px; background:#2271b1; color:#fff;">Actions</th>
+                    <th style="width:80; background:#2271b1; color:#fff;">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -612,5 +612,35 @@ document.addEventListener('DOMContentLoaded', function() {
     padding-left: 20px;
     color: #FFF!important;
 }
+
+/* Actions column header width */
+.documents-table thead th:last-child,
+.doc-types-table thead th:last-child {
+    width: 80px;               /* fixed width for Actions column */
+    text-align: center;        /* center the header text */
+}
+
+/* Actions column cells center alignment */
+.documents-table td:last-child,
+.doc-types-table td:last-child {
+    display: flex;             /* use flex layout */
+    justify-content: center;   /* horizontal center */
+    align-items: center;       /* vertical center */
+    gap: 10px;                 /* spacing between buttons/icons */
+    text-align: center;        /* fallback for text */
+}
+
+/* Mobile/Responsive view adjustments */
+@media (max-width: 768px) {
+    .documents-table td[data-label="Actions"],
+    .doc-types-table td[data-label="Actions"] {
+        display: flex;
+        justify-content: center;  /* horizontal center */
+        align-items: center;      /* vertical center */
+        gap: 10px;
+        padding: 10px 0;          /* optional spacing */
+    }
+}
+
 
 </style>

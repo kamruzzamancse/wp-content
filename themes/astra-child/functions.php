@@ -198,7 +198,7 @@ function rt_enqueue_realtor_scripts() {
         // SheetJS for XLSX export/import
         wp_enqueue_script(
             'sheetjs',
-            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+            'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
             [],
             '0.18.5',
             true

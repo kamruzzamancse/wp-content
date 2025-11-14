@@ -44,6 +44,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ---------------------------
+    // Wait for element helper
+    // ---------------------------
+    function waitForElement(selector, callback) {
+        const el = document.querySelector(selector);
+        if (el) return callback(el);
+        const observer = new MutationObserver(() => {
+            const el2 = document.querySelector(selector);
+            if (el2) {
+                observer.disconnect();
+                callback(el2);
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // ---------------------------
     // Fetch Leads with Pagination
     // ---------------------------
     async function fetchLeads({ page = 1, rows = 10, search = '', bodyId, paginationId }) {
@@ -132,7 +148,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('edit_rt_db_lead_lead_status').value = lead.lead_status || 'cold';
                     document.getElementById('editRtDbLeadPreviewAvatar').src = lead.profile_picture || rtDashboardAjax.default_avatar;
 
-                    // Show/hide lead status dropdown
                     document.getElementById('rtLeadStatusRow').style.display = lead.status === 'lead' ? 'block' : 'none';
                 } else {
                     showNotification('Error: ' + (result.data || 'Unknown error'), 'error');
@@ -219,8 +234,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---------------------------
     // Create Lead Form
     // ---------------------------
-    const createLeadForm = document.getElementById('rtDbLeadCreateForm');
-    if (createLeadForm) {
+    waitForElement('#rtDbLeadCreateForm', function (createLeadForm) {
         createLeadForm.addEventListener('submit', async function (e) {
             e.preventDefault();
             if (isProcessing) return;
@@ -238,7 +252,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (result.success) {
                 showNotification('Lead created successfully!');
                 this.reset();
-                document.getElementById('rtDbLeadCreateModal').style.display = 'none';
+
+                const modal = document.getElementById('rtDbLeadCreateModal');
+                if (modal) modal.style.display = 'none';
+
                 fetchLeads({
                     page: 1,
                     rows: parseInt(document.getElementById('leadsRows').value, 10),
@@ -252,7 +269,7 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.textContent = 'Add Lead';
             isProcessing = false;
         });
-    }
+    });
 
     // ---------------------------
     // Edit Lead Form
@@ -268,7 +285,6 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Updating...';
 
-            // Correct mapping: match PHP expected POST keys
             const fd = new FormData();
             fd.append('action', 'update_dashboard_lead_ajax');
             fd.append('nonce', rtDashboardAjax.edit_nonce);
@@ -288,7 +304,9 @@ document.addEventListener('DOMContentLoaded', function () {
             const result = await ajaxFetch(fd);
             if (result.success) {
                 showNotification('Lead updated successfully!');
-                document.getElementById('rtDbLeadEditModal').style.display = 'none';
+                const modal = document.getElementById('rtDbLeadEditModal');
+                if (modal) modal.style.display = 'none';
+
                 fetchLeads({
                     page: 1,
                     rows: parseInt(document.getElementById('leadsRows').value, 10),
