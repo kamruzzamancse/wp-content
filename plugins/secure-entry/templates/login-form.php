@@ -2,8 +2,8 @@
     <!-- Login Form -->
     <form id="enhanced-login" method="post">
         <div class="form-logo">
-            <img src="http://localhost/mary/wp-content/uploads/2025/08/mary-logo.png" alt="Company Logo">
-            <!-- <img src="https://maryasfour.livewebsite.space/wp-content/uploads/2025/08/mary-logo.png" alt="Company Logo"> -->
+            <!-- <img src="http://localhost/mary/wp-content/uploads/2025/08/mary-logo.png" alt="Company Logo"> -->
+            <img src="https://maryasfour.livewebsite.space/wp-content/uploads/2025/08/mary-logo.png" alt="Company Logo">
         </div>
 
         <div class="form-header">
