@@ -9,7 +9,7 @@ function rt_client_current_user_required() {
 }
 
 // =====================
-// Fetch Clients (List)
+// Fetch Clients (List) - Updated with Address
 // =====================
 function rt_fetch_clients_ajax() {
     rt_client_current_user_required();
@@ -27,16 +27,20 @@ function rt_fetch_clients_ajax() {
     $params = [];
     if ($search !== '') {
         $like = "%{$wpdb->esc_like($search)}%";
-        $where .= " AND (full_name LIKE %s OR email LIKE %s OR phone LIKE %s)";
-        $params = [$like, $like, $like];
+        $where .= " AND (full_name LIKE %s OR email LIKE %s OR phone LIKE %s OR address LIKE %s)";
+        $params = [$like, $like, $like, $like]; // Include address in search
     }
 
+    // Count total clients for pagination
     $count_query = !empty($params) 
         ? $wpdb->prepare("SELECT COUNT(*) FROM {$table} {$where}", $params) 
         : "SELECT COUNT(*) FROM {$table} {$where}";
     $total = intval($wpdb->get_var($count_query));
 
-    $sql = "SELECT * FROM {$table} {$where} ORDER BY created_at DESC LIMIT %d, %d";
+    // Select only required columns including address
+    $select = "client_id, full_name, email, phone, address, note, status, profile_picture, created_at";
+
+    $sql = "SELECT {$select} FROM {$table} {$where} ORDER BY created_at DESC LIMIT %d, %d";
     if (!empty($params)) {
         $params[] = $offset;
         $params[] = $rows;
@@ -56,15 +60,6 @@ function rt_fetch_clients_ajax() {
     ]);
 }
 add_action('wp_ajax_fetch_clients_ajax', 'rt_fetch_clients_ajax');
-
-// ======================
-// Register AJAX Handlers
-// ======================
-add_action('wp_ajax_create_realtor_client_ajax', 'rt_create_realtor_client_ajax');
-add_action('wp_ajax_update_realtor_client_ajax', 'rt_update_realtor_client_ajax');
-add_action('wp_ajax_delete_realtor_client_ajax', 'rt_delete_realtor_client_ajax');
-add_action('wp_ajax_export_clients_ajax', 'rt_export_clients_ajax');
-add_action('wp_ajax_import_clients_ajax', 'rt_import_clients_ajax');
 
 // ======================
 // Fetch single client (without property)
@@ -94,6 +89,53 @@ function rt_fetch_realtor_client_ajax() {
 }
 add_action('wp_ajax_fetch_realtor_client_ajax', 'rt_fetch_realtor_client_ajax');
 
+// ======================
+// Fetch Realtor Client with Assigned Property & Property Details
+// ======================
+function rt_fetch_realtor_client_full_ajax() {
+    check_ajax_referer('rt_client_edit_nonce', 'nonce');
+    rt_client_current_user_required();
+    
+    global $wpdb;
+
+    $client_id = intval($_POST['client_id'] ?? 0);
+    if (!$client_id) wp_send_json_error('Invalid client ID');
+
+    $table_clients = $wpdb->prefix . 'clients';
+    $table_assigned = $wpdb->prefix . 'assigned_property';
+    $table_properties = $wpdb->prefix . 'rentcast_properties';
+
+    // Single client data
+    $client = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM $table_clients WHERE client_id = %d AND deleted_at IS NULL",
+            $client_id
+        ),
+        ARRAY_A
+    );
+
+    if (!$client) wp_send_json_error('Client not found');
+
+    // Assigned properties for this client
+    $assigned_props = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT ap.property_id, rp.listing_id, rp.address, rp.city, rp.state, rp.zip, 
+                    rp.bedrooms, rp.bathrooms, rp.sqft, rp.price, rp.image_url, rp.description, rp.year_built, rp.property_value
+             FROM $table_assigned ap
+             LEFT JOIN $table_properties rp ON ap.property_id = rp.id
+             WHERE ap.client_id = %d AND ap.deleted_at IS NULL",
+            $client_id
+        ),
+        ARRAY_A
+    );
+
+    // Combine results
+    $client['assigned_properties'] = $assigned_props;
+
+    wp_send_json_success($client);
+}
+add_action('wp_ajax_fetch_realtor_client_full_ajax', 'rt_fetch_realtor_client_full_ajax');
+
 // =====================
 // Create Client
 // =====================
@@ -108,6 +150,7 @@ function rt_create_realtor_client_ajax() {
     $email = sanitize_email($_POST['realtor_client_email'] ?? '');
     $status = sanitize_text_field($_POST['realtor_client_status'] ?? '');
     $phone = sanitize_text_field($_POST['realtor_client_phone'] ?? '');
+    $address = sanitize_text_field($_POST['realtor_client_address'] ?? '');
     $note = sanitize_textarea_field($_POST['realtor_client_note'] ?? '');
     $preferred_location = sanitize_text_field($_POST['preferred_location'] ?? '');
 
@@ -162,6 +205,7 @@ function rt_create_realtor_client_ajax() {
             'full_name' => $full_name,
             'email' => $email,
             'phone' => $phone,
+            'address' => $address,
             'preferred_location' => $preferred_location,
             'note' => $note,
             'status' => $status,
@@ -207,6 +251,7 @@ function rt_update_realtor_client_ajax() {
         'full_name'   => sanitize_text_field($_POST['realtor_client_full_name'] ?? ''),
         'email'       => sanitize_email($_POST['realtor_client_email'] ?? ''),
         'phone'       => sanitize_text_field($_POST['realtor_client_phone'] ?? ''),
+        'address' => sanitize_text_field($_POST['realtor_client_address'] ?? ''),
         'note'        => sanitize_textarea_field($_POST['realtor_client_note'] ?? $_POST['realtor_client_notes'] ?? ''),
         'status'      => sanitize_text_field($_POST['realtor_client_status'] ?? ''),
         'lead_status' => sanitize_text_field($_POST['realtor_lead_status'] ?? ''),
@@ -312,7 +357,7 @@ function rt_export_clients_ajax() {
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
 
-    $allowed_cols = ['full_name', 'email', 'phone', 'note', 'status', 'profile_picture', 'created_at'];
+    $allowed_cols = ['full_name', 'email', 'phone', 'address', 'note', 'status', 'profile_picture', 'created_at'];
     $columns = json_decode(stripslashes($_POST['columns'] ?? '[]'), true);
     $columns = array_intersect($allowed_cols, $columns);
     if (empty($columns)) $columns = $allowed_cols;
@@ -414,6 +459,7 @@ function rt_import_clients_ajax() {
         $full_name = sanitize_text_field($row['full_name'] ?? $row['name'] ?? $row['client_name'] ?? '');
         $email     = sanitize_email($row['email'] ?? '');
         $phone     = sanitize_text_field($row['phone'] ?? $row['mobile'] ?? $row['phone_number'] ?? '');
+        $address = sanitize_text_field($row['address'] ?? '');
         $note      = sanitize_textarea_field($row['note'] ?? $row['notes'] ?? '');
         $status    = sanitize_text_field($row['status'] ?? 'active');
 
@@ -456,6 +502,7 @@ function rt_import_clients_ajax() {
             $update_data = [
                 'full_name'   => $full_name,
                 'phone'       => $phone,
+                'address'     => $address,
                 'note'        => $note,
                 'status'      => $status,
                 'updated_at'  => current_time('mysql'),
@@ -497,6 +544,7 @@ function rt_import_clients_ajax() {
             'email'         => $email,
             'phone'         => $phone,
             'note'          => $note,
+            'address'     => $address,
             'status'        => $status,
             'user_id'       => $user_id,
             'created_at'    => current_time('mysql'),
@@ -527,6 +575,7 @@ function rt_import_clients_ajax() {
         'errors' => array_slice($errors, 0, 50)
     ]);
 }
+add_action('wp_ajax_import_clients_ajax', 'rt_import_clients_ajax');
 
 // =====================
 // CSV Parser Function

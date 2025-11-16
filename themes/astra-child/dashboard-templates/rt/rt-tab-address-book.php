@@ -40,6 +40,7 @@
         <th class="client-name">Client Name</th>
         <th class="email">Email</th>
         <th class="phone-number">Phone Number</th>
+        <th class="address">Address</th>
         <th class="notes">Notes</th>
         <th class="Status">Status</th>
         <th class="ab-actions-column">Actions</th>
@@ -89,6 +90,7 @@ include locate_template('dashboard-templates/rt/rt-ab-client-details-modal.php')
         <label><input type="checkbox" name="ab_export_columns" value="full_name" checked> Client Name</label>
         <label><input type="checkbox" name="ab_export_columns" value="email" checked> Email</label>
         <label><input type="checkbox" name="ab_export_columns" value="phone" checked> Phone</label>
+        <label><input type="checkbox" name="ab_export_columns" value="address" checked> Address</label> <!-- New -->
         <label><input type="checkbox" name="ab_export_columns" value="note" checked> Notes</label>
         <label><input type="checkbox" name="ab_export_columns" value="status" checked> Status</label>
         <label><input type="checkbox" name="ab_export_columns" value="profile_picture"> Profile Picture URL</label>

@@ -11,7 +11,6 @@ $image_url = $upload_dir['baseurl'];
                 <img class="client-avatar" id="clientAvatar" src="<?php echo esc_url($image_url . '/2025/08/client-photo.jpg'); ?>" alt="Client Photo">
                 <span class="client-info">
                     <span class="client-name" id="clientName">Client Name</span><br>
-                    <span id="clientCompany">Company / Role</span>
                 </span>
             </div>
         </div>
@@ -21,31 +20,13 @@ $image_url = $upload_dir['baseurl'];
                 <tr><td>Client Name</td><td id="clientNameCell">—</td></tr>
                 <tr><td>Email</td><td id="clientEmailCell">—</td></tr>
                 <tr><td>Phone Number</td><td id="clientPhoneCell">—</td></tr>
-                <tr><td>Preferred Location</td><td id="clientPreferredLocationCell">—</td></tr>
                 <tr><td>Notes</td><td id="clientNotesCell">—</td></tr>
                 <tr><td>Status</td><td id="clientStatusCell">—</td></tr>
             </table>
 
-            <h2 class="modal-title" style="margin-bottom: 10px">Associated Property</h2>
-            <div class="property-item-modal">
-                <img src="" id="clientPropertyImage" alt="Property Image" class="main-image client-details-property-details">
-                <div class="property-details">
-                    <h3 class="property-title" id="clientPropertyTitle">No Property Associated</h3>
-                    <div class="property-price" id="clientPropertyPrice">—</div>
-                    <div class="property-location" id="clientPropertyLocation">—</div>
-                    <div class="property-features">
-                        <span class="feature" id="clientPropertyBedrooms">— beds</span>
-                        <span class="feature" id="clientPropertyBathrooms">— baths</span>
-                        <span class="feature" id="clientPropertySqft">— sqft</span>
-                    </div>
-                    <button class="view-details-btn" id="clientPropertyViewBtn" style="display: none;">View Property Details</button>
-                </div>
-            </div>
-
-            <div class="upload-documents">
-                <button class="cld-upload-btn" data-modal="cl-upload-document-modal">
-                    Upload Document
-                </button>
+            <h2 class="modal-title" style="margin-bottom: 10px">Associated Properties</h2>
+            <div id="clientPropertiesContainer">
+                <p>Loading properties...</p>
             </div>
         </div>
 
@@ -55,359 +36,103 @@ $image_url = $upload_dir['baseurl'];
     </div>
 </div>
 
-<?php 
-include locate_template('dashboard-templates/rt/rt-property-details-modal.php'); 
-include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
-?>
-
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("Upload Document modal logic loaded");
-
     let currentClientId = null;
-    let currentPropertiesId = null;
+    let currentClientData = null;
 
-    // ==========================
-    // Open Upload Modal - UPDATED
-    // ==========================
-    document.body.addEventListener("click", function (e) {
-        const btn = e.target.closest(".cld-upload-btn");
-        if (!btn) return;
-
-        e.preventDefault();
-        console.log("Upload Document button clicked");
-
-        // Store current client and properties IDs for form submission
-        if (window.currentClientData) {
-            currentClientId = window.currentClientData.client_id;
-            currentPropertiesId = window.currentClientData.property_id;
-            console.log("📋 Setting IDs - Client:", currentClientId, "Properties:", currentPropertiesId);
-        }
-
-        const modalId = btn.dataset.modal || "cl-upload-document-modal";
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-
-        const clientModal = document.getElementById("clientDetailsModal");
-        if (clientModal) clientModal.style.display = "none";
-
-        modal.style.display = "flex";
-        modal.classList.add("active");
-    });
-
-    // ==========================
-    // Close Upload Modal
-    // ==========================
-    document.body.addEventListener("click", function (e) {
-        // Close when click outside
-        const activeModal = document.querySelector(".clup-modal-overlay.active");
-        if (activeModal && e.target === activeModal) {
-            activeModal.classList.remove("active");
-            activeModal.style.display = "none";
-        }
-
-        // Close on cross button
-        if (e.target.classList.contains("clup-close-btn")) {
-            const modal = e.target.closest(".clup-modal-overlay");
-            if (modal) {
-                modal.classList.remove("active");
-                modal.style.display = "none";
-            }
-        }
-    });
-
-    // Close on ESC
-    document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") {
-            const activeModal = document.querySelector(".clup-modal-overlay.active");
-            if (activeModal) {
-                activeModal.classList.remove("active");
-                activeModal.style.display = "none";
-            }
-        }
-    });
-
-    // ==========================
-    // Browse Button & File Select
-    // ==========================
-    document.body.addEventListener("click", function (e) {
-        const browseBtn = e.target.closest(".clup-browse");
-        if (!browseBtn) return;
-
-        e.preventDefault();
-        const form = browseBtn.closest("form");
-        const fileInput = form.querySelector(".clup-file-input");
-        const fileNameLabel = form.querySelector("#selected-file-name");
-
-        if (fileInput) fileInput.click();
-
-        // When file selected
-        fileInput.addEventListener("change", function () {
-            if (fileInput.files.length > 0) {
-                fileNameLabel.textContent = "Selected: " + fileInput.files[0].name;
-            } else {
-                fileNameLabel.textContent = "";
-            }
-        });
-    });
-
-    // ==========================
-    // Save Button (Form Submit) - UPDATED
-    // ==========================
-    const uploadForm = document.getElementById("upload-document-form");
-    if (uploadForm) {
-        uploadForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            console.log("💾 Save clicked - Client ID:", currentClientId, "Properties ID:", currentPropertiesId);
-
-            // Create FormData with client and properties IDs
-            const formData = new FormData(uploadForm);
-            formData.append('action', 'rt_add_document');
-            formData.append('nonce', rtClientAjax.edit_nonce);
-            formData.append('client_id', currentClientId || '');
-            formData.append('property_id', currentPropertiesId || '');
-
-            // AJAX submission
-            fetch(rtClientAjax.ajax_url, {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    console.log("Document saved successfully");
-                    alert('Document saved successfully!');
-                    
-                    // Close modal and reset form
-                    const modal = uploadForm.closest(".clup-modal-overlay");
-                    if (modal) {
-                        modal.classList.remove("active");
-                        modal.style.display = "none";
-                        uploadForm.reset();
-                        const label = uploadForm.querySelector("#selected-file-name");
-                        if (label) label.textContent = "";
-                    }
-                } else {
-                    console.error("❌ Save failed:", data.data);
-                    alert('Error: ' + data.data);
-                }
-            })
-            .catch(error => {
-                console.error("❌ AJAX error:", error);
-                alert('Network error. Please try again.');
-            });
-        });
-    }
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🏠 Client details modal script loaded');
-    
     const clientModal = document.getElementById('clientDetailsModal');
     const closeModalBtn = document.getElementById('closeClientDetailsModal');
-    window.currentClientData = null; // Make it global for upload modal access
+    const propertiesContainer = document.getElementById('clientPropertiesContainer');
 
-    // Close modal functions
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', function() {
-            clientModal.style.display = 'none';
-        });
-    }
+    if (closeModalBtn) closeModalBtn.addEventListener('click', () => clientModal.style.display = 'none');
+    if (clientModal) clientModal.addEventListener('click', e => { if(e.target === clientModal) clientModal.style.display = 'none'; });
 
-    if (clientModal) {
-        clientModal.addEventListener('click', function(e) { 
-            if (e.target === clientModal) {
-                clientModal.style.display = 'none'; 
-            }
-        });
-    }
-
-    // View Property Button Event Handler
-    function handleViewPropertyClick() {
-        console.log('🖱️ View Details button clicked');
-        
-        if (!window.currentClientData) {
-            console.error('❌ No client data available');
-            alert('No client data loaded yet.');
-            return;
-        }
-
-        // Check if property data exists
-        if (!window.currentClientData.property_listing_id) {
-            alert('No property associated with this client.');
-            return;
-        }
-
-        if (typeof window.openPropertyDetailsModal !== 'function') {
-            console.error('❌ Property modal function not available');
-            alert('Property details feature is not loaded.');
-            return;
-        }
-
-        console.log('✅ Opening property modal with data:', window.currentClientData);
-        window.openPropertyDetailsModal(window.currentClientData);
-    }
-
-    // Initialize view button
-    function initializeViewButton() {
-        const viewPropertyBtn = document.getElementById('clientPropertyViewBtn');
-        if (viewPropertyBtn) {
-            console.log('✅ View button found');
-            
-            // Clear existing events and add new one
-            viewPropertyBtn.replaceWith(viewPropertyBtn.cloneNode(true));
-            const newBtn = document.getElementById('clientPropertyViewBtn');
-            newBtn.addEventListener('click', handleViewPropertyClick);
-            
-        } else {
-            console.log('⏳ View button not found');
-        }
-    }
-
-    // Main function to open client modal
     window.openClientDetailsModal = async function(clientId) {
-        console.log('👤 Opening client details for ID:', clientId);
-        
-        if (!clientId) {
-            console.error('❌ No client ID provided');
-            return;
-        }
-
-        // Show modal and loading state
+        if (!clientId) return;
         clientModal.style.display = 'flex';
         showLoadingState();
 
         try {
-            console.log('📡 Fetching client data...');
-            
             const response = await fetch(rtClientAjax.ajax_url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
-                    action: 'fetch_realtor_client_ajax',
+                    action: 'fetch_realtor_client_full_ajax',
                     nonce: rtClientAjax.edit_nonce,
                     client_id: clientId
                 })
             });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
             const result = await response.json();
-            console.log('🎯 API Response:', result);
-            
-            if (!result.success) {
-                throw new Error(result.data || 'API returned failure');
-            }
-            
-            const client = result.data;
-            console.log('📊 Client data loaded:', client);
+            if (!result.success) throw new Error(result.data || 'API returned failure');
 
-            // Store data globally for upload modal access
-            window.currentClientData = client;
-            
-            // Update UI with client data
-            updateClientUI(client);
-            
-            // Initialize view button
-            setTimeout(initializeViewButton, 100);
+            currentClientData = result.data;
+            currentClientId = clientId;
+            updateClientUI(result.data);
 
         } catch(error) {
-            console.error('❌ Error loading client data:', error);
             alert('Error loading client data: ' + error.message);
             showErrorState();
         }
     };
 
-    // Show loading state
     function showLoadingState() {
         document.getElementById('clientName').textContent = 'Loading...';
         document.getElementById('clientNameCell').textContent = 'Loading...';
-        document.getElementById('clientPropertyTitle').textContent = 'Loading property...';
-        document.getElementById('clientPropertyPrice').textContent = '...';
-        document.getElementById('clientPropertyViewBtn').style.display = 'none';
+        propertiesContainer.innerHTML = '<p>Loading properties...</p>';
     }
 
-    // Show error state
     function showErrorState() {
         document.getElementById('clientName').textContent = 'Error Loading';
-        document.getElementById('clientPropertyTitle').textContent = 'Failed to load property';
+        document.getElementById('clientNameCell').textContent = 'Error';
+        propertiesContainer.innerHTML = '<p>Failed to load properties</p>';
     }
 
-    // Update UI with client data
     function updateClientUI(client) {
-        console.log('🎨 Updating UI with client data');
-        
-        // Profile info
         document.getElementById('clientAvatar').src = client.profile_picture || (rtClientAjax?.default_avatar || '<?php echo esc_url($image_url . '/2025/08/client-photo.jpg'); ?>');
         document.getElementById('clientName').textContent = client.full_name || '—';
-        document.getElementById('clientCompany').textContent = client.company || '—';
-
-        // Client details table
         document.getElementById('clientNameCell').textContent = client.full_name || '—';
         document.getElementById('clientEmailCell').textContent = client.email || '—';
         document.getElementById('clientPhoneCell').textContent = client.phone || '—';
-        document.getElementById('clientPreferredLocationCell').textContent = client.preferred_location || '—';
         document.getElementById('clientNotesCell').textContent = client.note || '—';
         document.getElementById('clientStatusCell').textContent = client.status || '—';
 
-        // Property information
-        updatePropertyUI(client);
+        updatePropertiesUI(client.assigned_properties || []);
     }
 
-    // Update property section
-    function updatePropertyUI(client) {
-        const viewBtn = document.getElementById('clientPropertyViewBtn');
-        
-        // Check if client has associated property
-        if (client.property_listing_id && client.property_title) {
-            console.log('🏠 Client has associated property');
-            
-            // Property image
-            document.getElementById('clientPropertyImage').src = client.property_image_url || (rtClientAjax?.default_property_image || '<?php echo esc_url($image_url . '/assets/images/default-property.png'); ?>');
-            
-            // Property details
-            document.getElementById('clientPropertyTitle').textContent = client.property_title || 'Property';
-            document.getElementById('clientPropertyPrice').textContent = client.property_price ? '$' + numberWithCommas(client.property_price) : 'Price not set';
-            document.getElementById('clientPropertyLocation').textContent = client.property_location || 'Location not specified';
-            
-            // Property features
-            document.getElementById('clientPropertyBedrooms').textContent = (client.bedrooms || '—') + ' beds';
-            document.getElementById('clientPropertyBathrooms').textContent = (client.bathrooms || '—') + ' baths';
-            document.getElementById('clientPropertySqft').textContent = (client.sqft ? numberWithCommas(client.sqft) : '—') + ' sqft';
-            
-            // Show view button
-            viewBtn.style.display = 'block';
-            
-        } else {
-            console.log('❌ No associated property found');
-            document.getElementById('clientPropertyTitle').textContent = 'No Property Associated';
-            document.getElementById('clientPropertyPrice').textContent = '—';
-            document.getElementById('clientPropertyLocation').textContent = '—';
-            document.getElementById('clientPropertyImage').src = '<?php echo esc_url($image_url . '/assets/images/default-property.png'); ?>';
-            
-            // Hide features and view button
-            document.getElementById('clientPropertyBedrooms').textContent = '— beds';
-            document.getElementById('clientPropertyBathrooms').textContent = '— baths';
-            document.getElementById('clientPropertySqft').textContent = '— sqft';
-            viewBtn.style.display = 'none';
+    function updatePropertiesUI(properties) {
+        if (!properties || properties.length === 0) {
+            propertiesContainer.innerHTML = '<p>No properties assigned to this client.</p>';
+            return;
         }
+
+        let html = '';
+        properties.forEach(prop => {
+            const price = prop.price ? '$' + numberWithCommas(prop.price) : 'Price not set';
+            html += `
+                <div class="property-item-modal">
+                    <img src="${prop.image_url || '<?php echo esc_url($image_url . '/assets/images/default-property.png'); ?>'}" alt="Property Image" class="main-image client-details-property-details">
+                    <div class="property-details">
+                        <h3 class="property-title">${prop.address || 'Property Title'}</h3>
+                        <div class="property-price">${price}</div>
+                        <div class="property-location">${prop.city || ''}, ${prop.state || ''}</div>
+                        <div class="property-features">
+                            <span class="feature">${prop.bedrooms || '—'} beds</span>
+                            <span class="feature">${prop.bathrooms || '—'} baths</span>
+                            <span class="feature">${prop.sqft ? numberWithCommas(prop.sqft) : '—'} sqft</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        propertiesContainer.innerHTML = html;
     }
 
-    // Utility function to format numbers with commas
     function numberWithCommas(x) {
-        if (!x) return '0';
-        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0';
     }
 
-    // Initial initialization
-    initializeViewButton();
 });
 </script>
 
@@ -472,24 +197,19 @@ document.addEventListener('DOMContentLoaded', function() {
     font-size: 0.9em;
     color: #666;
 }
-.view-details-btn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 10px 20px;
+.property-item-modal {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+    padding: 10px;
     border-radius: 5px;
-    cursor: pointer;
-    margin-top: 10px;
-    font-size: 14px;
 }
-.view-details-btn:hover {
-    background: #218838;
-}
-.upload-documents {
-    margin-top: 20px;
-    text-align: right;
-}
-.cld-upload-btn {
-    color: #FFF !important;
+.property-details { flex: 1; }
+.main-image.client-details-property-details {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 4px;
 }
 </style>

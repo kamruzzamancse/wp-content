@@ -43,6 +43,11 @@
                         </div>
 
                         <div class="create-detail-row-realtor-client">
+                            <label for="create_realtor_client_address">Address:</label>
+                            <input type="text" id="create_realtor_client_address" name="realtor_client_address" placeholder="Enter full address">
+                        </div>
+
+                        <div class="create-detail-row-realtor-client">
                             <label for="create_realtor_client_note">Note:</label>
                             <textarea id="create_realtor_client_note" name="realtor_client_note" rows="4" placeholder="Enter note"></textarea>
                         </div>

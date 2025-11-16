@@ -19,7 +19,7 @@
 <div class="modal-overlay-address-book" id="clientDetailsModal">
     <div class="modal-container">
         <div class="modal-header-realtor">
-            <h1 class="header-title" style="margin-bottom: 20px">Client Details</h1>
+            <h1 class="header-title" style="margin-bottom: 20px">Client Details11111111</h1>
             <div class="client-profile-container">
                 <img style="display:none" decoding="async" class="client-avatar" src="https://maryasfour.livewebsite.space/wp-content/uploads/2025/08/client-photo.jpg" alt="Client Photo">
                 <img decoding="async" class="client-avatar" src="https://maryasfour.livewebsite.space/wp-content/uploads/2025/08/client-photo.jpg" alt="Client Photo">

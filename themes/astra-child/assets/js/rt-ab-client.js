@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     </td>
                     <td>${client.email}</td>
                     <td>${client.phone || ''}</td>
+                    <td>${client.address || ''}</td>
                     <td>${client.note || ''}</td>
                     <td>${client.status || ''}</td>
                     <td>
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
             setupRowButtons(bodyId);
             setupClientDetailsHandlers();
         } else {
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No clients found</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No clients found</td></tr>`;
         }
     };
 
@@ -315,6 +316,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('edit_realtor_client_full_name').value = client.full_name || '';
                     document.getElementById('edit_realtor_client_email').value = client.email || '';
                     document.getElementById('edit_realtor_client_phone').value = client.phone || '';
+                    document.getElementById('edit_realtor_client_address').value = client.address || '';
                     document.getElementById('edit_realtor_client_notes').value = client.note || '';
                     document.getElementById('edit_realtor_client_status').value = client.status || '';
 

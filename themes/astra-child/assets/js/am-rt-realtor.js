@@ -93,14 +93,17 @@ document.addEventListener('DOMContentLoaded', function () {
                             alt="${realtor.full_name}" 
                             style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
                     </td>
-                    <td class="realtor-name-text">${realtor.full_name}</td>
+                    <td class="realtor-name-text">
+                        <a href="#" class="viewRealtorBtn" data-id="${realtor.realtor_id}" style="color:#0073aa; text-decoration:none;">
+                            ${realtor.full_name}
+                        </a>
+                    </td>
                     <td>${realtor.email || ''}</td>
                     <td>${realtor.phone || ''}</td>
                     <td>${realtor.agency_name || ''}</td>
                     <td>${realtor.license_number || ''}</td>
                     <td class="rating">${realtor.rating_avg || ''}</td>
                     <td class="ab-actions-column">
-                        <span class="viewRealtorBtn" style="cursor:pointer; margin-right: 10px" data-id="${realtor.realtor_id}">👁️</span>
                         <span class="editRealtorBtn" style="cursor:pointer; margin-right: 10px" data-id="${realtor.realtor_id}">✏️</span>
                         <span class="deleteRealtorBtn" style="cursor:pointer;" data-id="${realtor.realtor_id}">🗑️</span>
                     </td>

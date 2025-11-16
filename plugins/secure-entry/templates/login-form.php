@@ -66,7 +66,7 @@
     margin-bottom: 25px;
 }
 .form-logo img {
-    max-width: 200px;
+    max-width: 280px;
     height: auto;
     display: inline-block;
     margin-top: -20px;

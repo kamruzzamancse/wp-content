@@ -12,7 +12,7 @@ $documents_table             = $wpdb->prefix . 'documents';
 
 <div class="assign-task-container">
 
-    <h3>Assigned Task</h3>
+    <h3>Client Documents</h3>
 
     <table class="wp-list-table widefat fixed striped">
         <thead>
@@ -20,9 +20,7 @@ $documents_table             = $wpdb->prefix . 'documents';
                 <th>Client Name</th>
                 <th>Property Address</th>
                 <th>Assigned Docs</th>
-                <th>Assigned Date</th>
                 <th>Reply Docs</th>
-                <th>Reply Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -96,8 +94,6 @@ $documents_table             = $wpdb->prefix . 'documents';
                         <td>' . esc_html($row->full_name) . '</td>
                         <td>' . esc_html($row->address) . '</td>
                         <td>' . $doc_name . '</td>
-                        <td>' . $doc_date . '</td>
-                        <td></td>
                         <td></td>
 
                         <td>

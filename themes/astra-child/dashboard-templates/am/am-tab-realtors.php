@@ -393,6 +393,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 
 <style>
+/* Cleaned and optimized CSS (duplicates removed, no required styles omitted) */
+
 /* Container & Header */
 .ab-container { width: 100%; margin: 0 auto; font-family: Arial, sans-serif; }
 .ab-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -407,19 +409,24 @@ document.addEventListener('DOMContentLoaded', () => {
 .ab-btn:hover { background-color: #0056b3; border-color: #0056b3; }
 .ab-btn:active { transform: scale(0.98); }
 .ab-btn .dashicons { font-size: 16px; vertical-align: middle; }
-.ab-btn-import, .ab-btn-export, .ab-btn-create { background-color: #007bff; border-color: #007bff; }
 
-/* Controls (Show rows dropdown) */
+/* Controls */
 .ab-controls { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-bottom: 10px; }
-#abControls #addressBookRows, #realtorRows { width: 100px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; background-color: #fff; font-size: 14px; cursor: pointer; }
+#realtorRows { width: 100px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; background-color: #fff; font-size: 14px; cursor: pointer; }
 
 /* Table */
-thead th { text-align: left; padding: 10px; border-bottom: 2px solid #ddd; font-weight: 600; }
-tbody td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #ddd; border-radius: 10px 10px 0 0; background: #fff; font-family: Arial, sans-serif; font-size: 14px; table-layout: auto; overflow: hidden; }
+thead th { padding: 10px; border-bottom: 2px solid #ddd; font-weight: 600; text-align: left; }
+table thead th:first-child { border-top-left-radius: 10px; }
+table thead th:last-child { border-top-right-radius: 10px; }
+
+tbody td { padding: 10px; border-bottom: 1px solid #eee; vertical-align: middle; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
 tbody td:hover::after { content: attr(title); position: absolute; left: 0; top: 100%; background: #333; color: #fff; padding: 6px 10px; border-radius: 4px; white-space: normal; min-width: 200px; max-width: 400px; z-index: 1000; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 tbody tr:hover { background-color: #f9f9f9; }
-.ab-sl-column, .ab-actions-column { width: 100px; min-width: 100px; max-width: 100px; text-align: center; }
-.ab-sl-column img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block; margin: 0 auto; }
+tbody tr:last-child td { border-bottom: none; }
+
+.ab-sl-column, .rating, .ab-actions-column { text-align: center; vertical-align: middle; }
+.ab-sl-column img { display: block; margin: 0 auto; border-radius: 50%; width: 40px; height: 40px; object-fit: cover; }
 .client-name { min-width: 150px; font-weight: 600; }
 .client-name-text { cursor: pointer; color: #0073aa; text-decoration: underline; }
 .client-name-text:hover { color: #0056b3; }
@@ -449,128 +456,19 @@ tbody tr:hover { background-color: #f9f9f9; }
 #abImportPreview { max-height: 220px; overflow: auto; border: 1px solid #eee; padding: 10px; background: #fafafa; font-size: 13px; }
 #abExportStatus, #realtorImportStatus { margin-top: 10px; color: #555; font-size: 14px; display: none; }
 
-/* Responsive Table */
+/* Footer Buttons */
+.ab-footer-buttons { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0; }
+.ab-footer-buttons .ab-btn { width: 80px; height: 36px; display: flex; justify-content: center; align-items: center; font-weight: 500; border-radius: 6px; border: 1px solid #ccc; background: #f5f5f5; color: #333; cursor: pointer; transition: background-color 0.25s ease; text-align: center; }
+.ab-footer-buttons .ab-btn:hover { background-color: #e9e9e9; }
+.ab-footer-buttons .ab-btn-primary { background-color: #0073aa; color: white; border: none; }
+.ab-footer-buttons .ab-btn-primary:hover { background-color: #005f8d; }
+
+/* Responsive */
 @media screen and (max-width: 768px) {
   table, thead, tbody, th, tr, td { display: block; width: 100%; }
   thead { display: none; }
   tr { margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; padding: 12px; background: #f9f9ff; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-  td { display: flex; flex-direction: column; width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid #eee; max-width: none !important; white-space: normal; overflow: visible; text-overflow: unset; }
-  td:last-child { border-bottom: none; }
-  td::before { content: attr(data-label); font-weight: 600; color: #333; margin-bottom: 4px; }
-  .ab-actions-column { flex-direction: row; justify-content: center; align-items: center; padding: 8px 0; }
-  .ab-action-icons { gap: 10px; }
-  td:hover::after { display: none; }
-}
+  td { display: flex; flex-direction: column; width: 100%; padding: 8px 0; border: none; border-bottom: 1px solid #eee; white
 
-/* Table layout & borders */
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border: 1px solid #ddd;          /* Outer table border */
-  border-radius: 10px 10px 0 0;    /* Rounded top corners */
-  background: #fff;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  table-layout: auto;
-  overflow: hidden;
-}
-
-/* Table header */
-thead th {
-  padding: 10px;
-  border-bottom: 2px solid #ddd;   /* Header bottom border */
-  font-weight: 600;
-  text-align: left;
-}
-
-/* Rounded corners for table header */
-table thead th:first-child {
-  border-top-left-radius: 10px;
-}
-table thead th:last-child {
-  border-top-right-radius: 10px;
-}
-
-/* Center align specific columns */
-.ab-sl-column,
-.rating,
-.ab-actions-column {
-  text-align: center;
-  vertical-align: middle;
-}
-
-/* Table body cells */
-tbody td {
-  padding: 10px;
-  border-bottom: 1px solid #eee;   /* Inner row borders */
-  vertical-align: middle;
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* Remove bottom border of last row */
-tbody tr:last-child td {
-  border-bottom: none;
-}
-
-/* Hover effect for rows */
-tbody tr:hover {
-  background-color: #f9f9f9;
-}
-
-/* Profile image styling */
-.ab-sl-column img {
-  display: block;
-  margin: 0 auto;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-}
-
-.ab-footer-buttons {
-  display: flex;
-  justify-content: flex-end; /* align buttons to right */
-  align-items: center;
-  gap: 10px; /* space between buttons */
-  margin-top: 20px;
-  padding-top: 15px;
-  border-top: 1px solid #e0e0e0;
-}
-
-/* Common button style */
-.ab-footer-buttons .ab-btn {
-  width: 80px;
-  height: 36px;
-  display: flex;                 /* ✅ Use flex to center text properly */
-  justify-content: center;       /* ✅ Horizontal center */
-  align-items: center;           /* ✅ Vertical center */
-  font-weight: 500;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #f5f5f5;
-  color: #333;
-  cursor: pointer;
-  transition: background-color 0.25s ease;
-  text-align: center;
-}
-
-.ab-footer-buttons .ab-btn:hover {
-  background-color: #e9e9e9;
-}
-
-/* Primary button */
-.ab-footer-buttons .ab-btn-primary {
-  background-color: #0073aa;
-  color: white;
-  border: none;
-}
-
-.ab-footer-buttons .ab-btn-primary:hover {
-  background-color: #005f8d;
-}
 
 </style>

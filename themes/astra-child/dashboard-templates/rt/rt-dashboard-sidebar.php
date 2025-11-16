@@ -32,9 +32,9 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
             </a>
         </li>
         <li class="<?php echo $current_tab === 'assign-task' ? 'active' : ''; ?>">
-            <a href="?tab=assign-task" title="Assign Task">
+            <a href="?tab=assign-task" title="Client Documents">
                 <span class="dashicons dashicons-clipboard"></span>
-                <span>Assign Task</span>
+                <span>Client Documents</span>
             </a>
         </li>
         <li class="<?php echo $current_tab === 'messages' ? 'active' : ''; ?>">

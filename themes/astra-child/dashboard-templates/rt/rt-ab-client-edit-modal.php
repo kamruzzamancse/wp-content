@@ -38,6 +38,11 @@
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
+                            <label for="edit_realtor_client_address">Address:</label>
+                            <input type="text" id="edit_realtor_client_address" name="realtor_client_address">
+                        </div>
+
+                        <div class="edit-detail-row-realtor-client">
                             <label for="edit_realtor_client_notes">Notes:</label>
                             <textarea id="edit_realtor_client_notes" name="realtor_client_note" rows="4"></textarea>
                         </div>
@@ -135,7 +140,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Client updated successfully!');
                     editModal.style.display='none';
                     if(typeof fetchClients === 'function'){
-                        fetchClients({ page:1, rows:10, search:'', bodyId:'addressBookBody', paginationId:'addressBookPagination' });
+                        fetchClients({ 
+                            page:1, 
+                            rows:parseInt(document.getElementById('addressBookRows').value,10) || 10, 
+                            search:document.getElementById('addressBookSearch').value.trim(), 
+                            bodyId:'addressBookBody', 
+                            paginationId:'addressBookPagination' 
+                        });
                     }
                 } else {
                     alert('Error: ' + result.data);
@@ -171,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('edit_realtor_client_full_name').value = client.full_name;
                 document.getElementById('edit_realtor_client_email').value = client.email;
                 document.getElementById('edit_realtor_client_phone').value = client.phone;
+                document.getElementById('edit_realtor_client_address').value = client.address || '';
                 document.getElementById('edit_realtor_client_notes').value = client.note;
                 document.getElementById('edit_realtor_client_status').value = client.status;
 
