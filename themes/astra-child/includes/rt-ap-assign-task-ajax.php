@@ -24,6 +24,7 @@ function rt_upload_document_handler() {
     $type_id      = intval($_POST['type_id'] ?? 0);
     $client_id    = intval($_POST['client_id'] ?? 0);
     $property_id  = intval($_POST['property_id'] ?? 0);
+    $note         = sanitize_textarea_field($_POST['note'] ?? '');
 
     if (empty($title) || empty($type_id) || empty($client_id) || empty($property_id)) {
         wp_send_json_error(['message' => 'Please fill all required fields.']);
@@ -83,11 +84,12 @@ function rt_upload_document_handler() {
                 'title'       => $title,
                 'type_id'     => $type_id,
                 'file_name'   => $file_url,
+                'note'        => $note,
                 'updated_at'  => $now,
                 'updated_by'  => $current_user
             ],
             ['id' => $existing_doc->id],
-            ['%s','%d','%s','%s','%d'],
+            ['%s','%d','%s','%s','%s','%d'],
             ['%d']
         );
         $document_id = $existing_doc->id;
@@ -102,10 +104,11 @@ function rt_upload_document_handler() {
                 'client_id'     => $client_id,
                 'property_id'   => $property_id,
                 'file_name'     => $file_url,
+                'note'          => $note,
                 'created_at'    => $now,
                 'created_by'    => $current_user
             ],
-            ['%s','%d','%d','%d','%s','%s','%d']
+            ['%s','%d','%d','%d','%s','%s','%s','%d']
         );
         $document_id = $wpdb->insert_id;
 
@@ -129,7 +132,6 @@ function rt_upload_document_handler() {
 
     if ($existing_assign) {
         // UPDATE existing assignment
-        // NEW: Reset deleted_at and deleted_by if they were not NULL
         $update_data = [
             'document_id' => $document_id,
             'updated_at'  => $now,
@@ -220,4 +222,145 @@ function rt_delete_assignment_handler() {
 
     wp_send_json_success(['message' => 'Assignment deleted successfully']);
     wp_die();
+}
+
+/*
+|----------------------------------------------------------------------
+| AJAX: Load Assign Table
+|----------------------------------------------------------------------
+*/
+
+add_action('wp_ajax_rt_load_assign_table', 'rt_load_assign_table');
+function rt_load_assign_table() {
+    global $wpdb;
+
+    $paged         = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
+    $items_per_page= 10;
+    $offset        = ($paged - 1) * $items_per_page;
+    $search_query  = sanitize_text_field($_POST['search'] ?? '');
+    $filter_status = sanitize_text_field($_POST['filter_status'] ?? '');
+
+    $clients_table               = $wpdb->prefix . 'clients';
+    $rentcast_properties_table   = $wpdb->prefix . 'rentcast_properties';
+    $assigned_property_table     = $wpdb->prefix . 'assigned_property';
+    $assigned_tasks_table        = $wpdb->prefix . 'assigned_tasks';
+    $documents_table             = $wpdb->prefix . 'documents';
+
+    // Build WHERE clause
+    $where_clause = ' WHERE a.deleted_at IS NULL ';
+    if ($search_query) {
+      $where_clause .= $wpdb->prepare(" AND (c.full_name LIKE %s OR p.address LIKE %s) ", "%$search_query%", "%$search_query%");
+    }
+    if ($filter_status === 'with_docs') {
+      $where_clause .= " AND EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
+    }
+    if ($filter_status === 'no_docs') {
+      $where_clause .= " AND NOT EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
+    }
+
+    // Count total items
+    $total_items = $wpdb->get_var("SELECT COUNT(a.id)
+                                   FROM {$assigned_property_table} a
+                                   LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
+                                   LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
+                                   $where_clause");
+
+    // Fetch data
+    $results = $wpdb->get_results("
+      SELECT a.id AS assignment_id, a.client_id, a.property_id, a.created_at, c.full_name, p.address
+      FROM {$assigned_property_table} a
+      LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
+      LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
+      $where_clause
+      ORDER BY a.created_at DESC
+      LIMIT $items_per_page OFFSET $offset
+    ");
+
+    ob_start();
+    if ($results) {
+        echo '<table class="wp-list-table widefat fixed striped">
+                <thead>
+                  <tr>
+                    <th>Client Name</th>
+                    <th>Property Address</th>
+                    <th>Assigned Docs</th>
+                    <th>Assigned Note</th>
+                    <th>Reply Docs</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>';
+        foreach ($results as $row) {
+            $doc_name = $note_text = '';
+            $task_id = 0;
+
+            $task = $wpdb->get_row($wpdb->prepare("
+                SELECT t.id AS task_id, t.document_id
+                FROM {$assigned_tasks_table} t
+                WHERE t.client_id=%d AND t.property_id=%d AND t.deleted_at IS NULL
+                ORDER BY t.id DESC LIMIT 1
+            ", $row->client_id, $row->property_id));
+
+            if ($task) {
+                $task_id = $task->task_id;
+                if ($task->document_id) {
+                    $doc = $wpdb->get_row($wpdb->prepare("
+                        SELECT title, file_name, note
+                        FROM {$documents_table}
+                        WHERE id=%d AND deleted_at IS NULL
+                    ", $task->document_id));
+                    if ($doc) {
+                        $file_short = basename($doc->file_name);
+                        $doc_name = '<a href="' . esc_url($doc->file_name) . '" target="_blank">' . esc_html($file_short) . '</a>';
+                        $note_text = !empty($doc->note) ? esc_html($doc->note) : '';
+                    }
+                }
+            }
+
+            echo '<tr 
+                    data-assignment-id="'.esc_attr($row->assignment_id).'" 
+                    data-task-id="'.esc_attr($task_id).'" 
+                    data-client-id="'.esc_attr($row->client_id).'" 
+                    data-property-id="'.esc_attr($row->property_id).'">
+                    <td data-label="Client">'.esc_html($row->full_name).'</td>
+                    <td data-label="Address">'.esc_html($row->address).'</td>
+                    <td data-label="Assigned Docs">'.$doc_name.'</td>
+                    <td data-label="Note">'.$note_text.'</td>
+                    <td data-label="Reply Docs"></td>
+                    <td data-label="Actions">
+                        <button class="button upload-document-trigger"
+                            data-assignment-id="'.esc_attr($row->assignment_id).'"
+                            data-task-id="'.esc_attr($task_id).'"
+                            data-client-id="'.esc_attr($row->client_id).'"
+                            data-property-id="'.esc_attr($row->property_id).'">
+                            <span class="dashicons dashicons-upload"></span>
+                        </button>
+                        <button class="button delete-assignment"
+                            data-task-id="'.esc_attr($task_id).'">
+                            <span class="dashicons dashicons-trash"></span>
+                        </button>
+                    </td>
+                </tr>';
+        }
+        echo '</tbody></table>';
+
+        // Pagination
+        $total_pages = ceil($total_items / $items_per_page);
+        if ($total_pages > 1) {
+            echo '<div class="pagination">';
+            echo paginate_links([
+                'base' => '%_%',
+                'format' => '',
+                'current' => $paged,
+                'total' => $total_pages,
+                'prev_text' => '« Prev',
+                'next_text' => 'Next »'
+            ]);
+            echo '</div>';
+        }
+    } else {
+        echo '<p>No assignments found.</p>';
+    }
+
+    wp_send_json_success(['html' => ob_get_clean()]);
 }

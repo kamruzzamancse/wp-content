@@ -35,6 +35,14 @@
                 </div>
             </div>
 
+            <!-- Note Textarea Added -->
+            <div class="clup-row-single">
+                <div class="clup-field">
+                    <label>Note (optional)</label>
+                    <textarea name="note" rows="4" placeholder="Enter note about the document"></textarea>
+                </div>
+            </div>
+
             <div class="clup-upload-box">
                 <div class="clup-upload-content">
                     <div class="clup-upload-icon">⬆</div>
@@ -52,7 +60,6 @@
         </form>
     </div>
 </div>
-
 
 <style>
 .clup-modal-overlay {

@@ -1,17 +1,15 @@
 jQuery(document).ready(function($){
 
-    // Trigger browse input
+    // ===== Modal & File Upload =====
     $(document).on('click', '.clup-browse', function(){
         $(this).siblings('.clup-file-input').click();
     });
 
-    // Show selected file name
     $(document).on('change', '.clup-file-input', function(){
         var fileName = $(this).val().split('\\').pop();
         $('#selected-file-name').text(fileName);
     });
 
-    // Open modal
     $(document).on('click', '.upload-document-trigger', function(){
         var clientId = $(this).data('client-id');
         var propertyId = $(this).data('property-id');
@@ -20,12 +18,10 @@ jQuery(document).ready(function($){
         $('#upload-document-form input[name="client_id"]').val(clientId);
         $('#upload-document-form input[name="property_id"]').val(propertyId);
 
-        // Clear old states
         $('#upload-document-form')[0].reset();
         $('#selected-file-name').text('');
     });
 
-    // Close modal
     $(document).on('click', '.clup-close-btn', function(){
         closeUploadModal();
     });
@@ -36,10 +32,8 @@ jQuery(document).ready(function($){
         $('#selected-file-name').text('');
     }
 
-    // Submit form via AJAX
     $('#upload-document-form').on('submit', function(e){
         e.preventDefault();
-
         var formData = new FormData(this);
         formData.append('action', 'upload_document');
         formData.append('nonce', rtAssignTaskAjax.nonce);
@@ -51,20 +45,14 @@ jQuery(document).ready(function($){
             processData: false,
             contentType: false,
             success: async function(response){
-                console.log(response);
-
                 if (response.success) {
-                    alert(response.data.message); // ✅ Alert shown outside modal
+                    alert(response.data.message);
                     closeUploadModal();
-
-                    // ✅ Refresh assigned task table dynamically (without full reload)
                     if (typeof refreshAssignedTaskTable === 'function') {
                         await refreshAssignedTaskTable();
                     } else {
-                        // fallback: reload tbody from server via AJAX
                         $('#assigned-list').load(location.href + ' #assigned-list > *');
                     }
-
                 } else {
                     alert(response.data.message || 'Something went wrong.');
                 }
@@ -76,40 +64,25 @@ jQuery(document).ready(function($){
         });
     });
 
-
-    // DELETE ASSIGNMENT (soft delete)
+    // ===== Delete Assignment =====
     $(document).on('click', '.delete-assignment', function() {
-
         var taskId = $(this).data('task-id');
-        if (!taskId) {
-            alert("Invalid task ID");
-            return;
-        }
-
+        if (!taskId) { alert("Invalid task ID"); return; }
         if (!confirm("Are you sure you want to delete this assignment?")) return;
 
         $.ajax({
             url: rtAssignTaskAjax.ajax_url,
             type: 'POST',
-            data: {
-                action: 'rt_delete_assignment',
-                nonce: rtAssignTaskAjax.nonce,
-                task_id: taskId
-            },
+            data: { action:'rt_delete_assignment', nonce: rtAssignTaskAjax.nonce, task_id: taskId },
             success: async function(response) {
                 if (response.success) {
                     alert(response.data.message);
-                    $('button[data-task-id="' + taskId + '"]').closest('tr').fadeOut(300, function(){
-                        $(this).remove();
-                    });
-
-                    // Refresh table after deletion
+                    $('button[data-task-id="' + taskId + '"]').closest('tr').fadeOut(300, function(){ $(this).remove(); });
                     if (typeof refreshAssignedTaskTable === 'function') {
                         await refreshAssignedTaskTable();
                     } else {
                         $('#assigned-list').load(location.href + ' #assigned-list > *');
                     }
-
                 } else {
                     alert(response.data.message || "Assignment could not be deleted.");
                 }
@@ -121,12 +94,55 @@ jQuery(document).ready(function($){
         });
     });
 
-
-    // Optional: helper function to refresh assigned table dynamically
+    // ===== Helper to refresh table =====
     window.refreshAssignedTaskTable = async function() {
         $('#assigned-list').addClass('loading');
         await $('#assigned-list').load(location.href + ' #assigned-list > *');
         $('#assigned-list').removeClass('loading');
     };
+
+    // ===== AJAX Table Load & Filter =====
+    function loadAssignTable(paged = 1) {
+        let search = $('#assign-search').val();
+        let filter_status = $('#assign-filter-status').val();
+
+        $.ajax({
+            url: rtAssignTaskAjax.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'rt_load_assign_table',
+                nonce: rtAssignTaskAjax.nonce,
+                search: search,
+                filter_status: filter_status,
+                paged: paged
+            },
+            success: function(response){
+                if(response.success) {
+                    $('#assign-table-wrapper').html(response.data.html);
+                } else {
+                    $('#assign-table-wrapper').html('<p>Failed to load table.</p>');
+                }
+            },
+            error: function() {
+                $('#assign-table-wrapper').html('<p>AJAX error occurred.</p>');
+            }
+        });
+    }
+
+    // Initial load
+    loadAssignTable();
+
+    // Filter button
+    $('#assign-filter-btn').on('click', function(e){
+        e.preventDefault();
+        loadAssignTable();
+    });
+
+    // Pagination click (delegated)
+    $(document).on('click', '.pagination a', function(e){
+        e.preventDefault();
+        let page = $(this).attr('href').split('paged=')[1];
+        if(page) loadAssignTable(page);
+    });
 
 });

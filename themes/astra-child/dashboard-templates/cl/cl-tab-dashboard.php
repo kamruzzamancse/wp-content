@@ -1,28 +1,21 @@
 <div class="dashboard-top">
-    <!-- LEFT SIDE -->
+
+    <!-- LEFT SIDE: Tracking Property -->
     <div class="dashboard-top-left">
         <div class="tpg-dashboard-container">
             <div class="tpg-tracking-section">
-
-                <!-- Header with Dropdown -->
                 <div class="tpg-tracking-header">
                     <h1 class="tpg-section-title">Tracking Property</h1>
-
                     <div class="tpg-tracking-summary">
-                        <span class="tpg-rental" id="tpg-avg-rental-price">Avg Rental: $5.34K</span> | 
-                        <span class="tpg-sales" id="tpg-avg-sales-price">Avg Sales: $250K</span>
+                        <span class="tpg-rental" id="tpg-avg-rental-price">Avg Rental: $0</span> | 
+                        <span class="tpg-sales" id="tpg-avg-sales-price">Avg Sales: $0</span>
                     </div>
-
                     <select id="tpg-property-select">
-                        <option value="property1">Property 1</option>
-                        <option value="property2">Property 2</option>
-                        <option value="property3">Property 3</option>
+                        <option value="">Loading...</option>
                     </select>
                 </div>
 
                 <div class="tpg-chart-container">
-
-                    <!-- Y Axis -->
                     <div class="tpg-y-axis">
                         <span>250k</span>
                         <span>200k</span>
@@ -30,40 +23,20 @@
                         <span>100k</span>
                         <span>50k</span>
                     </div>
-
-                    <!-- Line Chart -->
                     <svg class="tpg-line-chart" viewBox="0 0 600 250" preserveAspectRatio="none">
-                        <!-- Rental Income Line (Blue) -->
-                        <polyline class="rental-line" points="0,210 100,180 200,150 300,120 400,80 500,40" />
-                        <circle class="rental-circle" cx="0" cy="210" r="5" data-value="$2.10k"></circle>
-                        <circle class="rental-circle" cx="100" cy="180" r="5" data-value="$3.20k"></circle>
-                        <circle class="rental-circle" cx="200" cy="150" r="5" data-value="$4.80k"></circle>
-                        <circle class="rental-circle" cx="300" cy="120" r="5" data-value="$6.20k"></circle>
-                        <circle class="rental-circle" cx="400" cy="80" r="5" data-value="$7.50k"></circle>
-                        <circle class="rental-circle" cx="500" cy="40" r="5" data-value="$8.24k"></circle>
-
-                        <!-- Sales Price Line (Red) -->
-                        <polyline class="sales-line" points="0,200 100,190 200,170 300,140 400,110 500,70" />
-                        <circle class="sales-circle" cx="0" cy="200" r="5" data-value="$180k"></circle>
-                        <circle class="sales-circle" cx="100" cy="190" r="5" data-value="$185k"></circle>
-                        <circle class="sales-circle" cx="200" cy="170" r="5" data-value="$190k"></circle>
-                        <circle class="sales-circle" cx="300" cy="140" r="5" data-value="$200k"></circle>
-                        <circle class="sales-circle" cx="400" cy="110" r="5" data-value="$220k"></circle>
-                        <circle class="sales-circle" cx="500" cy="70" r="5" data-value="$250k"></circle>
+                        <polyline class="rental-line" points="" />
+                        <polyline class="sales-line" points="" />
                     </svg>
-
-                    <!-- X Axis -->
                     <div class="tpg-x-axis">
-                        <span>10:30 AM</span>
-                        <span>11:30 AM</span>
-                        <span>12:30 PM</span>
-                        <span>1:30 PM</span>
-                        <span>2:30 PM</span>
-                        <span>3:30 PM</span>
+                        <span>1</span>
+                        <span>2</span>
+                        <span>3</span>
+                        <span>4</span>
+                        <span>5</span>
+                        <span>6</span>
                     </div>
                 </div>
 
-                <!-- Legend -->
                 <div class="tpg-chart-legend" style="display:flex; gap:20px; margin-top:25px;">
                     <span style="display:flex; align-items:center; gap:5px;">
                         <span style="width:12px; height:12px; background:#4e6ef2; display:inline-block;"></span> Rental Income
@@ -72,25 +45,22 @@
                         <span style="width:12px; height:12px; background:#e74c3c; display:inline-block;"></span> Sales Price
                     </span>
                 </div>
-
             </div>
         </div>
 
-
-        <!-- Message Realtor under the graph -->
+        <!-- Message Realtor Box -->
         <div class="cld-box cld-message-box">
             <div class="cld-box-header">
                 <span>Message Realtor</span>
                 <button class="cld-send-btn">Send</button>
             </div>
             <div class="cld-box-body">
-                <textarea class="cld-textarea" placeholder="type message here"></textarea>
+                <textarea class="cld-textarea" placeholder="Type your message here"></textarea>
             </div>
         </div>
-
     </div>
-    
-   <!-- RIGHT SIDE -->
+
+    <!-- RIGHT SIDE: Calendar + Notes -->
     <div class="dashboard-top-right">
         <?php
         $current_user = wp_get_current_user();
@@ -117,7 +87,7 @@
         }
         ?>
 
-        <!-- Header -->
+        <!-- Notes Header -->
         <div class="notes-header">
             <h1>Notes</h1>
             <button class="add-note-btn">+</button>
@@ -125,10 +95,63 @@
 
         <!-- Sticky Notes Container -->
         <div class="sticky-notes-container"></div>
-
     </div>
-
 </div>
+
+<!-- ======== JS ======== -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const rentalDisplay = document.getElementById('tpg-avg-rental-price');
+    const salesDisplay  = document.getElementById('tpg-avg-sales-price');
+    const propertySelect = document.getElementById('tpg-property-select');
+    const rentalLine    = document.querySelector('.rental-line');
+    const salesLine     = document.querySelector('.sales-line');
+
+    // Fetch chart data for current user
+    fetch('<?php echo admin_url("admin-ajax.php?action=get_rentcast_chart_data"); ?>')
+        .then(res => res.json())
+        .then(data => {
+            const keys = Object.keys(data);
+            if (!keys.length) {
+                propertySelect.innerHTML = '<option value="">No properties assigned</option>';
+                return;
+            }
+
+            // Populate dropdown
+            propertySelect.innerHTML = '';
+            keys.forEach(key => {
+                const opt = document.createElement('option');
+                opt.value = key;
+                opt.textContent = data[key].address;
+                propertySelect.appendChild(opt);
+            });
+
+            function updateChart(propertyKey) {
+                const prop = data[propertyKey];
+                if (!prop) return;
+
+                const points = [];
+                const salesPoints = [];
+                for (let i = 0; i < 6; i++) {
+                    points.push([i * 100, 250 - (prop.rental / 1000 * 25)]);
+                    salesPoints.push([i * 100, 250 - (prop.sales / 1000 * 25)]);
+                }
+
+                rentalLine.setAttribute('points', points.map(p => p.join(',')).join(' '));
+                salesLine.setAttribute('points', salesPoints.map(p => p.join(',')).join(' '));
+
+                rentalDisplay.textContent = `Avg Rental: $${prop.rental}`;
+                salesDisplay.textContent  = `Avg Sales: $${prop.sales}`;
+            }
+
+            updateChart(keys[0]);
+
+            propertySelect.addEventListener('change', function () {
+                updateChart(this.value);
+            });
+        });
+});
+</script>
 
 <style>
 /* Message Realtor Box Styles */
@@ -502,120 +525,3 @@ table {
     fill: #e74c3c;
 }
 </style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const salesDisplay = document.getElementById('tpg-sales-price');
-    const salesCircles = document.querySelectorAll('.sales-circle');
-
-    // Set initial number to the last point's value
-    if (salesCircles.length) {
-        salesDisplay.textContent = salesCircles[salesCircles.length - 1].dataset.value;
-    }
-
-    // Update number when hovering each sales point
-    salesCircles.forEach(circle => {
-        circle.addEventListener('mouseenter', function () {
-            salesDisplay.textContent = this.dataset.value;
-        });
-        circle.addEventListener('mouseleave', function () {
-            // revert to last value when leaving
-            salesDisplay.textContent = salesCircles[salesCircles.length - 1].dataset.value;
-        });
-    });
-});
-</script>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const rentalDisplay = document.getElementById('tpg-avg-rental-price');
-    const salesDisplay  = document.getElementById('tpg-avg-sales-price');
-    const propertySelect = document.getElementById('tpg-property-select');
-
-    const rentalLine   = document.querySelector('.rental-line');
-    const salesLine    = document.querySelector('.sales-line');
-    const svgChart     = document.querySelector('.tpg-line-chart');
-
-    // Store dataset for each property (example data)
-    const propertyData = {
-        property1: {
-            rentalPoints: [ [0,210,"$2.10k"], [100,180,"$3.20k"], [200,150,"$4.80k"], [300,120,"$6.20k"], [400,80,"$7.50k"], [500,40,"$8.24k"] ],
-            salesPoints:  [ [0,200,"$180k"], [100,190,"$185k"], [200,170,"$190k"], [300,140,"$200k"], [400,110,"$220k"], [500,70,"$250k"] ]
-        },
-        property2: {
-            rentalPoints: [ [0,200,"$1.80k"], [100,170,"$2.50k"], [200,140,"$3.90k"], [300,100,"$5.00k"], [400,70,"$6.20k"], [500,50,"$7.10k"] ],
-            salesPoints:  [ [0,210,"$170k"], [100,195,"$180k"], [200,180,"$190k"], [300,150,"$210k"], [400,120,"$230k"], [500,90,"$240k"] ]
-        },
-        property3: {
-            rentalPoints: [ [0,220,"$2.50k"], [100,190,"$3.40k"], [200,170,"$4.20k"], [300,140,"$5.50k"], [400,100,"$6.80k"], [500,60,"$8.00k"] ],
-            salesPoints:  [ [0,190,"$160k"], [100,185,"$170k"], [200,175,"$180k"], [300,160,"$190k"], [400,140,"$200k"], [500,120,"$210k"] ]
-        }
-    };
-
-    // Utility to calculate average
-    function getAverageFromPoints(points, isRental = true) {
-        const nums = points.map(p => {
-            let val = p[2].replace(/[$k]/gi,"");
-            return parseFloat(val);
-        });
-        return nums.reduce((a,b)=>a+b,0) / nums.length;
-    }
-
-    // Remove old circles before adding new ones
-    function clearCircles() {
-        svgChart.querySelectorAll('.rental-circle, .sales-circle').forEach(el => el.remove());
-    }
-
-    // Render circles for rental & sales
-    function renderCircles(points, className) {
-        points.forEach(p => {
-            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            circle.setAttribute("cx", p[0]);
-            circle.setAttribute("cy", p[1]);
-            circle.setAttribute("r", "5");
-            circle.setAttribute("class", className);
-            circle.dataset.value = p[2];
-            svgChart.appendChild(circle);
-        });
-    }
-
-    // Update chart + summary
-    function updateChart(propertyKey) {
-        const data = propertyData[propertyKey];
-        if (!data) return;
-
-        // Update polyline paths
-        rentalLine.setAttribute("points", data.rentalPoints.map(p => `${p[0]},${p[1]}`).join(" "));
-        salesLine.setAttribute("points", data.salesPoints.map(p => `${p[0]},${p[1]}`).join(" "));
-
-        // Clear and re-render circles
-        clearCircles();
-        renderCircles(data.rentalPoints, "rental-circle");
-        renderCircles(data.salesPoints, "sales-circle");
-
-        // Update averages
-        rentalDisplay.textContent = `Avg Rental: $${getAverageFromPoints(data.rentalPoints).toFixed(2)}K`;
-        salesDisplay.textContent  = `Avg Sales: $${getAverageFromPoints(data.salesPoints,false).toFixed(0)}K`;
-
-        // Reattach hover for sales circles
-        const salesCircles = svgChart.querySelectorAll('.sales-circle');
-        salesCircles.forEach(circle => {
-            circle.addEventListener('mouseenter', function () {
-                salesDisplay.textContent = `Avg Sales: ${this.dataset.value}`;
-            });
-            circle.addEventListener('mouseleave', function () {
-                salesDisplay.textContent = `Avg Sales: $${getAverageFromPoints(data.salesPoints,false).toFixed(0)}K`;
-            });
-        });
-    }
-
-    // Init with first property
-    updateChart(propertySelect.value);
-
-    // Listen for dropdown changes
-    propertySelect.addEventListener('change', function () {
-        updateChart(this.value);
-    });
-});
-</script>
-

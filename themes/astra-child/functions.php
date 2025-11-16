@@ -32,6 +32,7 @@ $includes = [
     'rt-ap-assign-property-ajax.php',
     'rt-ap-assign-task-ajax.php',
     'cl-reply-docs-ajax.php',
+    'cl-db-tracking-property.php',
 ];
 
 foreach ($includes as $file) {

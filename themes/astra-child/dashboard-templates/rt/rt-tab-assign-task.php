@@ -3,122 +3,33 @@ if (!defined('ABSPATH')) exit;
 
 global $wpdb;
 
+// Table references
 $clients_table               = $wpdb->prefix . 'clients';
 $rentcast_properties_table   = $wpdb->prefix . 'rentcast_properties';
 $assigned_property_table     = $wpdb->prefix . 'assigned_property';
 $assigned_tasks_table        = $wpdb->prefix . 'assigned_tasks';
 $documents_table             = $wpdb->prefix . 'documents';
+
 ?>
 
 <div class="assign-task-container">
 
+  <div class="assign-task-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
     <h3>Client Documents</h3>
+    <div class="assign-task-filters" style="display:flex; gap:10px;">
+        <input type="text" id="assign-search" placeholder="Search client or address">
+        <select id="assign-filter-status">
+            <option value="">All Status</option>
+            <option value="with_docs">With Docs</option>
+            <option value="no_docs">Without Docs</option>
+        </select>
+        <button id="assign-filter-btn" class="button">Filter</button>
+    </div>
+  </div>
 
-    <table class="wp-list-table widefat fixed striped">
-        <thead>
-            <tr>
-                <th>Client Name</th>
-                <th>Property Address</th>
-                <th>Assigned Docs</th>
-                <th>Reply Docs</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-
-        <tbody id="assigned-list">
-        <?php
-
-        // Fetch assigned properties
-        $results = $wpdb->get_results("
-            SELECT a.id AS assignment_id,
-                   a.client_id,
-                   a.property_id,
-                   a.created_at,
-                   c.full_name,
-                   p.address
-            FROM {$assigned_property_table} a
-            LEFT JOIN {$clients_table} c 
-                   ON a.client_id = c.client_id
-            LEFT JOIN {$rentcast_properties_table} p 
-                   ON a.property_id = p.id
-            WHERE a.deleted_at IS NULL
-            ORDER BY a.created_at DESC
-        ");
-
-        if ($results) {
-            foreach ($results as $row) {
-
-                $doc_name = '';
-                $doc_date = '';
-                $task_id  = 0;
-
-                // Fetch latest assigned task
-                $task = $wpdb->get_row($wpdb->prepare("
-                    SELECT t.id AS task_id,
-                           t.document_id,
-                           t.created_at
-                    FROM {$assigned_tasks_table} t
-                    WHERE t.client_id = %d
-                      AND t.property_id = %d
-                      AND t.deleted_at IS NULL
-                    ORDER BY t.id DESC
-                    LIMIT 1
-                ", $row->client_id, $row->property_id));
-
-                if ($task) {
-                    $task_id = $task->task_id;
-
-                    if ($task->document_id) {
-                        $doc = $wpdb->get_row($wpdb->prepare("
-                            SELECT title, file_name
-                            FROM {$documents_table}
-                            WHERE id = %d
-                              AND client_id = %d
-                              AND deleted_at IS NULL
-                        ", $task->document_id, $row->client_id));
-
-                        if ($doc) {
-                            $file_short = basename($doc->file_name);
-                            $doc_name = '<a href="' . esc_url($doc->file_name) . '" target="_blank">' . esc_html($file_short) . '</a>';
-                            $doc_date = esc_html($task->created_at);
-                        }
-                    }
-                }
-
-                echo '<tr 
-                        data-assignment-id="' . esc_attr($row->assignment_id) . '" 
-                        data-task-id="' . esc_attr($task_id) . '" 
-                        data-client-id="' . esc_attr($row->client_id) . '" 
-                        data-property-id="' . esc_attr($row->property_id) . '">
-
-                        <td>' . esc_html($row->full_name) . '</td>
-                        <td>' . esc_html($row->address) . '</td>
-                        <td>' . $doc_name . '</td>
-                        <td></td>
-
-                        <td>
-                            <button class="button upload-document-trigger"
-                                data-assignment-id="' . esc_attr($row->assignment_id) . '"
-                                data-task-id="' . esc_attr($task_id) . '"
-                                data-client-id="' . esc_attr($row->client_id) . '"
-                                data-property-id="' . esc_attr($row->property_id) . '">
-                                <span class="dashicons dashicons-upload"></span>
-                            </button>
-
-                            <button class="button delete-assignment"
-                                data-task-id="' . esc_attr($task_id) . '">
-                                <span class="dashicons dashicons-trash"></span>
-                            </button>
-                        </td>
-
-                      </tr>';
-            }
-        } else {
-            echo '<tr><td colspan="7">No assignments found.</td></tr>';
-        }
-        ?>
-        </tbody>
-    </table>
+  <div id="assign-table-wrapper">
+      <!-- Table will be loaded here via AJAX -->
+  </div>
 
 </div>
 
@@ -138,7 +49,6 @@ $documents_table             = $wpdb->prefix . 'documents';
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background: #fff;
   font-size: 14px;
   border: 1px solid #ddd;
   border-radius: 10px 10px 0 0;
@@ -179,12 +89,10 @@ $documents_table             = $wpdb->prefix . 'documents';
 .assign-task-container table th:last-child {
   border-top-right-radius: 10px;
   width: 100px;
-  min-width: 100px;
-  max-width: 100px;
   text-align: center;
 }
 
-/* action icons */
+/* Action buttons */
 .assign-task-container .button {
   border: none;
   background: transparent;
@@ -198,7 +106,7 @@ $documents_table             = $wpdb->prefix . 'documents';
   text-align: center;
 }
 
-/* Mobile responsiveness */
+/* ===== Mobile responsiveness ===== */
 @media screen and (max-width: 768px) {
   .assign-task-container table,
   .assign-task-container thead,
