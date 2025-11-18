@@ -234,28 +234,29 @@ add_action('wp_ajax_rt_load_assign_table', 'rt_load_assign_table');
 function rt_load_assign_table() {
     global $wpdb;
 
-    $paged         = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
-    $items_per_page= 10;
-    $offset        = ($paged - 1) * $items_per_page;
-    $search_query  = sanitize_text_field($_POST['search'] ?? '');
-    $filter_status = sanitize_text_field($_POST['filter_status'] ?? '');
+    $paged           = isset($_POST['paged']) ? intval($_POST['paged']) : 1;
+    $items_per_page  = 10;
+    $offset          = ($paged - 1) * $items_per_page;
+    $search_query    = sanitize_text_field($_POST['search'] ?? '');
+    $filter_status   = sanitize_text_field($_POST['filter_status'] ?? '');
 
     $clients_table               = $wpdb->prefix . 'clients';
     $rentcast_properties_table   = $wpdb->prefix . 'rentcast_properties';
     $assigned_property_table     = $wpdb->prefix . 'assigned_property';
     $assigned_tasks_table        = $wpdb->prefix . 'assigned_tasks';
     $documents_table             = $wpdb->prefix . 'documents';
+    $reply_docs_table            = $wpdb->prefix . 'reply_docs'; // <-- Reply Docs table
 
     // Build WHERE clause
     $where_clause = ' WHERE a.deleted_at IS NULL ';
     if ($search_query) {
-      $where_clause .= $wpdb->prepare(" AND (c.full_name LIKE %s OR p.address LIKE %s) ", "%$search_query%", "%$search_query%");
+        $where_clause .= $wpdb->prepare(" AND (c.full_name LIKE %s OR p.address LIKE %s) ", "%$search_query%", "%$search_query%");
     }
     if ($filter_status === 'with_docs') {
-      $where_clause .= " AND EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
+        $where_clause .= " AND EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
     }
     if ($filter_status === 'no_docs') {
-      $where_clause .= " AND NOT EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
+        $where_clause .= " AND NOT EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
     }
 
     // Count total items
@@ -291,9 +292,10 @@ function rt_load_assign_table() {
                 </thead>
                 <tbody>';
         foreach ($results as $row) {
-            $doc_name = $note_text = '';
+            $doc_name = $note_text = $reply_doc_name = '';
             $task_id = 0;
 
+            // Fetch latest assigned task
             $task = $wpdb->get_row($wpdb->prepare("
                 SELECT t.id AS task_id, t.document_id
                 FROM {$assigned_tasks_table} t
@@ -317,6 +319,29 @@ function rt_load_assign_table() {
                 }
             }
 
+            // Fetch reply docs
+            if ($task_id) {
+                $reply = $wpdb->get_row($wpdb->prepare("
+                    SELECT r.document_id
+                    FROM {$reply_docs_table} r
+                    WHERE r.assigned_task_id = %d AND r.client_id = %d AND r.property_id = %d AND r.deleted_at IS NULL
+                    ORDER BY r.id DESC LIMIT 1
+                ", $task_id, $row->client_id, $row->property_id));
+
+                if ($reply && $reply->document_id) {
+                    $reply_doc = $wpdb->get_row($wpdb->prepare("
+                        SELECT title, file_name
+                        FROM {$documents_table}
+                        WHERE id = %d AND deleted_at IS NULL
+                    ", $reply->document_id));
+
+                    if ($reply_doc) {
+                        $file_short = basename($reply_doc->file_name);
+                        $reply_doc_name = '<a href="' . esc_url($reply_doc->file_name) . '" target="_blank">' . esc_html($file_short) . '</a>';
+                    }
+                }
+            }
+
             echo '<tr 
                     data-assignment-id="'.esc_attr($row->assignment_id).'" 
                     data-task-id="'.esc_attr($task_id).'" 
@@ -326,7 +351,7 @@ function rt_load_assign_table() {
                     <td data-label="Address">'.esc_html($row->address).'</td>
                     <td data-label="Assigned Docs">'.$doc_name.'</td>
                     <td data-label="Note">'.$note_text.'</td>
-                    <td data-label="Reply Docs"></td>
+                    <td data-label="Reply Docs">'.$reply_doc_name.'</td>
                     <td data-label="Actions">
                         <button class="button upload-document-trigger"
                             data-assignment-id="'.esc_attr($row->assignment_id).'"
