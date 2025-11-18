@@ -175,7 +175,6 @@ function upload_property_image() {
 }
 add_action('wp_ajax_upload_property_image', 'upload_property_image');
 
-
 // ==============================
 // Shortcode: Show All Properties
 // ==============================
@@ -188,20 +187,24 @@ function rentcast_properties_shortcode($atts) {
     ob_start();
 
     foreach ($properties as $property):
-        $property_id = intval($property->id); // <-- database id
-        $listing_id  = esc_attr($property->listing_id); // <-- existing listing_id
+        $property_id = intval($property->id);
+        $listing_id  = esc_attr($property->listing_id);
         $image_url   = esc_url($property->image_url ?: "https://placehold.co/500x300?text=No+Image");
         $rent_price  = !empty($property->price) ? '$' . number_format((float)$property->price) . '/month' : 'N/A';
         $value_price = $property->property_value ? '$' . number_format((float)$property->property_value) : 'Value not available';
         $location    = esc_html("{$property->city}, {$property->state}");
+
+        // Use property address in URL (slugify to make URL-friendly)
+        $address_slug = sanitize_title($property->address);
+        $property_url = "?tab=cl-property-details&listing_id={$listing_id}&id={$property_id}&address={$address_slug}";
     ?>
     <div class="pt-property-item" 
          id="property-item-<?php echo $listing_id; ?>" 
          data-id="<?php echo $property_id; ?>" 
          data-listing-id="<?php echo $listing_id; ?>">
         
-        <!-- Link updated to include both listing_id & id -->
-        <a href="?tab=cl-property-details&listing_id=<?php echo $listing_id; ?>&id=<?php echo $property_id; ?>">
+        <!-- Image now links to address URL -->
+        <a href="<?php echo $property_url; ?>">
             <img src="<?php echo $image_url; ?>" 
                  id="property-img-<?php echo $listing_id; ?>" 
                  class="pt-main-image" 
@@ -219,7 +222,12 @@ function rentcast_properties_shortcode($atts) {
                data-id="<?php echo $property_id; ?>">
 
         <div class="pt-property-details">
-            <h3><?php echo esc_html($property->address); ?></h3>
+            <!-- Address as clickable link -->
+            <h3>
+                <a href="<?php echo $property_url; ?>">
+                    <?php echo esc_html($property->address); ?>
+                </a>
+            </h3>
             <div>Rent: <?php echo $rent_price; ?></div>
             <div>Value: <?php echo $value_price; ?></div>
             <div><?php echo $location; ?></div>

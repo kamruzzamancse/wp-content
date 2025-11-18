@@ -730,7 +730,7 @@ register_deactivation_hook(__FILE__, 'mdk_deactivate');
 /**
  * Add custom user fields
  */
-function add_custom_user_fields($user) {
+/* function add_custom_user_fields($user) {
     ?>
     <h3>Broker Information</h3>
     <table class="form-table">
@@ -759,12 +759,12 @@ function add_custom_user_fields($user) {
     <?php
 }
 add_action('show_user_profile', 'add_custom_user_fields');
-add_action('edit_user_profile', 'add_custom_user_fields');
+add_action('edit_user_profile', 'add_custom_user_fields'); */
 
 /**
  * Save custom user fields
  */
-function save_custom_user_fields($user_id) {
+/* function save_custom_user_fields($user_id) {
     if (!current_user_can('edit_user', $user_id)) {
         return false;
     }
@@ -782,78 +782,4 @@ function save_custom_user_fields($user_id) {
     }
 }
 add_action('personal_options_update', 'save_custom_user_fields');
-add_action('edit_user_profile_update', 'save_custom_user_fields');
-
-add_action('init', function() {
-    if(isset($_GET['export_addressbook']) && $_GET['export_addressbook'] == '1') {
-        $format = isset($_GET['format']) ? $_GET['format'] : 'csv';
-
-        // Example data — replace with your dynamic table data
-        $clients = [
-            ['sl'=>'01','name'=>'Afsana Hamid Mim','email'=>'Support.info@gmail.com','phone'=>'999-888-666','address'=>'New York'],
-            ['sl'=>'02','name'=>'John D. Smith','email'=>'john.smith@business.com','phone'=>'555-123-4567','address'=>'Los Angeles, CA'],
-            ['sl'=>'03','name'=>'Emily Carter','email'=>'emily.carter@example.com','phone'=>'777-222-9999','address'=>'Chicago, IL'],
-            ['sl'=>'04','name'=>'Michael Johnson','email'=>'michael.johnson@example.com','phone'=>'888-333-4444','address'=>'Houston, TX'],
-            ['sl'=>'05','name'=>'Sophia Williams','email'=>'sophia.williams@example.com','phone'=>'999-555-1111','address'=>'San Francisco, CA'],
-            ['sl'=>'06','name'=>'David Brown','email'=>'david.brown@example.com','phone'=>'444-777-2222','address'=>'Miami, FL'],
-            ['sl'=>'07','name'=>'Olivia Martinez','email'=>'olivia.martinez@example.com','phone'=>'333-666-8888','address'=>'Seattle, WA'],
-            ['sl'=>'08','name'=>'James Lee','email'=>'james.lee@example.com','phone'=>'222-444-5555','address'=>'Boston, MA'],
-            ['sl'=>'09','name'=>'Isabella Thompson','email'=>'isabella.thompson@example.com','phone'=>'555-888-9999','address'=>'Denver, CO'],
-            ['sl'=>'10','name'=>'William Garcia','email'=>'william.garcia@example.com','phone'=>'777-999-0000','address'=>'Phoenix, AZ'],
-        ];
-
-        // CSV Export
-        if($format == 'csv'){
-            header('Content-Type: text/csv');
-            header('Content-Disposition: attachment; filename="address_book.csv"');
-            $output = fopen('php://output', 'w');
-            fputcsv($output, ['#SL', 'Client Name', 'Email', 'Phone Number', 'Address']);
-            foreach($clients as $c){
-                fputcsv($output, [$c['sl'],$c['name'],$c['email'],$c['phone'],$c['address']]);
-            }
-            fclose($output);
-            exit;
-        }
-
-        // JSON Export
-        if($format == 'json'){
-            header('Content-Type: application/json');
-            header('Content-Disposition: attachment; filename="address_book.json"');
-            echo json_encode($clients, JSON_PRETTY_PRINT);
-            exit;
-        }
-    }
-});
-
-// Redirect wp-login.php to custom login page
-add_action('init', function() {
-    $login_page = home_url('/login/');
-    $request_uri = $_SERVER['REQUEST_URI'];
-
-    if (strpos($request_uri, 'wp-login.php') !== false && !is_user_logged_in()) {
-        wp_redirect($login_page);
-        exit;
-    }
-});
-
-// WordPress dashboard access block
-function restrict_specific_users_from_wpadmin() {
-    // Get current user
-    $user = wp_get_current_user();
-
-    // Redirect based on username
-    if ( is_admin() && !defined('DOING_AJAX') ) {
-        switch ( $user->user_login ) {
-            case 'admin':
-                wp_redirect(site_url('/am/admin-dashboard/'));
-                exit;
-            case 'anis':
-                wp_redirect(site_url('/rt/realtor-dashboard'));
-                exit;
-            case 'sadi':
-                wp_redirect(site_url('/cl/client-dashboard/'));
-                exit;
-        }
-    }
-}
-add_action('admin_init', 'restrict_specific_users_from_wpadmin');
+add_action('edit_user_profile_update', 'save_custom_user_fields'); */
