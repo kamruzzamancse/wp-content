@@ -1,68 +1,94 @@
-<!-- Document Management Page -->
+<!-- Document Types Section -->
 <div class="cld-task-section">
 
-    <!-- Top Flex Container: Left & Right -->
-    <div class="cld-top-flex">
-        <!-- Left: Document Types -->
-        <div class="cld-doc-types-wrapper">
-            <div class="cld-doc-types-header">
-                <h2 class="header-title">Document Types</h2>
-                <button id="addDocTypeBtn" class="btn-primary">+ Add Type</button>
-            </div>
+    <div class="cld-doc-types-wrapper">
+        <div class="cld-doc-types-header">
+            <h2 class="header-title">Document Types</h2>
+            <button id="addDocTypeBtn" class="btn-primary">+ Add Type</button>
+        </div>
 
-            <table class="doc-types-table">
-                <thead>
-                    <tr>
-                        <th style="width:50px;">#</th>
-                        <th>Type Name</th>
-                        <th style="width:120px;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                    global $wpdb;
-                    $doc_types = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}document_types WHERE deleted_at IS NULL ORDER BY created_at DESC");
-                    if ($doc_types):
-                        foreach ($doc_types as $index => $type): ?>
-                            <tr data-id="<?php echo esc_attr($type->id); ?>">
-                                <td><?php echo $index + 1; ?></td>
-                                <td><?php echo esc_html($type->type_name); ?></td>
-                                <td>
-                                    <span class="edit-doc-type" title="Edit">✏️</span>
-                                    <span class="delete-doc-type" title="Delete">🗑️</span>
-                                </td>
-                            </tr>
-                        <?php endforeach;
-                    else: ?>
-                        <tr><td colspan="3" style="text-align:center;">No Document Types Found</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <!-- Controls: Show dropdown (right side, label left) -->
+        <div class="doc-types-controls" style="display:flex; justify-content:flex-end; align-items:center; margin-bottom:10px; gap:5px;">
+            <label for="docTypeRowsPerPage">Show:</label>
+            <select id="docTypeRowsPerPage">
+                <option value="5" selected>5 rows</option>
+                <option value="10">10 rows</option>
+                <option value="25">25 rows</option>
+            </select>
+        </div>
+
+        <table class="doc-types-table">
+            <thead>
+                <tr>
+                    <th style="width:50px;">#</th>
+                    <th>Type Name</th>
+                    <th style="width:80px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                global $wpdb;
+                $doc_types = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}document_types WHERE deleted_at IS NULL ORDER BY created_at DESC");
+                if ($doc_types):
+                    foreach ($doc_types as $index => $type): ?>
+                        <tr data-id="<?php echo esc_attr($type->id); ?>">
+                            <td><?php echo $index + 1; ?></td>
+                            <td><?php echo esc_html($type->type_name); ?></td>
+                            <td>
+                                <span class="edit-doc-type" title="Edit">✏️</span>
+                                <span class="delete-doc-type" title="Delete">🗑️</span>
+                            </td>
+                        </tr>
+                    <?php endforeach;
+                else: ?>
+                    <tr><td colspan="3" style="text-align:center;">No Document Types Found</td></tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+
+        <!-- Pagination (table bottom, right aligned) -->
+        <div id="docTypesPagination" class="pagination" style="display:flex; justify-content:flex-end; margin-top:10px;"></div>
+    </div>
+
+</div>
+
+<!-- ================= Documents Section ================= -->
+<div class="cld-task-section">
+
+    <h2 class="header-title">Documents</h2>
+
+    <!-- Controls: Search + Show -->
+    <div class="cld-doc-top-flex" style="margin-bottom:15px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+
+        <!-- Tabs -->
+        <div class="cld-doc-type-tabs-wrapper">
+            <button class="doc-type-tab active" data-type="all">All</button>
+            <?php foreach ($doc_types as $type): ?>
+                <button class="doc-type-tab" data-type="<?php echo esc_attr($type->id); ?>">
+                    <?php echo esc_html($type->type_name); ?>
+                </button>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Search + Show dropdown -->
+        <div style="display:flex; align-items:center; gap:10px; position: relative;">
+            <div class="cld-doc-search-wrapper">
+                <input type="text" id="documentSearchInput" placeholder="Search documents..." />
+                <ul id="documentSearchSuggestions" class="auto-suggest-list"></ul>
+            </div>
+            <div style="display:flex; align-items:center; gap:5px;">
+                <span>Show:</span>
+                <select id="rowsPerPage">
+                    <option value="5" selected>5 rows</option>
+                    <option value="10">10 rows</option>
+                    <option value="25">25 rows</option>
+                </select>
+            </div>
         </div>
     </div>
 
     <!-- Documents Table -->
     <div class="documents-section">
-        <div class="cld-doc-top-flex">
-            <!-- Left: Tabs -->
-            <div class="cld-doc-type-tabs-wrapper">
-                <button class="doc-type-tab active" data-type="all">All</button>
-                <?php foreach ($doc_types as $type): ?>
-                    <button class="doc-type-tab" data-type="<?php echo esc_attr($type->id); ?>">
-                        <?php echo esc_html($type->type_name); ?>
-                    </button>
-                <?php endforeach; ?>
-            </div>
-
-            <!-- Right: Search -->
-            <div class="cld-doc-search-wrapper">
-                <input type="text" id="documentSearchInput" placeholder="Search documents..." />
-                <ul id="documentSearchSuggestions" class="auto-suggest-list"></ul>
-            </div>
-        </div>
-
-
-        <!-- Table -->
         <table class="documents-table">
             <thead>
                 <tr>
@@ -90,11 +116,10 @@
 
                 if ($documents):
                     foreach ($documents as $index => $doc):
-
                         $upload_dir = wp_upload_dir();
-                        $file_path  = trailingslashit($upload_dir['basedir']) . ltrim($doc->file_name, '/');
-                        $file_url   = trailingslashit($upload_dir['baseurl']) . ltrim($doc->file_name, '/');
-                        $file_name  = basename($doc->file_name);
+                        $file_url  = $doc->file_name;
+                        $file_name = basename($doc->file_name);
+                        $file_path = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_url);
 
                         $assigned_status = $doc->doc_type ?: 'Assigned';
                         $assignment = $wpdb->get_row($wpdb->prepare("
@@ -118,27 +143,18 @@
                             <td><?php echo esc_html($doc->title); ?></td>
                             <td><?php echo esc_html($doc->type_name); ?></td>
                             <td>
-                                <?php
-                                $file_url  = $doc->file_name;
-                                $file_name = basename($doc->file_name);
-
-                                // Check file exists locally
-                                $upload_dir = wp_upload_dir();
-                                $file_path  = str_replace($upload_dir['baseurl'], $upload_dir['basedir'], $file_url);
-
-                                if (file_exists($file_path)) : ?>
+                                <?php if (file_exists($file_path)) : ?>
                                     <a href="<?php echo esc_url($file_url); ?>" target="_blank">
                                         <?php echo esc_html($file_name); ?>
                                     </a>
                                 <?php else: ?>
-                                    <span style="color:red;">File missing</span>
+                                    <span class="missing-file">File missing</span>
                                 <?php endif; ?>
                             </td>
                             <td><?php echo esc_html($assigned_status); ?></td>
                             <td>
                                 <?php if (file_exists($file_path)): ?>
-                                    <a href="<?php echo esc_url($file_url); ?>" download="<?php echo esc_attr($file_name); ?>"
-                                    class="doc-action download" title="Download">⬇️</a>
+                                    <a href="<?php echo esc_url($file_url); ?>" download="<?php echo esc_attr($file_name); ?>" class="doc-action download" title="Download">⬇️</a>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -148,6 +164,9 @@
                 <?php endif; ?>
             </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div id="documentsPagination" class="pagination" style="margin-top:10px; display:flex; justify-content:flex-end; gap:5px;"></div>
     </div>
 
 </div>
@@ -156,6 +175,178 @@
 include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
 include locate_template('dashboard-templates/rt/rt-document-type-modal.php');
 ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.querySelector('.doc-types-table tbody');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    const rowsPerPageSelect = document.getElementById('docTypeRowsPerPage');
+    const paginationContainer = document.getElementById('docTypesPagination');
+
+    let currentPage = 1;
+    let rowsPerPage = parseInt(rowsPerPageSelect.value);
+
+    function renderTable() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.forEach((row, index) => {
+            row.style.display = (index >= start && index < end) ? '' : 'none';
+        });
+    }
+
+    function renderPagination() {
+        paginationContainer.innerHTML = '';
+        const pageCount = Math.ceil(rows.length / rowsPerPage);
+
+        for(let i = 1; i <= pageCount; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.classList.add('page-btn'); // same class as documents
+
+            if (i === currentPage) {
+                btn.classList.add('active'); // highlight active page
+            }
+
+            btn.addEventListener('click', () => {
+                currentPage = i;
+                renderTable();
+                renderPagination();
+            });
+
+            paginationContainer.appendChild(btn);
+        }
+    }
+
+    rowsPerPageSelect.addEventListener('change', function() {
+        rowsPerPage = parseInt(this.value);
+        currentPage = 1;
+        renderTable();
+        renderPagination();
+    });
+
+    renderTable();
+    renderPagination();
+});
+</script>
+
+<!-- JS: Tabs, Search, Pagination -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // --- Tabs Filtering ---
+    const tabs = document.querySelectorAll('.doc-type-tab');
+    const rows = document.querySelectorAll('.documents-table tbody tr');
+
+    function filterByType(typeId) {
+        rows.forEach(row => {
+            row.style.display = (typeId === 'all' || row.dataset.typeId === typeId) ? '' : 'none';
+        });
+        currentPage = 1;
+        renderDocumentsTable();
+    }
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            filterByType(tab.dataset.type);
+            document.getElementById('documentSearchInput').value = '';
+            document.getElementById('documentSearchSuggestions').innerHTML = '';
+        });
+    });
+
+    // --- Search Auto-Suggestion ---
+    const searchInput = document.getElementById('documentSearchInput');
+    const suggestions = document.getElementById('documentSearchSuggestions');
+
+    searchInput.addEventListener('input', function() {
+        const query = this.value.toLowerCase().trim();
+        suggestions.innerHTML = '';
+
+        const activeTab = document.querySelector('.doc-type-tab.active');
+        const activeTypeId = activeTab.dataset.type;
+
+        const matched = [];
+        rows.forEach(row => {
+            const title = row.children[1].textContent.toLowerCase();
+            const typeId = row.dataset.typeId;
+            if(title.includes(query) && (activeTypeId === 'all' || activeTypeId === typeId)){
+                row.style.display = '';
+                matched.push(title);
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        [...new Set(matched)].slice(0, 5).forEach(s => {
+            const li = document.createElement('li');
+            li.textContent = s;
+            li.addEventListener('click', () => {
+                searchInput.value = s;
+                suggestions.innerHTML = '';
+                rows.forEach(row => {
+                    row.style.display = (row.children[1].textContent.toLowerCase() === s.toLowerCase()) ? '' : 'none';
+                });
+            });
+            suggestions.appendChild(li);
+        });
+    });
+
+    document.addEventListener('click', e => {
+        if(!searchInput.contains(e.target)){
+            suggestions.innerHTML = '';
+        }
+    });
+
+    // --- Pagination ---
+    const rowsPerPageSelect = document.getElementById('rowsPerPage');
+    const paginationContainer = document.getElementById('documentsPagination');
+    const docRows = Array.from(document.querySelectorAll('.documents-table tbody tr'));
+    let currentPage = 1;
+    let rowsPerPage = parseInt(rowsPerPageSelect.value);
+
+    function renderDocumentsTable() {
+        const activeTab = document.querySelector('.doc-type-tab.active');
+        const activeTypeId = activeTab.dataset.type;
+
+        const filteredRows = docRows.filter(row => activeTypeId === 'all' || row.dataset.typeId === activeTypeId);
+
+        const totalRows = filteredRows.length;
+        const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+        filteredRows.forEach((row, index) => {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            row.style.display = (index >= start && index < end) ? '' : 'none';
+        });
+
+        renderPagination(totalPages, filteredRows);
+    }
+
+    function renderPagination(totalPages, filteredRows) {
+        paginationContainer.innerHTML = '';
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.classList.add('page-btn');
+            if (i === currentPage) btn.classList.add('active');
+            btn.addEventListener('click', () => {
+                currentPage = i;
+                renderDocumentsTable();
+            });
+            paginationContainer.appendChild(btn);
+        }
+    }
+
+    rowsPerPageSelect.addEventListener('change', () => {
+        rowsPerPage = parseInt(rowsPerPageSelect.value);
+        currentPage = 1;
+        renderDocumentsTable();
+    });
+
+    renderDocumentsTable();
+});
+</script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -595,6 +786,45 @@ document.addEventListener('DOMContentLoaded', function() {
     .cld-doc-search-wrapper input {
         max-width: 100%;
     }
+}
+
+/* Pagination buttons */
+.page-btn {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background: #fff;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 6px;
+}
+
+.page-btn.active {
+    background: #2271b1;
+    color: #fff;
+    border-color: #2271b1;
+}
+
+#rowsPerPage {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+}
+
+#docTypeRowsPerPage {
+    padding: 5px 10px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    width: 85px; /* Fixed width */
+    background: #fff;
+    font-size: 14px;
+}
+
+.doc-types-controls label {
+    font-size: 14px;
+    margin-right: 6px;
+    font-weight: 500;
 }
 
 </style>

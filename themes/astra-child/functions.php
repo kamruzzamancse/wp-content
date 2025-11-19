@@ -15,24 +15,35 @@ add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
 // Include Required Files
 // ======================
 $includes = [
-    'am-rt-realtor-ajax.php',
+    // ========================
+    // Client (cl) files
+    // ========================
+    'cl-client-profile.php',
+    'cl-settings-password.php',
+    'cl-settings-support-ajax.php',
+    'cl-reply-docs-ajax.php',
+    'cl-db-tracking-property.php',
+    'cl-rentcast-properties-ajax.php',
+
+    // ========================
+    // Realtor (rt) files
+    // ========================
     'rt-db-active-client-ajax.php',
     'rt-db-lead-client-ajax.php',
     'rt-ab-client-ajax.php',
-    'cl-client-profile.php',
     'rt-realtor-profile.php',
     'rt-document-type.php',
     'rt-documents.php',
     'rt-settings-password.php',
-    'cl-settings-password.php',
-    'rt-settings-support-ajax.php',
-    'cl-settings-support-ajax.php',
     'rentcast-properties.php',
-    'rentcast-cron.php',
     'rt-ap-assign-property-ajax.php',
     'rt-ap-assign-task-ajax.php',
-    'cl-reply-docs-ajax.php',
-    'cl-db-tracking-property.php',
+
+    // ========================
+    // Admin / Other
+    // ========================
+    'am-rt-realtor-ajax.php',
+    'rentcast-cron.php',
 ];
 
 foreach ($includes as $file) {
@@ -481,11 +492,11 @@ function astra_child_enqueue_assets() {
         ]);
     }
 
-    // Property Upload
-    if (wp_script_is('property-upload-js', 'enqueued')) {
-        wp_localize_script('property-upload-js', 'property_image_vars', [
+    // Property Edit (modal)
+    if (wp_script_is('property-upload-js', 'enqueued')) { // or any JS loaded on properties page
+        wp_localize_script('property-upload-js', 'property_edit_vars', [
             'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('property_image_nonce'),
+            'nonce'    => wp_create_nonce('property_edit_nonce'),
         ]);
     }
 

@@ -211,7 +211,11 @@ function rentcast_properties_shortcode($atts) {
                  alt="<?php echo esc_attr($property->address); ?>">
         </a>
 
-        <label class="pt-upload-icon" for="file-input-<?php echo $listing_id; ?>" title="Upload Image">
+        <!-- <label class="pt-upload-icon" for="file-input-<?php echo $listing_id; ?>" title="Upload Image">
+            <span class="dashicons dashicons-edit"></span>
+        </label> -->
+
+        <label class="pt-upload-icon" data-listing="<?php echo $listing_id; ?>" title="Edit Property">
             <span class="dashicons dashicons-edit"></span>
         </label>
 
@@ -238,4 +242,7 @@ function rentcast_properties_shortcode($atts) {
     return ob_get_clean();
 }
 add_shortcode('rentcast_properties', 'rentcast_properties_shortcode');
+
+
+
 

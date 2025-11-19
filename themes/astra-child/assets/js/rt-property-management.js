@@ -252,6 +252,3 @@ document.addEventListener('click', function (e) {
     if (e.target === modalCreate) closeCreateModal();
     if (e.target === modalEdit) closeEditModal();
 });
-
-
-

@@ -1,5 +1,4 @@
 jQuery(document).ready(function ($) {
-    console.log('✅ rt-document-type.js loaded');
 
     const modal = $('#cl-add-doc-type-modal');
     const form = $('#add-doc-type-form');
@@ -30,7 +29,6 @@ jQuery(document).ready(function ($) {
     // -------------------------
     $(document).on('submit', '#add-doc-type-form', function (e) {
         e.preventDefault();
-        console.log('Submitting form...');
 
         const type_name = $(this).find('[name="type_name"]').val().trim();
         if (!type_name) return alert('Please enter a document type name.');
@@ -40,7 +38,6 @@ jQuery(document).ready(function ($) {
             nonce: rt_doc_type_ajax.nonce,
             type_name
         }, function (res) {
-            console.log('AJAX response:', res);
 
             if (res.success) {
                 const tbody = $('.doc-types-table tbody');
@@ -82,7 +79,6 @@ jQuery(document).ready(function ($) {
             nonce: rt_doc_type_ajax.nonce,
             id
         }, function (res) {
-            console.log('Delete response:', res);
 
             if (res.success) {
                 row.remove();
@@ -112,7 +108,6 @@ jQuery(document).ready(function ($) {
             id,
             type_name: newName
         }, function (res) {
-            console.log('Update response:', res);
 
             if (res.success) {
                 row.find('td:eq(1)').text(res.data?.type_name || newName);
@@ -121,4 +116,7 @@ jQuery(document).ready(function ($) {
             }
         });
     });
+    
 });
+
+

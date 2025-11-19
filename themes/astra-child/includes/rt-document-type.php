@@ -17,6 +17,16 @@ function rt_add_document_type_callback() {
         wp_send_json_error('Type name is required.');
     }
 
+    // Duplicate Check
+    $exists = $wpdb->get_var($wpdb->prepare("
+        SELECT COUNT(*) FROM $table 
+        WHERE type_name = %s AND deleted_at IS NULL
+    ", $type_name));
+
+    if ($exists > 0) {
+        wp_send_json_error('This document type already exists.');
+    }
+
     $wpdb->insert($table, [
         'type_name'  => $type_name,
         'created_at' => current_time('mysql'),
@@ -47,6 +57,16 @@ add_action('wp_ajax_rt_update_document_type', function() {
 
     if (!$id || !$type_name) {
         wp_send_json_error('Invalid data.');
+    }
+
+    // Duplicate Check (Except current ID)
+    $exists = $wpdb->get_var($wpdb->prepare("
+        SELECT COUNT(*) FROM $table 
+        WHERE type_name = %s AND id != %d AND deleted_at IS NULL
+    ", $type_name, $id));
+
+    if ($exists > 0) {
+        wp_send_json_error('This document type already exists.');
     }
 
     $updated = $wpdb->update($table, [
@@ -88,3 +108,37 @@ add_action('wp_ajax_rt_delete_document_type', function() {
         wp_send_json_error('Failed to delete document type.');
     }
 });
+
+// ---------------------
+// AJAX: Get Paginated Document Types
+// ---------------------
+add_action('wp_ajax_rt_get_document_types', 'rt_get_document_types_callback');
+function rt_get_document_types_callback() {
+    check_ajax_referer('rt_doc_type_nonce', 'nonce');
+
+    global $wpdb;
+    $table = $wpdb->prefix . 'document_types';
+
+    $page = max(1, intval($_POST['page'] ?? 1));
+    $per_page = intval($_POST['per_page'] ?? 5);
+    $offset = ($page - 1) * $per_page;
+
+    // Total count
+    $total = $wpdb->get_var("SELECT COUNT(*) FROM $table WHERE deleted_at IS NULL");
+
+    // Get paginated results
+    $doc_types = $wpdb->get_results($wpdb->prepare("
+        SELECT id, type_name FROM $table
+        WHERE deleted_at IS NULL
+        ORDER BY created_at DESC
+        LIMIT %d OFFSET %d
+    ", $per_page, $offset));
+
+    wp_send_json_success([
+        'data'      => $doc_types,
+        'total'     => intval($total),
+        'per_page'  => $per_page,
+        'current'   => $page,
+        'total_pages' => ceil($total / $per_page),
+    ]);
+}
