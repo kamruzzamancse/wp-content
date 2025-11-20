@@ -72,6 +72,9 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
                 <li class="<?php echo $current_tab === 'dashboard' ? 'active' : ''; ?>">
                     <a href="?tab=dashboard"><span class="dashicons dashicons-admin-home"></span> Dashboard</a>
                 </li>
+                <li class="<?php echo $current_tab === 'link-property' ? 'active' : ''; ?>">
+                    <a href="?tab=link-property"><span class="dashicons dashicons-admin-links"></span> Link Property</a>
+                </li>
                 <li class="<?php echo $current_tab === 'properties' ? 'active' : ''; ?>">
                     <a href="?tab=properties"><span class="dashicons dashicons-building"></span> Properties</a>
                 </li>

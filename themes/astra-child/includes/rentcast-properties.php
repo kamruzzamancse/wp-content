@@ -2,38 +2,6 @@
 if (!defined('ABSPATH')) exit;
 
 // ==============================
-// Create DB Table
-// ==============================
-function create_rentcast_properties_table() {
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'rentcast_properties';
-    $charset_collate = $wpdb->get_charset_collate();
-
-    $sql = "CREATE TABLE $table_name (
-        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-        listing_id VARCHAR(255) NOT NULL,
-        address VARCHAR(255),
-        city VARCHAR(100),
-        state VARCHAR(50),
-        zip VARCHAR(20),
-        bedrooms INT,
-        bathrooms INT,
-        sqft INT,
-        price VARCHAR(50),
-        property_value FLOAT DEFAULT 0,
-        image_url VARCHAR(255),
-        description TEXT,
-        year_built INT,
-        PRIMARY KEY (id),
-        UNIQUE KEY unique_listing (listing_id)
-    ) $charset_collate;";
-
-    require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    dbDelta($sql);
-}
-add_action('after_setup_theme', 'create_rentcast_properties_table');
-
-// ==============================
 // Fetch API & Save to DB (Updated)
 // ==============================
 function fetch_rentcast_properties_to_db($city = 'Orlando', $limit = 1) {
@@ -242,7 +210,3 @@ function rentcast_properties_shortcode($atts) {
     return ob_get_clean();
 }
 add_shortcode('rentcast_properties', 'rentcast_properties_shortcode');
-
-
-
-

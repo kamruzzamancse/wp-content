@@ -12,6 +12,12 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
                 <span>Dashboard</span>
             </a>
         </li>
+        <li class="<?php echo $current_tab === 'link-property' ? 'active' : ''; ?>">
+            <a href="?tab=link-property" title="Link Property">
+                <span class="dashicons dashicons-admin-links"></span>
+                <span>Link Property</span>
+            </a>
+        </li>
         <li class="<?php echo $current_tab === 'properties' ? 'active' : ''; ?>">
             <a href="?tab=properties" title="Properties">
                 <span class="dashicons dashicons-building"></span>

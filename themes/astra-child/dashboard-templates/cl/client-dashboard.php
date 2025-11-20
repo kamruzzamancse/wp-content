@@ -78,6 +78,9 @@ get_header();
                 case 'notifications':
                     include locate_template('dashboard-templates/cl/cl-tab-notifications.php');
                     break;
+                case 'link-property':
+                    include locate_template('dashboard-templates/cl/cl-tab-link-property.php');
+                    break;
                 case 'properties':
                     include locate_template('dashboard-templates/cl/cl-tab-properties.php');
                     break;
