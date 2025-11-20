@@ -51,6 +51,85 @@ foreach ($includes as $file) {
     if (file_exists($path)) require_once $path;
 }
 
+/**
+ * Enqueue general child theme assets (CSS + JS)
+ */
+function astra_child_enqueue_assets() {
+    $assets = [
+        // CSS
+        'property-management-css' => 'assets/css/rt-property-management.css',
+        'address-book-css'        => 'assets/css/rt-address-book.css',
+        'realtor-settings-css'    => 'assets/css/rt-realtor-settings.css',
+        'cl-dashboard-css'        => 'assets/css/cl-dashboard.css',
+        'all-sticky-notes-css'    => 'assets/css/all-sticky-notes.css',
+        // JS
+        'property-management-js'  => 'assets/js/rt-property-management.js',
+        'address-book-js'         => 'assets/js/rt-address-book.js',
+        'realtor-settings-js'     => 'assets/js/rt-realtor-settings.js',
+        'all-sticky-notes-js'     => 'assets/js/all-sticky-notes.js',
+        'property-upload-js'      => 'assets/js/property-upload.js',
+    ];
+
+    foreach ($assets as $handle => $path) {
+        $full_path = get_stylesheet_directory() . '/' . $path;
+        $uri = get_stylesheet_directory_uri() . '/' . $path;
+
+        if (file_exists($full_path)) {
+            $ext = pathinfo($path, PATHINFO_EXTENSION);
+            if ($ext === 'css') {
+                wp_enqueue_style($handle, $uri, [], filemtime($full_path));
+            } elseif ($ext === 'js') {
+                wp_enqueue_script($handle, $uri, ['jquery'], filemtime($full_path), true);
+            }
+        }
+    }
+
+    // Localize scripts
+
+    // Todo Calendar
+    if (wp_script_is('todo-calendar-js', 'enqueued')) {
+        wp_localize_script('todo-calendar-js', 'todoCalendarVars', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce'   => wp_create_nonce('todo_calendar_nonce'),
+            'i18n'    => [
+                'confirmDelete' => __('Are you sure you want to delete this todo?', 'astra-child'),
+                'saving'        => __('Saving...', 'astra-child'),
+            ]
+        ]);
+    }
+
+    // Address Book
+    if (wp_script_is('address-book-js', 'enqueued')) {
+        wp_localize_script('address-book-js', 'propertyDetailsAjax', [
+            'ajaxurl' => admin_url('admin-ajax.php')
+        ]);
+    }
+
+    // Property Edit (modal)
+    if (wp_script_is('property-upload-js', 'enqueued')) {
+        wp_localize_script('property-upload-js', 'property_edit_vars', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('property_edit_nonce'),
+        ]);
+        
+        // Add this for image uploads
+        wp_localize_script('property-upload-js', 'property_image_vars', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('property_image_nonce'),
+        ]);
+    }
+
+    // Sticky Notes
+    if (wp_script_is('all-sticky-notes-js', 'enqueued')) {
+        wp_localize_script('all-sticky-notes-js', 'stickyNotesData', [
+            'userId'  => get_current_user_id(),
+            'ajaxurl' => admin_url('admin-ajax.php')
+        ]);
+    }
+
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_assets');
+
 // ======================
 // Enqueue JS & Localize AJAX for Reply Docs
 // ======================
@@ -437,79 +516,6 @@ function cl_enqueue_password_script() {
     ]);
 }
 add_action('wp_enqueue_scripts', 'cl_enqueue_password_script');
-
-/**
- * Enqueue general child theme assets (CSS + JS)
- */
-function astra_child_enqueue_assets() {
-    $assets = [
-        // CSS
-        'property-management-css' => 'assets/css/rt-property-management.css',
-        'address-book-css'        => 'assets/css/rt-address-book.css',
-        'realtor-settings-css'    => 'assets/css/rt-realtor-settings.css',
-        'cl-dashboard-css'        => 'assets/css/cl-dashboard.css',
-        'all-sticky-notes-css'    => 'assets/css/all-sticky-notes.css',
-        // JS
-        'property-management-js'  => 'assets/js/rt-property-management.js',
-        'address-book-js'         => 'assets/js/rt-address-book.js',
-        'realtor-settings-js'     => 'assets/js/rt-realtor-settings.js',
-        'all-sticky-notes-js'     => 'assets/js/all-sticky-notes.js',
-        'property-upload-js'      => 'assets/js/property-upload.js',
-    ];
-
-    foreach ($assets as $handle => $path) {
-        $full_path = get_stylesheet_directory() . '/' . $path;
-        $uri = get_stylesheet_directory_uri() . '/' . $path;
-
-        if (file_exists($full_path)) {
-            $ext = pathinfo($path, PATHINFO_EXTENSION);
-            if ($ext === 'css') {
-                wp_enqueue_style($handle, $uri, [], filemtime($full_path));
-            } elseif ($ext === 'js') {
-                wp_enqueue_script($handle, $uri, ['jquery'], filemtime($full_path), true);
-            }
-        }
-    }
-
-    // Localize scripts
-
-    // Todo Calendar
-    if (wp_script_is('todo-calendar-js', 'enqueued')) {
-        wp_localize_script('todo-calendar-js', 'todoCalendarVars', [
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce('todo_calendar_nonce'),
-            'i18n'    => [
-                'confirmDelete' => __('Are you sure you want to delete this todo?', 'astra-child'),
-                'saving'        => __('Saving...', 'astra-child'),
-            ]
-        ]);
-    }
-
-    // Address Book
-    if (wp_script_is('address-book-js', 'enqueued')) {
-        wp_localize_script('address-book-js', 'propertyDetailsAjax', [
-            'ajaxurl' => admin_url('admin-ajax.php')
-        ]);
-    }
-
-    // Property Edit (modal)
-    if (wp_script_is('property-upload-js', 'enqueued')) { // or any JS loaded on properties page
-        wp_localize_script('property-upload-js', 'property_edit_vars', [
-            'ajax_url' => admin_url('admin-ajax.php'),
-            'nonce'    => wp_create_nonce('property_edit_nonce'),
-        ]);
-    }
-
-    // Sticky Notes
-    if (wp_script_is('all-sticky-notes-js', 'enqueued')) {
-        wp_localize_script('all-sticky-notes-js', 'stickyNotesData', [
-            'userId'  => get_current_user_id(),
-            'ajaxurl' => admin_url('admin-ajax.php')
-        ]);
-    }
-
-}
-add_action('wp_enqueue_scripts', 'astra_child_enqueue_assets');
 
 /**
  * Conditionally enqueue dashboard assets

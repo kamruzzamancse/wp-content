@@ -1,143 +1,342 @@
 <?php
-    $upload_dir = wp_upload_dir();
-    $image_url  = $upload_dir['baseurl'];
+if (!defined('ABSPATH')) exit;
+
+$upload_dir = wp_upload_dir();
+$image_url  = $upload_dir['baseurl'];
 ?>
 
 <div class="pt-toolbar-container">
-    
     <div class="pt-left-section">
-            <h1 class="header-title">All Properties</h1>
-            <div class="pt-search-box">
-                <span class="pt-search-icon">🔍</span>
-                <input type="text" class="pt-search-input" placeholder="Search: Property Name" />
-            </div>
+        <h1 class="header-title">All Properties</h1>
+        <div class="pt-search-box">
+            <span class="pt-search-icon">🔍</span>
+            <input type="text" class="pt-search-input" placeholder="Search: Property Name" />
+        </div>
         <div class="pt-sort-container">
             <select class="pt-sort-select">
-            <option value="">Sort by</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="name-asc">Name: A to Z</option>
-            <option value="name-desc">Name: Z to A</option>
-            <option value="date-asc">Date: Oldest First</option>
-            <option value="date-desc">Date: Newest First</option>
+                <option value="">Sort by</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+                <option value="name-desc">Name: Z to A</option>
+                <option value="date-asc">Date: Oldest First</option>
+                <option value="date-desc">Date: Newest First</option>
             </select>
         </div>
     </div>
-
 </div>
 
 <div class="pt-property-container">
     <?php echo do_shortcode('[rentcast_properties]'); ?>
-    <div class="pt-property-list">
+    <div class="pt-property-list"></div>
 </div>
 
+<!-- =================== EDIT PROPERTY MODAL =================== -->
 <div id="propertyEditModal" class="simple-modal">
     <div class="simple-modal-content">
-        
         <h2>Edit Property</h2>
-
         <form id="propertyEditForm">
-
             <input type="hidden" name="listing_id" id="edit_listing_id">
 
-            <label>Bedrooms</label>
-            <input type="number" name="bedrooms" id="edit_bedrooms">
+            <!-- Image -->
+            <label>Property Image</label>
+            <div class="image-preview-container">
+                <img id="edit_image_preview" src="" alt="Property Image" style="max-width:100%;height:auto;margin-bottom:10px;">
+            </div>
+            <input type="file" name="property_image" id="edit_property_image" data-listing-id="">
 
-            <label>Bathrooms</label>
-            <input type="number" name="bathrooms" id="edit_bathrooms">
-
-            <label>Square Feet</label>
-            <input type="number" name="sqft" id="edit_sqft">
-
+            <!-- Price -->
             <label>Rent Price ($)</label>
             <input type="text" name="price" id="edit_price">
 
-            <label>Year Built</label>
-            <input type="number" name="year_built" id="edit_year_built">
+            <!-- Property Value -->
+            <label>Property Value ($)</label>
+            <input type="text" name="property_value" id="edit_property_value">
 
-            <label>Description</label>
-            <textarea name="description" id="edit_description"></textarea>
-
-            <!-- Button group wrapper -->
             <div class="button-group">
                 <button type="button" id="closeModal" class="simple-modal-close">Cancel</button>
                 <button type="submit" class="simple-modal-btn">Update</button>
             </div>
-
         </form>
-
     </div>
 </div>
 
+<!-- =================== MODAL & LIST JS =================== -->
 <script>
 jQuery(document).ready(function($){
+    // Define ajax URL and nonces directly to avoid localization issues
+    const ajaxUrl = '<?php echo admin_url("admin-ajax.php"); ?>';
+    const editNonce = '<?php echo wp_create_nonce("property_edit_nonce"); ?>';
+    const imageNonce = '<?php echo wp_create_nonce("property_image_nonce"); ?>';
 
-    // ==============================
-    // OPEN EDIT MODAL
-    // ==============================
-
+    // ===== OPEN MODAL =====
     $(document).on("click", ".pt-upload-icon", function(){
         var listingId = $(this).data("listing");
         if(!listingId) return;
 
         $.ajax({
-            url: property_edit_vars.ajax_url,
+            url: ajaxUrl,
             type: "POST",
             data: {
                 action: "get_property_data",
-                nonce: property_edit_vars.nonce,
+                nonce: editNonce,
                 listing_id: listingId
             },
             success: function(response){
                 if(response.success){
                     var p = response.data;
                     $("#edit_listing_id").val(p.listing_id);
-                    $("#edit_bedrooms").val(p.bedrooms);
-                    $("#edit_bathrooms").val(p.bathrooms);
-                    $("#edit_sqft").val(p.sqft);
                     $("#edit_price").val(p.price);
-                    $("#edit_year_built").val(p.year_built);
-                    $("#edit_description").val(p.description);
-
-                    $("#propertyEditModal").fadeIn(200); // modal open
+                    $("#edit_property_value").val(p.property_value);
+                    $("#edit_image_preview").attr('src', p.image_url || "https://placehold.co/500x300?text=No+Image");
+                    $("#edit_property_image").data('listing-id', p.listing_id);
+                    $("#propertyEditModal").fadeIn(200);
                 } else {
                     alert("Property not found");
                 }
+            },
+            error: function(xhr, status, error) {
+                console.error("AJAX Error:", error);
+                alert("Error loading property data");
             }
         });
     });
 
-    // Close modal
+    // ===== CLOSE MODAL =====
     $("#closeModal").on("click", function(){
         $("#propertyEditModal").fadeOut(200);
     });
 
+    // Close modal when clicking outside
+    $(document).on("click", function(e){
+        if ($(e.target).hasClass("simple-modal")) {
+            $("#propertyEditModal").fadeOut(200);
+        }
+    });
 
-    // ==============================
-    // SUBMIT EDIT FORM
-    // ==============================
+    // ===== UPDATE PRICE & PROPERTY VALUE =====
     $("#propertyEditForm").on("submit", function(e){
         e.preventDefault();
+        var listingId = $("#edit_listing_id").val();
+        var price = $("#edit_price").val();
+        var propertyValue = $("#edit_property_value").val();
+
+        // Basic validation
+        if(!price || !propertyValue) {
+            alert("Please fill in all fields");
+            return;
+        }
+
         $.ajax({
-            url: property_edit_vars.ajax_url,
+            url: ajaxUrl,
             type: "POST",
-            data: $(this).serialize() + "&action=update_property_fields&nonce=" + property_edit_vars.nonce,
+            data: {
+                action: "update_property_fields",
+                nonce: editNonce,
+                listing_id: listingId,
+                price: price,
+                property_value: propertyValue
+            },
             success: function(response){
                 if(response.success){
+                    // Update property list dynamically
+                    var $item = $("#property-item-" + listingId);
+                    if($item.length){
+                        $item.find(".pt-property-details div").eq(0).text("Rent: $" + price + "/month");
+                        $item.find(".pt-property-details div").eq(1).text("Value: $" + parseFloat(propertyValue).toLocaleString());
+                    }
                     alert("Property Updated!");
-                    location.reload();
+                    $("#propertyEditModal").fadeOut(200);
                 } else {
-                    alert("Update failed");
+                    alert("Update failed: " + (response.data || "Unknown error"));
                 }
             },
             error: function(xhr, status, error){
-                alert("AJAX submit failed");
+                console.error("Update Error:", error);
+                alert("Update failed - please try again");
             }
         });
     });
 
-});
+    // ===== IMAGE UPLOAD - MAXIMUM FORMAT SUPPORT =====
+    $("#edit_property_image").on('change', function(){
+        var listingId = $(this).data('listing-id');
+        var file = this.files[0];
+        
+        if(!file) {
+            return;
+        }
 
+        // Maximum supported image formats
+        var validTypes = [
+            'image/jpeg', 
+            'image/jpg', 
+            'image/png', 
+            'image/gif',
+            'image/webp',
+            'image/bmp',
+            'image/svg+xml',
+            'image/tiff',
+            'image/x-icon',
+            'image/vnd.microsoft.icon',
+            'image/avif',
+            'image/heic',
+            'image/heif'
+        ];
+
+        // Also check by file extension for broader support
+        var fileName = file.name.toLowerCase();
+        var validExtensions = [
+            '.jpg', '.jpeg', '.png', '.gif', '.webp', 
+            '.bmp', '.svg', '.tiff', '.tif', '.ico',
+            '.avif', '.heic', '.heif'
+        ];
+
+        var hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+        var hasValidType = validTypes.indexOf(file.type) > -1;
+
+        if(!hasValidType && !hasValidExtension) {
+            alert("Please select a valid image file (JPEG, JPG, PNG, GIF, WEBP, BMP, SVG, TIFF, ICO, AVIF, HEIC, HEIF)");
+            $(this).val(''); // Clear the file input
+            return;
+        }
+
+        // Validate file size (max 10MB for larger formats)
+        if(file.size > 10 * 1024 * 1024) {
+            alert("Image size should be less than 10MB");
+            $(this).val('');
+            return;
+        }
+
+        // Show loading state on preview image
+        var $previewImg = $("#edit_image_preview");
+        var originalSrc = $previewImg.attr('src');
+        $previewImg.css('opacity', '0.6');
+
+        var formData = new FormData();
+        formData.append('action', 'upload_property_image');
+        formData.append('nonce', imageNonce);
+        formData.append('listing_id', listingId);
+        formData.append('property_image', file);
+
+        $.ajax({
+            url: ajaxUrl,
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response){
+                // Restore image opacity
+                $previewImg.css('opacity', '1');
+                
+                if(response.success){
+                    var newImageUrl = response.data + "?t=" + new Date().getTime();
+                    
+                    // Update preview image in modal
+                    $previewImg.attr('src', newImageUrl);
+                    
+                    // Update property list image
+                    var $itemImg = $("#property-img-" + listingId);
+                    if($itemImg.length){
+                        $itemImg.attr('src', newImageUrl);
+                    }
+                    
+                    // Update the main property image if exists
+                    $(".pt-property-image[data-listing='" + listingId + "']").attr('src', newImageUrl);
+                    
+                    // Clear the file input for potential re-upload
+                    $("#edit_property_image").val('');
+                    
+                } else {
+                    // Silent failure - just clear the input
+                    $("#edit_property_image").val('');
+                }
+            },
+            error: function(xhr, status, error){
+                // Restore image opacity
+                $previewImg.css('opacity', '1');
+                // Silent failure - just clear the input
+                $("#edit_property_image").val('');
+            }
+        });
+    });
+
+    // ===== SEARCH =====
+    $('.pt-search-input').on('keyup', function(){
+        var searchTerm = $(this).val().toLowerCase().trim();
+        var $items = $('.pt-property-item');
+        
+        if(searchTerm === '') {
+            $items.show();
+            return;
+        }
+
+        $items.each(function(){
+            var $item = $(this);
+            var propertyName = $item.find('h3').text().toLowerCase();
+            var propertyAddress = $item.find('.pt-property-address').text().toLowerCase();
+            
+            var matchesName = propertyName.indexOf(searchTerm) > -1;
+            var matchesAddress = propertyAddress.indexOf(searchTerm) > -1;
+            
+            $item.toggle(matchesName || matchesAddress);
+        });
+    });
+
+    // ===== SORT =====
+    $('.pt-sort-select').on('change', function(){
+        var sortVal = $(this).val();
+        if(!sortVal) return;
+
+        var $container = $('.pt-property-list');
+        var $items = $container.find('.pt-property-item').get();
+
+        var sorted = $items.sort(function(a, b){
+            var $a = $(a);
+            var $b = $(b);
+            
+            var aText = $a.find('h3').text();
+            var bText = $b.find('h3').text();
+            
+            var aPriceText = $a.find('.pt-property-details div').eq(0).text();
+            var bPriceText = $b.find('.pt-property-details div').eq(0).text();
+            
+            var aPrice = parseFloat(aPriceText.replace(/[^0-9.]/g,'') || 0);
+            var bPrice = parseFloat(bPriceText.replace(/[^0-9.]/g,'') || 0);
+            
+            var aDate = $a.data('date') || 0;
+            var bDate = $b.data('date') || 0;
+
+            switch(sortVal){
+                case 'price-asc': 
+                    return aPrice - bPrice;
+                case 'price-desc': 
+                    return bPrice - aPrice;
+                case 'name-asc': 
+                    return aText.localeCompare(bText);
+                case 'name-desc': 
+                    return bText.localeCompare(aText);
+                case 'date-asc': 
+                    return new Date(aDate) - new Date(bDate);
+                case 'date-desc': 
+                    return new Date(bDate) - new Date(aDate);
+                default: 
+                    return 0;
+            }
+        });
+
+        // Re-append sorted items
+        $.each(sorted, function(idx, itm){ 
+            $container.append(itm); 
+        });
+    });
+
+    // Clear search when sort changes
+    $('.pt-sort-select').on('change', function(){
+        $('.pt-search-input').val('').trigger('keyup');
+    });
+
+});
 </script>
 
 <script>

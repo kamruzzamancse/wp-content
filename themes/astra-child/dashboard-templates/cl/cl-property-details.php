@@ -111,7 +111,7 @@ $site_url   = site_url();
 
             <div class="feature-box">
                 <div class="feature-label"><span class="dashicons dashicons-admin-site-alt3"></span> Value</div>
-                <div class="feature-value"><?php echo ''; ?></div>
+                <div class="feature-value"><?php echo esc_html($property->property_value ?? 'N/A'); ?></div>
             </div>
 
             <div class="feature-box">

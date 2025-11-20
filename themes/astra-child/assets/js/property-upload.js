@@ -6,19 +6,18 @@ jQuery(document).ready(function($){
 
         var formData = new FormData();
         formData.append('action','upload_property_image');
-        formData.append('nonce', property_image_vars.nonce);
+        formData.append('nonce', '<?php echo wp_create_nonce("property_image_nonce"); ?>');
         formData.append('listing_id', listingId);
         formData.append('property_image', file);
 
         $.ajax({
-            url: property_image_vars.ajax_url,
+            url: '<?php echo admin_url("admin-ajax.php"); ?>',
             type: 'POST',
             data: formData,
             contentType: false,
             processData: false,
             success: function(response){
                 if(response.success){
-                    // Image upload success -> reload page
                     location.reload();
                 } else {
                     alert('Upload failed: ' + (response.data || 'Unknown error'));
