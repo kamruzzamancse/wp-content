@@ -80,33 +80,6 @@ function redbm_create_tables() {
         KEY listing_id (listing_id)
     ) $charset_collate;";
 
-    // Saved Properties table (client ↔ property relation)
-    $tables[] = "CREATE TABLE {$wpdb->prefix}saved_properties (
-        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-        client_id BIGINT(20) UNSIGNED NOT NULL,
-        property_id BIGINT(20) UNSIGNED NOT NULL,
-        saved_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (id),
-        KEY client_id (client_id),
-        KEY property_id (property_id)
-    ) $charset_collate;";
-
-    // Inquiries table (client ↔ realtor ↔ property)
-    $tables[] = "CREATE TABLE {$wpdb->prefix}inquiries (
-        inquiry_id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-        client_id BIGINT(20) UNSIGNED NOT NULL,
-        realtor_id BIGINT(20) UNSIGNED NOT NULL,
-        property_id BIGINT(20) UNSIGNED NOT NULL,
-        message TEXT NOT NULL,
-        reply TEXT,
-        status ENUM('open','closed') DEFAULT 'open',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        PRIMARY KEY (inquiry_id),
-        KEY client_id (client_id),
-        KEY realtor_id (realtor_id),
-        KEY property_id (property_id)
-    ) $charset_collate;";
-
     // Document Types Table
     $tables[] = "CREATE TABLE {$wpdb->prefix}document_types (
         id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,

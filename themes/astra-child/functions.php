@@ -55,7 +55,7 @@ foreach ($includes as $file) {
 /**
  * Enqueue general child theme assets (CSS + JS)
  */
-function astra_child_enqueue_assets() {
+/* function astra_child_enqueue_assets() {
     $assets = [
         // CSS
         'property-management-css' => 'assets/css/rt-property-management.css',
@@ -83,20 +83,6 @@ function astra_child_enqueue_assets() {
                 wp_enqueue_script($handle, $uri, ['jquery'], filemtime($full_path), true);
             }
         }
-    }
-
-    // Localize scripts
-
-    // Todo Calendar
-    if (wp_script_is('todo-calendar-js', 'enqueued')) {
-        wp_localize_script('todo-calendar-js', 'todoCalendarVars', [
-            'ajaxurl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce('todo_calendar_nonce'),
-            'i18n'    => [
-                'confirmDelete' => __('Are you sure you want to delete this todo?', 'astra-child'),
-                'saving'        => __('Saving...', 'astra-child'),
-            ]
-        ]);
     }
 
     // Address Book
@@ -128,6 +114,97 @@ function astra_child_enqueue_assets() {
         ]);
     }
 
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_assets'); */
+
+/**
+ * Enqueue child theme CSS & JS assets
+ */
+function astra_child_enqueue_assets() {
+
+    /* ------------------------------------------------------
+     * 1. CSS Files
+     * ------------------------------------------------------ */
+    $styles = [
+        'property-management-css' => 'assets/css/rt-property-management.css',
+        'address-book-css'        => 'assets/css/rt-address-book.css',
+        'realtor-settings-css'    => 'assets/css/rt-realtor-settings.css',
+        'cl-dashboard-css'        => 'assets/css/cl-dashboard.css',
+        'all-sticky-notes-css'    => 'assets/css/all-sticky-notes.css',
+    ];
+
+    foreach ($styles as $handle => $path) {
+        $file = get_stylesheet_directory() . '/' . $path;
+        $uri  = get_stylesheet_directory_uri() . '/' . $path;
+
+        if (file_exists($file)) {
+            wp_enqueue_style(
+                $handle,
+                $uri,
+                [],
+                filemtime($file) // version updated automatically
+            );
+        }
+    }
+
+    /* ------------------------------------------------------
+     * 2. JS Files
+     * ------------------------------------------------------ */
+    $scripts = [
+        'property-management-js' => 'assets/js/rt-property-management.js',
+        'address-book-js'        => 'assets/js/rt-address-book.js',
+        'realtor-settings-js'    => 'assets/js/rt-realtor-settings.js',
+        'all-sticky-notes-js'    => 'assets/js/all-sticky-notes.js',
+        'property-upload-js'     => 'assets/js/property-upload.js',
+    ];
+
+    foreach ($scripts as $handle => $path) {
+        $file = get_stylesheet_directory() . '/' . $path;
+        $uri  = get_stylesheet_directory_uri() . '/' . $path;
+
+        if (file_exists($file)) {
+            wp_enqueue_script(
+                $handle,
+                $uri,
+                ['jquery'],         // default dependency
+                filemtime($file),   // version auto updated
+                true                // load in footer
+            );
+        }
+    }
+
+    /* ------------------------------------------------------
+     * 3. LOCALIZE SCRIPTS (AFTER enqueue)
+     * ------------------------------------------------------ */
+
+    /* Address Book */
+    if (wp_script_is('address-book-js', 'enqueued')) {
+        wp_localize_script('address-book-js', 'propertyDetailsAjax', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+        ]);
+    }
+
+    /* Property Upload + Edit */
+    if (wp_script_is('property-upload-js', 'enqueued')) {
+        wp_localize_script('property-upload-js', 'property_upload_vars', [
+            'edit' => [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('property_edit_nonce'),
+            ],
+            'image' => [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('property_image_nonce'),
+            ],
+        ]);
+    }
+
+    /* Sticky Notes */
+    if (wp_script_is('all-sticky-notes-js', 'enqueued')) {
+        wp_localize_script('all-sticky-notes-js', 'stickyNotesData', [
+            'userId'  => get_current_user_id(),
+            'ajaxurl' => admin_url('admin-ajax.php'),
+        ]);
+    }
 }
 add_action('wp_enqueue_scripts', 'astra_child_enqueue_assets');
 
@@ -269,17 +346,6 @@ function rt_enqueue_client_scripts() {
 add_action('wp_enqueue_scripts', 'rt_enqueue_client_scripts');
 
 // ======================
-// Register AJAX Handlers
-// ======================
-add_action('wp_ajax_fetch_clients_ajax', 'rt_fetch_clients_ajax');
-add_action('wp_ajax_fetch_realtor_client_ajax', 'rt_fetch_realtor_client_ajax');
-add_action('wp_ajax_create_realtor_client_ajax', 'rt_create_realtor_client_ajax');
-add_action('wp_ajax_update_realtor_client_ajax', 'rt_update_realtor_client_ajax');
-add_action('wp_ajax_delete_realtor_client_ajax', 'rt_delete_realtor_client_ajax');
-add_action('wp_ajax_search_properties', 'rt_search_properties_ajax');
-
-
-// ======================
 // Enqueue JS & Localize AJAX for Realtors
 // ======================
 function rt_enqueue_realtor_scripts() {
@@ -378,16 +444,6 @@ function rt_enqueue_lead_client_scripts() {
     }
 }
 add_action('wp_enqueue_scripts', 'rt_enqueue_lead_client_scripts');
-
-// ======================
-// Register AJAX Handlers for Leads
-// ======================
-add_action('wp_ajax_fetch_dashboard_leads_ajax', 'rt_fetch_dashboard_leads_ajax');
-add_action('wp_ajax_fetch_dashboard_lead_ajax', 'rt_fetch_dashboard_lead_ajax');
-add_action('wp_ajax_create_dashboard_lead_ajax', 'rt_create_dashboard_lead_ajax');
-add_action('wp_ajax_update_dashboard_lead_ajax', 'rt_update_dashboard_lead_ajax');
-add_action('wp_ajax_delete_dashboard_lead_ajax', 'rt_delete_dashboard_lead_ajax');
-add_action('wp_ajax_convert_lead_to_client_ajax', 'rt_convert_lead_to_client_ajax');
 
 // ======================
 // Conditional Script Enqueues
@@ -551,77 +607,6 @@ function mdk_enqueue_dashboard_assets() {
 add_action('wp_enqueue_scripts', 'mdk_enqueue_dashboard_assets');
 
 /**
- * Ajax: Load property details (modal)
- */
-add_action('wp_ajax_get_property_details', 'load_property_details');
-add_action('wp_ajax_nopriv_get_property_details', 'load_property_details');
-function load_property_details() {
-    $template = locate_template('dashboard-templates/rt/rt-property-details-modal.php');
-    if ($template) {
-        include $template;
-    }
-    wp_die();
-}
-
-/**
- * Create dashboard pages (runs on theme activation)
- */
-function mdk_create_dashboard_pages() {
-    $pages = [
-        'admin-dashboard'   => ['title' => 'Admin Dashboard',   'content' => '[mdk_admin_dashboard]'],
-        'realtor-dashboard' => ['title' => 'Realtor Dashboard', 'content' => '[mdk_realtor_dashboard]'],
-        'client-dashboard'  => ['title' => 'Client Dashboard',  'content' => '[mdk_client_dashboard]'],
-    ];
-
-    foreach ($pages as $slug => $page) {
-        if (!get_page_by_path($slug)) {
-            wp_insert_post([
-                'post_title'   => $page['title'],
-                'post_name'    => $slug,
-                'post_status'  => 'publish',
-                'post_type'    => 'page',
-                'post_content' => $page['content'],
-            ]);
-        }
-    }
-    flush_rewrite_rules();
-}
-add_action('after_switch_theme', 'mdk_create_dashboard_pages');
-
-/**
- * Secure dashboard template loader
- */
-function mdk_load_dashboard_template($template) {
-    global $post;
-    if (!$post || !is_page()) return $template;
-
-    $dashboard_map = [
-        'admin-dashboard'   => ['template' => 'admin',   'capability' => 'manage_options'],
-        'realtor-dashboard' => ['template' => 'realtor', 'capability' => 'edit_properties'],
-        'client-dashboard'  => ['template' => 'client',  'capability' => 'read_properties'],
-    ];
-
-    if (isset($dashboard_map[$post->post_name])) {
-        $dashboard = $dashboard_map[$post->post_name];
-
-        if (!current_user_can($dashboard['capability'])) {
-            wp_redirect(wp_login_url(get_permalink()));
-            exit;
-        }
-
-        $template_path = locate_template([
-            "dashboard-templates/{$dashboard['template']}-dashboard.php",
-            "dashboard-templates/default-dashboard.php"
-        ]);
-
-        if ($template_path) return $template_path;
-    }
-
-    return $template;
-}
-add_filter('template_include', 'mdk_load_dashboard_template', 99);
-
-/**
  * Unified dashboard shortcode handler
  */
 function mdk_dashboard_shortcode($atts, $content = null, $tag = '') {
@@ -678,126 +663,72 @@ function mdk_dashboard_login_message($role) {
 }
 
 /**
- * Redirect users after login based on role
+ * Create dashboard pages (runs on theme activation)
  */
-function mdk_login_redirect($redirect_to, $request, $user) {
-    if (!isset($user->roles) || !is_array($user->roles)) {
-        return $redirect_to;
-    }
-
-    $role = $user->roles[0];
-
-    $dashboards = [
-        'admin'   => home_url('/am/admin-dashboard/'),
-        'realtor' => home_url('/rt/realtor-dashboard/'),
-        'client'  => home_url('/cl/client-dashboard/'),
+/* function mdk_create_dashboard_pages() {
+    $pages = [
+        'admin-dashboard'   => ['title' => 'Admin Dashboard',   'content' => '[mdk_admin_dashboard]'],
+        'realtor-dashboard' => ['title' => 'Realtor Dashboard', 'content' => '[mdk_realtor_dashboard]'],
+        'client-dashboard'  => ['title' => 'Client Dashboard',  'content' => '[mdk_client_dashboard]'],
     ];
 
-    if (isset($dashboards[$role])) {
-        return $dashboards[$role];
-    }
-
-    return $redirect_to;
-}
-add_filter('login_redirect', 'mdk_login_redirect', 10, 3);
-
-/**
- * Add body class for hiding header/footer for certain roles
- */
-function add_user_role_body_class($classes) {
-    if (is_user_logged_in()) {
-        $user = wp_get_current_user();
-        if (array_intersect(['realtor', 'client', 'admin'], $user->roles)) {
-            $classes[] = 'hide-header-footer';
+    foreach ($pages as $slug => $page) {
+        if (!get_page_by_path($slug)) {
+            wp_insert_post([
+                'post_title'   => $page['title'],
+                'post_name'    => $slug,
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+                'post_content' => $page['content'],
+            ]);
         }
     }
-    return $classes;
-}
-add_filter('body_class', 'add_user_role_body_class');
-
-/**
- * Add custom user roles
- */
-function mdk_add_user_roles() {
-    add_role('admin', 'Admin', [
-        'read'            => true,
-        'manage_options'  => true,
-    ]);
-
-    add_role('realtor', 'Realtor', [
-        'read'            => true,
-        'edit_properties' => true,
-        'edit_clients'    => true,
-    ]);
-
-    add_role('client', 'Client', [
-        'read'            => true,
-        'read_properties' => true,
-    ]);
-}
-add_action('init', 'mdk_add_user_roles');
-
-/**
- * Deactivation cleanup
- */
-function mdk_deactivate() {
     flush_rewrite_rules();
 }
-register_deactivation_hook(__FILE__, 'mdk_deactivate');
+add_action('after_switch_theme', 'mdk_create_dashboard_pages'); */
 
 /**
- * Add custom user fields
+ * Secure dashboard template loader
  */
-/* function add_custom_user_fields($user) {
-    ?>
-    <h3>Broker Information</h3>
-    <table class="form-table">
-        <tr>
-            <th><label for="broker_number">Broker Number</label></th>
-            <td>
-                <input type="text" name="broker_number" id="broker_number" value="<?php echo esc_attr(get_user_meta($user->ID, 'broker_number', true)); ?>" class="regular-text" /><br />
-                <span class="description">Enter your broker license number.</span>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="company_name">Company Name</label></th>
-            <td>
-                <input type="text" name="company_name" id="company_name" value="<?php echo esc_attr(get_user_meta($user->ID, 'company_name', true)); ?>" class="regular-text" /><br />
-                <span class="description">Enter your company name.</span>
-            </td>
-        </tr>
-        <tr>
-            <th><label for="profile_picture">Profile Picture URL</label></th>
-            <td>
-                <input type="text" name="profile_picture" id="profile_picture" value="<?php echo esc_attr(get_user_meta($user->ID, 'profile_picture', true)); ?>" class="regular-text" /><br />
-                <span class="description">Enter the URL of your profile picture.</span>
-            </td>
-        </tr>
-    </table>
-    <?php
+/* function mdk_load_dashboard_template($template) {
+    global $post;
+    if (!$post || !is_page()) return $template;
+
+    $dashboard_map = [
+        'admin-dashboard'   => ['template' => 'admin',   'capability' => 'manage_options'],
+        'realtor-dashboard' => ['template' => 'realtor', 'capability' => 'edit_properties'],
+        'client-dashboard'  => ['template' => 'client',  'capability' => 'read_properties'],
+    ];
+
+    if (isset($dashboard_map[$post->post_name])) {
+        $dashboard = $dashboard_map[$post->post_name];
+
+        if (!current_user_can($dashboard['capability'])) {
+            wp_redirect(wp_login_url(get_permalink()));
+            exit;
+        }
+
+        $template_path = locate_template([
+            "dashboard-templates/{$dashboard['template']}-dashboard.php",
+            "dashboard-templates/default-dashboard.php"
+        ]);
+
+        if ($template_path) return $template_path;
+    }
+
+    return $template;
 }
-add_action('show_user_profile', 'add_custom_user_fields');
-add_action('edit_user_profile', 'add_custom_user_fields'); */
+add_filter('template_include', 'mdk_load_dashboard_template', 99); */
 
 /**
- * Save custom user fields
+ * Ajax: Load property details (modal)
  */
-/* function save_custom_user_fields($user_id) {
-    if (!current_user_can('edit_user', $user_id)) {
-        return false;
+/* add_action('wp_ajax_get_property_details', 'load_property_details');
+add_action('wp_ajax_nopriv_get_property_details', 'load_property_details');
+function load_property_details() {
+    $template = locate_template('dashboard-templates/rt/rt-property-details-modal.php');
+    if ($template) {
+        include $template;
     }
-    
-    if (isset($_POST['broker_number'])) {
-        update_user_meta($user_id, 'broker_number', sanitize_text_field($_POST['broker_number']));
-    }
-    
-    if (isset($_POST['company_name'])) {
-        update_user_meta($user_id, 'company_name', sanitize_text_field($_POST['company_name']));
-    }
-    
-    if (isset($_POST['profile_picture'])) {
-        update_user_meta($user_id, 'profile_picture', esc_url_raw($_POST['profile_picture']));
-    }
-}
-add_action('personal_options_update', 'save_custom_user_fields');
-add_action('edit_user_profile_update', 'save_custom_user_fields'); */
+    wp_die();
+} */

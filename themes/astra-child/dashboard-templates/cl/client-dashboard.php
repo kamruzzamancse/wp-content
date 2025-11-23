@@ -1,6 +1,6 @@
 <?php
 /**
- * Realtor Dashboard Main Template
+ * Client Dashboard Main Template
  */
 
 if (!defined('ABSPATH')) exit;

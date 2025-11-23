@@ -488,10 +488,10 @@ table {
     .tpg-x-axis span { max-width: 60px; }
 }
 
-/* X-axis labels নিচে show হবে */
+/* Show after X-axis labels */
 .tpg-x-axis {
     position: absolute;
-    bottom: -20px; /* আগের 30px থেকে নিচে নামানো label জন্য */
+    bottom: -20px;
     left: 40px;
     right: 0;
     display: flex;
