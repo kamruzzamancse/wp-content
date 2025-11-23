@@ -28,7 +28,7 @@ $image_url  = $upload_dir['baseurl'];
 
 <div class="pt-property-container">
     <?php echo do_shortcode('[rentcast_properties]'); ?>
-    <div class="pt-property-list"></div>
+    <div class="pt-property-item"></div>
 </div>
 
 <!-- =================== EDIT PROPERTY MODAL =================== -->
@@ -61,7 +61,6 @@ $image_url  = $upload_dir['baseurl'];
     </div>
 </div>
 
-<!-- =================== MODAL & LIST JS =================== -->
 <script>
 jQuery(document).ready(function($){
     // Define ajax URL and nonces directly to avoid localization issues
@@ -139,11 +138,15 @@ jQuery(document).ready(function($){
             },
             success: function(response){
                 if(response.success){
-                    // Update property list dynamically
+                    // Update property list dynamically - FIXED SELECTOR
                     var $item = $("#property-item-" + listingId);
                     if($item.length){
-                        $item.find(".pt-property-details div").eq(0).text("Rent: $" + price + "/month");
-                        $item.find(".pt-property-details div").eq(1).text("Value: $" + parseFloat(propertyValue).toLocaleString());
+                        // Updated selectors for new HTML structure
+                        var rentText = "Rent: $" + parseFloat(price).toLocaleString() + "/month";
+                        var valueText = "Value: $" + parseFloat(propertyValue).toLocaleString();
+                        
+                        $item.find(".property-stats span:first-child").text(rentText);
+                        $item.find(".property-stats span:last-child").text(valueText);
                     }
                     alert("Property Updated!");
                     $("#propertyEditModal").fadeOut(200);
@@ -241,9 +244,6 @@ jQuery(document).ready(function($){
                         $itemImg.attr('src', newImageUrl);
                     }
                     
-                    // Update the main property image if exists
-                    $(".pt-property-image[data-listing='" + listingId + "']").attr('src', newImageUrl);
-                    
                     // Clear the file input for potential re-upload
                     $("#edit_property_image").val('');
                     
@@ -261,7 +261,7 @@ jQuery(document).ready(function($){
         });
     });
 
-    // ===== SEARCH =====
+    // ===== SEARCH FUNCTIONALITY - FIXED =====
     $('.pt-search-input').on('keyup', function(){
         var searchTerm = $(this).val().toLowerCase().trim();
         var $items = $('.pt-property-item');
@@ -273,39 +273,51 @@ jQuery(document).ready(function($){
 
         $items.each(function(){
             var $item = $(this);
-            var propertyName = $item.find('h3').text().toLowerCase();
-            var propertyAddress = $item.find('.pt-property-address').text().toLowerCase();
+            // Search in property address (h3 text)
+            var propertyAddress = $item.find('h3').text().toLowerCase();
+            // Search in location (p.location text)
+            var propertyLocation = $item.find('.location').text().toLowerCase();
             
-            var matchesName = propertyName.indexOf(searchTerm) > -1;
             var matchesAddress = propertyAddress.indexOf(searchTerm) > -1;
+            var matchesLocation = propertyLocation.indexOf(searchTerm) > -1;
             
-            $item.toggle(matchesName || matchesAddress);
+            $item.toggle(matchesAddress || matchesLocation);
         });
     });
 
-    // ===== SORT =====
+    // ===== SORT FUNCTIONALITY - FIXED =====
     $('.pt-sort-select').on('change', function(){
         var sortVal = $(this).val();
         if(!sortVal) return;
 
-        var $container = $('.pt-property-list');
+        var $container = $('.pt-property-container');
         var $items = $container.find('.pt-property-item').get();
 
         var sorted = $items.sort(function(a, b){
             var $a = $(a);
             var $b = $(b);
             
+            // Get property address for name sorting
             var aText = $a.find('h3').text();
             var bText = $b.find('h3').text();
             
-            var aPriceText = $a.find('.pt-property-details div').eq(0).text();
-            var bPriceText = $b.find('.pt-property-details div').eq(0).text();
+            // Get rent price for price sorting
+            var aRentText = $a.find('.property-stats span:first-child').text();
+            var bRentText = $b.find('.property-stats span:first-child').text();
             
-            var aPrice = parseFloat(aPriceText.replace(/[^0-9.]/g,'') || 0);
-            var bPrice = parseFloat(bPriceText.replace(/[^0-9.]/g,'') || 0);
+            var aPrice = parseFloat(aRentText.replace(/[^0-9.]/g,'') || 0);
+            var bPrice = parseFloat(bRentText.replace(/[^0-9.]/g,'') || 0);
             
-            var aDate = $a.data('date') || 0;
-            var bDate = $b.data('date') || 0;
+            // Get linked date for date sorting
+            var aDateText = $a.find('.property-meta small:first-child').text();
+            var bDateText = $b.find('.property-meta small:first-child').text();
+            
+            // Extract date from text like "Linked: Jan 15, 2024"
+            var aDateMatch = aDateText.match(/Linked:\s*(.+)/);
+            var bDateMatch = bDateText.match(/Linked:\s*(.+)/);
+            
+            var aDate = aDateMatch ? new Date(aDateMatch[1]) : new Date(0);
+            var bDate = bDateMatch ? new Date(bDateMatch[1]) : new Date(0);
 
             switch(sortVal){
                 case 'price-asc': 
@@ -317,18 +329,16 @@ jQuery(document).ready(function($){
                 case 'name-desc': 
                     return bText.localeCompare(aText);
                 case 'date-asc': 
-                    return new Date(aDate) - new Date(bDate);
+                    return aDate - bDate;
                 case 'date-desc': 
-                    return new Date(bDate) - new Date(aDate);
+                    return bDate - aDate;
                 default: 
                     return 0;
             }
         });
 
         // Re-append sorted items
-        $.each(sorted, function(idx, itm){ 
-            $container.append(itm); 
-        });
+        $container.empty().append(sorted);
     });
 
     // Clear search when sort changes
@@ -337,50 +347,6 @@ jQuery(document).ready(function($){
     });
 
 });
-</script>
-
-<script>
-    jQuery(document).ready(function($){
-        // Live Search
-        $('.pt-search-input').on('keyup', function(){
-            var searchTerm = $(this).val().toLowerCase();
-            $('.pt-property-item').each(function(){
-                var text = $(this).find('h3').text().toLowerCase();
-                $(this).toggle(text.indexOf(searchTerm) > -1);
-            });
-        });
-
-        // Sorting
-        $('.pt-sort-select').on('change', function(){
-            var sortVal = $(this).val();
-            var $container = $('.pt-property-list');
-            var $items = $container.find('.pt-property-item');
-
-            var sorted = $items.get().sort(function(a,b){
-                var aText = $(a).find('h3').text();
-                var bText = $(b).find('h3').text();
-                var aPrice = parseFloat($(a).find('.pt-property-details div').eq(0).text().replace(/[^0-9.]/g,'') || 0);
-                var bPrice = parseFloat($(b).find('.pt-property-details div').eq(0).text().replace(/[^0-9.]/g,'') || 0);
-                var aDate = $(a).data('date') || 0;
-                var bDate = $(b).data('date') || 0;
-
-                switch(sortVal){
-                    case 'price-asc': return aPrice - bPrice;
-                    case 'price-desc': return bPrice - aPrice;
-                    case 'name-asc': return aText.localeCompare(bText);
-                    case 'name-desc': return bText.localeCompare(aText);
-                    case 'date-asc': return aDate - bDate;
-                    case 'date-desc': return bDate - aDate;
-                    default: return 0;
-                }
-            });
-
-            // Preserve grid layout
-            $.each(sorted, function(idx, itm){
-                $container.append(itm);
-            });
-        });
-    });
 </script>
 
 <style>
@@ -500,5 +466,210 @@ jQuery(document).ready(function($){
         padding: 20px;
     }
 }
+
+/**************************************/
+
+/* ==========================
+   Property Details Design
+========================== */
+.pt-property-details {
+    padding: 24px;
+}
+
+.pt-property-details h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #2c3e50;
+    line-height: 1.4;
+}
+
+.pt-property-details h3 a {
+    color: #2c3e50;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.pt-property-details h3 a:hover {
+    color: #3498db;
+}
+
+.pt-property-details .location {
+    margin: 0 0 16px 0;
+    color: #7f8c8d;
+    font-size: 15px;
+    line-height: 1.4;
+    font-weight: 500;
+}
+
+.property-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.property-stats span {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    padding: 8px 0;
+}
+
+.property-stats span:first-child {
+    color: #27ae60;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.property-stats span:last-child {
+    color: #3498db;
+}
+
+.property-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #95a5a6;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 16px;
+}
+
+.property-meta small {
+    font-style: italic;
+    display: flex;
+    align-items: center;
+}
+
+.property-meta small:before {
+    content: "•";
+    margin-right: 5px;
+    color: #bdc3c7;
+}
+
+.property-meta small:first-child:before {
+    content: "";
+    margin-right: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pt-property-details {
+        padding: 20px;
+    }
+    
+    .pt-property-details h3 {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+    
+    .pt-property-details .location {
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+    
+    .property-stats {
+        gap: 6px;
+        margin-bottom: 14px;
+    }
+    
+    .property-stats span {
+        font-size: 14px;
+        padding: 6px 0;
+    }
+    
+    .property-meta {
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 14px;
+    }
+    
+    .property-meta small:before {
+        content: "";
+        margin-right: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .pt-property-details {
+        padding: 18px;
+    }
+    
+    .pt-property-details h3 {
+        font-size: 17px;
+    }
+    
+    .property-stats {
+        flex-direction: column;
+    }
+    
+    .property-meta {
+        font-size: 12px;
+    }
+}
+
+/* Optional: Add some icons for better visual */
+.property-stats span:first-child {
+    position: relative;
+    padding-left: 24px;
+}
+
+.property-stats span:first-child:before {
+    content: "💰";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+}
+
+.property-stats span:last-child {
+    position: relative;
+    padding-left: 24px;
+}
+
+.property-stats span:last-child:before {
+    content: "🏠";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+}
+
+.property-meta small:first-child {
+    position: relative;
+    padding-left: 20px;
+}
+
+.property-meta small:first-child:before {
+    content: "📅";
+    position: absolute;
+    left: 0;
+    font-style: normal;
+}
+
+.property-meta small:last-child {
+    position: relative;
+    padding-left: 20px;
+}
+
+.property-meta small:last-child:before {
+    content: "🔄";
+    position: absolute;
+    left: 0;
+    font-style: normal;
+}
+
+.pt-property-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.pt-property-item {
+    flex: 1 1 300px; /* grow/shrink, base width 300px */
+    max-width: 350px;
+}
+
 
 </style>

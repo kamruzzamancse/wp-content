@@ -27,7 +27,7 @@
                     </tr>
                 </thead>
                 <tbody id="activeClientsBody">
-                    <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+                    <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
                 </tbody>
             </table>
             <div id="activeClientsPagination" class="pagination"></div>

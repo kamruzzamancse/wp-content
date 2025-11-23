@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) exit;
 // ==============================
 // Fetch API & Save to DB (Updated)
 // ==============================
-function fetch_rentcast_properties_to_db($city = 'Orlando', $limit = 1) {
+/* function fetch_rentcast_properties_to_db($city = 'Orlando', $limit = 1) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'rentcast_properties';
     $api_key = "7a7c73a68ffc46abae4f32d560e54bf2";
@@ -108,12 +108,12 @@ function fetch_rentcast_properties_to_db($city = 'Orlando', $limit = 1) {
         }
     }
     return true;
-}
+} */
 
 // ==============================
 // AJAX Upload Property Image
 // ==============================
-function upload_property_image() {
+/* function upload_property_image() {
     check_ajax_referer('property_image_nonce', 'nonce');
 
     if (empty($_POST['listing_id'])) wp_send_json_error('Missing listing ID');
@@ -141,12 +141,12 @@ function upload_property_image() {
         wp_send_json_error($movefile['error'] ?? 'Upload error');
     }
 }
-add_action('wp_ajax_upload_property_image', 'upload_property_image');
+add_action('wp_ajax_upload_property_image', 'upload_property_image'); */
 
 // ==============================
 // Shortcode: Show All Properties
 // ==============================
-function rentcast_properties_shortcode($atts) {
+/* function rentcast_properties_shortcode($atts) {
     global $wpdb;
     $table_name = $wpdb->prefix . 'rentcast_properties';
     $properties = $wpdb->get_results("SELECT * FROM $table_name ORDER BY id DESC");
@@ -203,6 +203,97 @@ function rentcast_properties_shortcode($atts) {
             <div>Rent: <?php echo $rent_price; ?></div>
             <div>Value: <?php echo $value_price; ?></div>
             <div><?php echo $location; ?></div>
+        </div>
+    </div>
+    <?php endforeach;
+
+    return ob_get_clean();
+}
+add_shortcode('rentcast_properties', 'rentcast_properties_shortcode'); */
+
+// ==============================
+// Shortcode: Show Current User's Linked Properties
+// ==============================
+function rentcast_properties_shortcode($atts) {
+    global $wpdb;
+    
+    $user_id = get_current_user_id();
+    if (!$user_id) return "<p>Please login to view your properties.</p>";
+    
+    $properties_table = $wpdb->prefix . 'rentcast_properties';
+    $user_properties_table = $wpdb->prefix . 'rentcast_user_properties';
+    
+    // Get only current user's linked properties
+    $properties = $wpdb->get_results($wpdb->prepare("
+        SELECT p.* 
+        FROM $properties_table p
+        INNER JOIN $user_properties_table up ON p.id = up.property_id
+        WHERE up.user_id = %d AND up.is_active = 1
+        ORDER BY up.linked_date DESC
+    ", $user_id));
+
+    if (!$properties) {
+        return "<div class='no-properties-message'>
+                    <p>You have no linked properties yet.</p>
+                    <p><a href='?tab=link-property' class='button'>Link Your First Property</a></p>
+                </div>";
+    }
+    
+    ob_start();
+
+    foreach ($properties as $property):
+        $property_id = intval($property->id);
+        $listing_id  = esc_attr($property->listing_id);
+        $image_url   = esc_url($property->image_url ?: "https://placehold.co/500x300?text=No+Image");
+        $rent_price  = !empty($property->price) ? '$' . number_format((float)$property->price) . '/month' : 'N/A';
+        $value_price = $property->property_value ? '$' . number_format((float)$property->property_value) : 'Value not available';
+        $location    = esc_html("{$property->city}, {$property->state}");
+        
+        // Last updated date - using modified_date if exists, otherwise current date
+        $last_updated = !empty($property->modified_date) ? date('M j, Y', strtotime($property->modified_date)) : date('M j, Y');
+
+        // Use property address in URL (slugify to make URL-friendly)
+        $address_slug = sanitize_title($property->address);
+        $property_url = "?tab=cl-property-details&listing_id={$listing_id}&id={$property_id}&address={$address_slug}";
+    ?>
+    <div class="pt-property-item" 
+         id="property-item-<?php echo $listing_id; ?>" 
+         data-id="<?php echo $property_id; ?>" 
+         data-listing-id="<?php echo $listing_id; ?>">
+        
+        <!-- Image now links to address URL -->
+        <a href="<?php echo $property_url; ?>">
+            <img src="<?php echo $image_url; ?>" 
+                 id="property-img-<?php echo $listing_id; ?>" 
+                 class="pt-main-image" 
+                 alt="<?php echo esc_attr($property->address); ?>">
+        </a>
+
+        <label class="pt-upload-icon" data-listing="<?php echo $listing_id; ?>" title="Edit Property">
+            <span class="dashicons dashicons-edit"></span>
+        </label>
+
+        <input type="file" 
+               id="file-input-<?php echo $listing_id; ?>" 
+               class="property-image-input" 
+               data-listing-id="<?php echo $listing_id; ?>" 
+               data-id="<?php echo $property_id; ?>">
+
+        <div class="pt-property-details">
+            <h3>
+                <a href="<?php echo $property_url; ?>">
+                    <?php echo esc_html($property->address); ?>
+                </a>
+            </h3>
+            <p class="location"><?php echo esc_html($property->city . ', ' . $property->state); ?></p>
+            <div class="property-stats">
+                <span>Rent: <?php echo $rent_price; ?></span>
+                <span>Value: <?php echo $value_price; ?></span>
+            </div>
+            <div class="property-meta">
+                <small>Linked: <?php echo date('M j, Y', strtotime($property->linked_date)); ?></small>
+                <small>Updated: <?php echo $last_updated; ?></small>
+            </div>
         </div>
     </div>
     <?php endforeach;

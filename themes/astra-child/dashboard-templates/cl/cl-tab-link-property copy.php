@@ -42,129 +42,6 @@ if (!defined('ABSPATH')) exit;
     </div>
 </div>
 
-<script>
-jQuery(document).ready(function($) {
-    const ajaxUrl = '<?php echo admin_url("admin-ajax.php"); ?>';
-    const searchNonce = '<?php echo wp_create_nonce("property_search_nonce"); ?>';
-    const linkNonce = '<?php echo wp_create_nonce("property_link_nonce"); ?>';
-
-    // Render a single property item
-    function renderPropertyItem(property) {
-        const image = property.photos?.[0] || 'https://placehold.co/100x80?text=No+Image';
-        const address = property.formattedAddress || property.address || '';
-        const city = property.city || '';
-        const state = property.state || '';
-        const zip = property.zipCode || property.zip || '';
-        const price = property.price || property.rent || '';
-        const bedrooms = property.bedrooms || property.bed || 0;
-        const bathrooms = property.bathrooms || property.bath || 0;
-        const sqft = property.squareFootage || property.sqft || 0;
-
-        const $item = $('<div/>', { 'class': 'property-result-item' });
-        const $img = $('<img/>', { src: image, alt: 'Property Image' });
-        const $info = $('<div/>', { 'class': 'property-info' });
-
-        $info.append($('<h4/>').text(address));
-        $info.append($('<p/>').text(city + (city ? ', ' : '') + state + (zip ? (' ' + zip) : '')));
-        $info.append($('<p/>').text('Rent: $' + (price ? Number(price).toLocaleString() : 'N/A') + '/month'));
-        $info.append($('<p/>').text('Bed: ' + bedrooms + ' | Bath: ' + bathrooms + ' | SqFt: ' + (sqft ? Number(sqft).toLocaleString() : 'N/A')));
-
-        const $btn = $('<button/>', {
-            'class': 'link-property-btn',
-            'type': 'button',
-            text: 'Link Property'
-        });
-
-        // Store JS object safely in jQuery data (not as HTML attribute)
-        $btn.data('propertyPayload', property);
-
-        $item.append($img).append($info).append($btn);
-        return $item;
-    }
-
-    // Search properties
-    function searchProperties() {
-        const searchTerm = $('#property-search-input').val().trim();
-        if (!searchTerm) {
-            alert('Please enter a city name, ZIP code, or address');
-            return;
-        }
-
-        $('#search-results-list').html('<div class="loading">Searching properties...</div>');
-        $('#property-search-results').show();
-
-        $.post(ajaxUrl, {
-            action: 'real_time_property_search',
-            search: searchTerm,
-            nonce: searchNonce
-        })
-        .done(function(response) {
-            if (response.success && response.data?.html) {
-                $('#search-results-list').html(response.data.html);
-            } else {
-                const msg = response.data || 'No properties found.';
-                $('#search-results-list').html(`<div class="error">${$('<div>').text(msg).html()}</div>`);
-            }
-        })
-        .fail(function() {
-            $('#search-results-list').html('<div class="error">Search failed. Please try again.</div>');
-        });
-    }
-
-    $('#search-property-btn').on('click', searchProperties);
-    $('#property-search-input').on('keypress', function(e) {
-        if (e.which === 13) searchProperties();
-    });
-
-    // Link property
-    $(document).on('click', '.link-property-btn', function() {
-        const $btn = $(this);
-        const property = $btn.data('propertyPayload') || {};
-
-        $btn.text('Linking...').prop('disabled', true);
-
-        // Extract individual fields from property object
-        const payload = {
-            action: 'simple_link_property',
-            nonce: linkNonce,
-            listing_id: property.id || property.listingId || '',
-            address: property.formattedAddress || property.address || '',
-            city: property.city || '',
-            state: property.state || '',
-            zip: property.zipCode || property.zip || '',
-            bedrooms: property.bedrooms || property.bed || 0,
-            bathrooms: property.bathrooms || property.bath || 0,
-            sqft: property.squareFootage || property.sqft || 0,
-            price: property.price || property.rent || '',
-            image_url: property.photos?.[0] || ''
-        };
-
-        $.post(ajaxUrl, payload)
-        .done(function(response) {
-            if (response.success) {
-                $('#link-success').fadeIn();
-                $('#property-search-results').hide();
-                $('#property-search-input').val('');
-
-                // Refresh linked properties section
-                $('.linked-properties-section').load(location.href + ' .linked-properties-section > *');
-
-                $('html, body').animate({
-                    scrollTop: $('#link-success').offset().top - 100
-                }, 800);
-            } else {
-                alert('Error: ' + (response.data || 'Failed to link property.'));
-                $btn.text('Link Property').prop('disabled', false);
-            }
-        })
-        .fail(function() {
-            alert('Link request failed. Please try again.');
-            $btn.text('Link Property').prop('disabled', false);
-        });
-    });
-});
-</script>
-
 <style>
 /* ===== Property Linker Page Styling ===== */
 .property-linker-container {
@@ -575,3 +452,71 @@ jQuery(document).ready(function($) {
   outline-offset: 2px;
 }
 </style>
+
+<script>
+jQuery(document).ready(function($) {
+    // Search properties
+    $('#search-property-btn').click(function() {
+        var searchTerm = $('#property-search-input').val().trim();
+        if (!searchTerm) {
+            alert('Please enter a city name, ZIP code, or address');
+            return;
+        }
+        
+        $('#search-results-list').html('<div class="loading">Searching properties...</div>');
+        $('#property-search-results').show();
+        
+        $.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+            action: 'real_time_property_search',
+            search: searchTerm,
+            nonce: '<?php echo wp_create_nonce('property_search_nonce'); ?>'
+        }, function(response) {
+            if (response.success) {
+                $('#search-results-list').html(response.data);
+            } else {
+                $('#search-results-list').html('<div class="error">' + response.data + '</div>');
+            }
+        }).fail(function() {
+            $('#search-results-list').html('<div class="error">Search failed. Please try again.</div>');
+        });
+    });
+
+    // Link property
+    $(document).on('click', '.link-property-btn', function() {
+        var $btn = $(this);
+        var propertyId = $btn.data('property-id');
+        
+        $btn.text('Linking...').prop('disabled', true);
+        
+        $.post('<?php echo admin_url('admin-ajax.php'); ?>', {
+            action: 'simple_link_property',
+            property_id: propertyId,
+            nonce: '<?php echo wp_create_nonce('property_link_nonce'); ?>'
+        }, function(response) {
+            if (response.success) {
+                $('#link-success').show();
+                $('#property-search-results').hide();
+                $('#property-search-input').val('');
+                
+                // Refresh linked properties
+                $('.linked-properties-section').load(' .linked-properties-section > *');
+                
+                // Scroll to success message
+                $('html, body').animate({
+                    scrollTop: $('#link-success').offset().top - 100
+                }, 1000);
+            } else {
+                alert('Error: ' + response.data);
+                $btn.text('Link Property').prop('disabled', false);
+            }
+        });
+    });
+
+    // Enter key support
+    $('#property-search-input').on('keypress', function(e) {
+        if (e.which === 13) {
+            $('#search-property-btn').click();
+        }
+    });
+});
+</script>

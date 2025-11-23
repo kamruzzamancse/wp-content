@@ -30,6 +30,7 @@ if (!function_exists('load_client_dashboard_data')) {
                     ])),
                     'messages_count' => 0, // Replace with actual query
                 ];
+            case 'link-property':
             case 'properties':
                 return get_posts([
                     'post_type' => 'property',

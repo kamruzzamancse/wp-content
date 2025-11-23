@@ -29,21 +29,27 @@
                 <?php
                 global $wpdb;
                 $doc_types = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}document_types WHERE deleted_at IS NULL ORDER BY created_at DESC");
+                
                 if ($doc_types):
-                    foreach ($doc_types as $index => $type): ?>
-                        <tr data-id="<?php echo esc_attr($type->id); ?>">
-                            <td><?php echo $index + 1; ?></td>
-                            <td><?php echo esc_html($type->type_name); ?></td>
-                            <td>
-                                <span class="edit-doc-type" title="Edit">✏️</span>
-                                <span class="delete-doc-type" title="Delete">🗑️</span>
-                            </td>
-                        </tr>
-                    <?php endforeach;
+                    $serial = 1; // Use separate serial counter
+                    foreach ($doc_types as $type):
+                        if (!$type) continue; // skip null/empty objects
+                ?>
+                    <tr data-id="<?php echo esc_attr($type->id); ?>">
+                        <td><?php echo $serial++; ?></td>
+                        <td><?php echo esc_html($type->type_name); ?></td>
+                        <td>
+                            <span class="edit-doc-type" title="Edit">✏️</span>
+                            <span class="delete-doc-type" title="Delete">🗑️</span>
+                        </td>
+                    </tr>
+                <?php
+                    endforeach;
                 else: ?>
                     <tr><td colspan="3" style="text-align:center;">No Document Types Found</td></tr>
                 <?php endif; ?>
             </tbody>
+
         </table>
 
         <!-- Pagination (table bottom, right aligned) -->
@@ -800,7 +806,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 .page-btn.active {
     background: #2271b1;
-    color: #fff;
+    color: #fff!important;
     border-color: #2271b1;
 }
 

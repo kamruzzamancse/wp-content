@@ -24,6 +24,7 @@ $includes = [
     'cl-reply-docs-ajax.php',
     'cl-db-tracking-property.php',
     'cl-rentcast-properties-ajax.php',
+    'cl-link-property-ajax.php',
 
     // ========================
     // Realtor (rt) files
