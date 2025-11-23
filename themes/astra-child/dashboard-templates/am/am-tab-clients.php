@@ -40,13 +40,14 @@
         <th class="client-name">Client Name</th>
         <th class="email">Email</th>
         <th class="phone-number">Phone Number</th>
+        <th class="address">Address</th>
         <th class="notes">Notes</th>
         <th class="Status">Status</th>
         <th class="ab-actions-column">Actions</th>
       </tr>
     </thead>
     <tbody id="addressBookBody">
-      <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+      <tr><td colspan="8" style="text-align:center;">Loading...</td></tr>
     </tbody>
   </table>
 
