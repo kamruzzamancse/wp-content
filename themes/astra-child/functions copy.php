@@ -1,0 +1,598 @@
+<?php
+if (!defined('ABSPATH')) exit;
+
+// ======================
+// Enqueue Parent + Child Styles
+// ======================
+function astra_child_enqueue_theme_styles() {
+    wp_enqueue_style('parent-style', get_template_directory_uri() . '/style.css');
+    wp_enqueue_style('child-style', get_stylesheet_directory_uri() . '/style.css', ['parent-style']);
+    wp_enqueue_style('dashicons');
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_theme_styles');
+
+// ======================
+// Include Required Files
+// ======================
+$includes = [
+    // ========================
+    // Client (cl) files
+    // ========================
+    'cl-client-profile.php',
+    'cl-settings-password.php',
+    'cl-settings-support-ajax.php',
+    'cl-reply-docs-ajax.php',
+    'cl-db-tracking-property.php',
+    'cl-rentcast-properties-ajax.php',
+    'cl-link-property-ajax.php',
+
+    // ========================
+    // Realtor (rt) files
+    // ========================
+    'rt-db-active-client-ajax.php',
+    'rt-db-lead-client-ajax.php',
+    'rt-ab-client-ajax.php',
+    'rt-realtor-profile.php',
+    'rt-document-type.php',
+    'rt-documents.php',
+    'rt-settings-password.php',
+    'rentcast-properties.php',
+    'rt-ap-assign-property-ajax.php',
+    'rt-ap-assign-task-ajax.php',
+
+    // ========================
+    // Admin / Other
+    // ========================
+    'am-rt-realtor-ajax.php',
+    'rentcast-cron.php',
+];
+
+foreach ($includes as $file) {
+    $path = get_stylesheet_directory() . '/includes/' . $file;
+    if (file_exists($path)) require_once $path;
+}
+
+/**
+ * Enqueue child theme CSS & JS assets
+ */
+function astra_child_enqueue_assets() {
+
+    /* ------------------------------------------------------
+     * 1. CSS Files
+     * ------------------------------------------------------ */
+    $styles = [
+        'property-management-css' => 'assets/css/rt-property-management.css',
+        'address-book-css'        => 'assets/css/rt-address-book.css',
+        'realtor-settings-css'    => 'assets/css/rt-realtor-settings.css',
+        'cl-dashboard-css'        => 'assets/css/cl-dashboard.css',
+        'all-sticky-notes-css'    => 'assets/css/all-sticky-notes.css',
+    ];
+
+    foreach ($styles as $handle => $path) {
+        $file = get_stylesheet_directory() . '/' . $path;
+        $uri  = get_stylesheet_directory_uri() . '/' . $path;
+
+        if (file_exists($file)) {
+            wp_enqueue_style(
+                $handle,
+                $uri,
+                [],
+                filemtime($file) // version updated automatically
+            );
+        }
+    }
+
+    /* ------------------------------------------------------
+     * 2. JS Files
+     * ------------------------------------------------------ */
+    $scripts = [
+        'property-management-js' => 'assets/js/rt-property-management.js',
+        'address-book-js'        => 'assets/js/rt-address-book.js',
+        'realtor-settings-js'    => 'assets/js/rt-realtor-settings.js',
+        'all-sticky-notes-js'    => 'assets/js/all-sticky-notes.js',
+        'property-upload-js'     => 'assets/js/property-upload.js',
+    ];
+
+    foreach ($scripts as $handle => $path) {
+        $file = get_stylesheet_directory() . '/' . $path;
+        $uri  = get_stylesheet_directory_uri() . '/' . $path;
+
+        if (file_exists($file)) {
+            wp_enqueue_script(
+                $handle,
+                $uri,
+                ['jquery'],         // default dependency
+                filemtime($file),   // version auto updated
+                true                // load in footer
+            );
+        }
+    }
+
+    /* ------------------------------------------------------
+     * 3. LOCALIZE SCRIPTS (AFTER enqueue)
+     * ------------------------------------------------------ */
+
+    /* Address Book */
+    if (wp_script_is('address-book-js', 'enqueued')) {
+        wp_localize_script('address-book-js', 'propertyDetailsAjax', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+        ]);
+    }
+
+    /* Property Upload + Edit */
+    if (wp_script_is('property-upload-js', 'enqueued')) {
+        wp_localize_script('property-upload-js', 'property_upload_vars', [
+            'edit' => [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('property_edit_nonce'),
+            ],
+            'image' => [
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce'    => wp_create_nonce('property_image_nonce'),
+            ],
+        ]);
+    }
+
+    /* Sticky Notes */
+    if (wp_script_is('all-sticky-notes-js', 'enqueued')) {
+        wp_localize_script('all-sticky-notes-js', 'stickyNotesData', [
+            'userId'  => get_current_user_id(),
+            'ajaxurl' => admin_url('admin-ajax.php'),
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'astra_child_enqueue_assets');
+
+// ======================
+// Enqueue JS & Localize AJAX for Reply Docs
+// ======================
+function enqueue_rt_reply_docs_scripts() {
+    if (is_page('client-dashboard') && isset($_GET['tab']) && $_GET['tab'] === 'documents') {
+
+        $script_path = get_stylesheet_directory() . '/assets/js/cl-reply-docs.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/cl-reply-docs.js';
+
+        wp_enqueue_script(
+            'cl-reply-docs-js',
+            $script_uri,
+            ['jquery'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        $nonce = wp_create_nonce('cl_reply_docs_nonce');
+
+        wp_localize_script('cl-reply-docs-js', 'rtReplyDocsAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => $nonce,
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_rt_reply_docs_scripts');
+
+// ======================
+// Enqueue JS & Localize AJAX for Assign Task
+// ======================
+function enqueue_rt_ap_assign_task_scripts() {
+    if (is_page('realtor-dashboard') && isset($_GET['tab']) && $_GET['tab'] === 'assign-task') {
+
+        $script_path = get_stylesheet_directory() . '/assets/js/rt-ap-assign-task.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ap-assign-task.js';
+
+        wp_enqueue_script(
+            'rt-ap-assign-task-js',
+            $script_uri,
+            ['jquery'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        $nonce = wp_create_nonce('rt_ap_assign_task_nonce');
+
+       wp_localize_script('rt-ap-assign-task-js', 'rtAssignTaskAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_ap_assign_task_nonce'),
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_rt_ap_assign_task_scripts');
+
+// ======================
+// Enqueue JS & Localize AJAX for Assign Property - FIXED NONCE ISSUE
+// ======================
+function enqueue_rt_ap_assign_property_scripts() {
+    // Only load on Realtor Dashboard page with "assign-property" tab
+    if (is_page('realtor-dashboard') && isset($_GET['tab']) && $_GET['tab'] === 'assign-property') {
+
+        $script_path = get_stylesheet_directory() . '/assets/js/rt-ap-assign-property.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ap-assign-property.js';
+
+        wp_enqueue_script(
+            'rt-ap-assign-property-js',
+            $script_uri,
+            ['jquery'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        // Create fresh nonce for each page load
+        $nonce = wp_create_nonce('rt_ap_assign_property_nonce');
+        
+        wp_localize_script('rt-ap-assign-property-js', 'rtAssignPropertyAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => $nonce,
+            'debug'    => true
+        ]);
+        
+        error_log("Nonce generated for property search: " . $nonce);
+    }
+}
+add_action('wp_enqueue_scripts', 'enqueue_rt_ap_assign_property_scripts');
+
+// ======================
+// Enqueue JS & Localize AJAX for Address Book
+// ======================
+function rt_enqueue_client_scripts() {
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
+    $is_allowed_page = is_page('realtor-dashboard') || is_page('admin-dashboard');
+    $is_allowed_tab = in_array($current_tab, ['address-book', 'clients', '']);
+
+    if ($is_allowed_page && $is_allowed_tab) {
+
+        // SheetJS for XLSX import/export
+        wp_enqueue_script(
+            'sheetjs',
+            'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+            [],
+            '0.18.5',
+            true
+        );
+
+        // Custom Address Book JS
+        $script_path = get_stylesheet_directory() . '/assets/js/rt-ab-client.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/rt-ab-client.js';
+
+        wp_enqueue_script(
+            'rt-ab-client-js',
+            $script_uri,
+            ['jquery', 'sheetjs'],
+            file_exists($script_path) ? filemtime($script_path) : time(), // cache-busting for updates
+            true
+        );
+
+        // Localize AJAX variables & default assets
+        wp_localize_script('rt-ab-client-js', 'rtClientAjax', [
+            'ajax_url'               => admin_url('admin-ajax.php'),
+            'create_nonce'           => wp_create_nonce('rt_client_create_nonce'),
+            'edit_nonce'             => wp_create_nonce('rt_client_edit_nonce'),
+            'delete_nonce'           => wp_create_nonce('rt_client_delete_nonce'),
+            'export_nonce'           => wp_create_nonce('rt_client_export_nonce'),
+            'import_nonce'           => wp_create_nonce('rt_client_import_nonce'),
+
+            // Default fallbacks for missing images
+            'default_avatar'         => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
+            'default_property_image' => get_stylesheet_directory_uri() . '/assets/images/default-property.png',
+
+            // (Optional) Add log flag to help debugging
+            'debug' => true,
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_client_scripts');
+
+// ======================
+// Enqueue JS & Localize AJAX for Realtors
+// ======================
+function rt_enqueue_realtor_scripts() {
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
+
+    if ($current_tab === 'realtors') {
+
+        // SheetJS for XLSX export/import
+        wp_enqueue_script(
+            'sheetjs',
+            'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',
+            [],
+            '0.18.5',
+            true
+        );
+
+        // Realtor JS
+        $script_path = get_stylesheet_directory() . '/assets/js/am-rt-realtor.js';
+        $script_uri  = get_stylesheet_directory_uri() . '/assets/js/am-rt-realtor.js';
+
+        wp_enqueue_script(
+            'am-rt-realtor-js',
+            $script_uri,
+            ['jquery', 'sheetjs'],
+            file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+            true
+        );
+
+        // Localize AJAX variables & nonces
+        wp_localize_script('am-rt-realtor-js', 'rtRealtorAjax', [
+            'ajax_url'                => admin_url('admin-ajax.php'),
+            'create_nonce'            => wp_create_nonce('am_realtor_create_nonce'),
+            'edit_nonce'              => wp_create_nonce('am_realtor_edit_nonce'),
+            'delete_nonce'            => wp_create_nonce('am_realtor_delete_nonce'),
+            'export_nonce'            => wp_create_nonce('am_realtor_export_nonce'),
+            'import_nonce'            => wp_create_nonce('am_realtor_import_nonce'),
+            'default_avatar'          => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
+            'default_property_image'  => get_stylesheet_directory_uri() . '/assets/images/default-property.png',
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_realtor_scripts');
+
+// ======================
+// Enqueue JS for Active Client Dashboard
+// ======================
+function rt_enqueue_active_client_dashboard_scripts() {
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
+    
+    $is_dashboard_page = is_page('realtor-dashboard') || is_page('admin-dashboard');
+    $is_dashboard_tab = empty($current_tab) || $current_tab === 'dashboard';
+
+    if ( $is_dashboard_page && $is_dashboard_tab ) {
+        wp_enqueue_script(
+            'rt-db-active-client-js',
+            get_stylesheet_directory_uri() . '/assets/js/rt-db-active-client.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-db-active-client.js'),
+            true
+        );
+
+        wp_localize_script('rt-db-active-client-js','rtActiveClientAjax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'pagination_nonce' => wp_create_nonce('clients_pagination_nonce'),
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts','rt_enqueue_active_client_dashboard_scripts');
+
+// ======================
+// Enqueue JS for Lead Dashboard
+// ======================
+function rt_enqueue_lead_client_scripts() {
+    $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
+
+    $is_dashboard_page = is_page('realtor-dashboard') || is_page('admin-dashboard');
+    $is_dashboard_tab = empty($current_tab) || $current_tab === 'dashboard';
+
+    if ( $is_dashboard_page && $is_dashboard_tab ) {
+        wp_enqueue_script(
+            'rt-db-lead-client-js',
+            get_stylesheet_directory_uri() . '/assets/js/rt-db-lead-client.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-db-lead-client.js'),
+            true
+        );
+
+        wp_localize_script('rt-db-lead-client-js', 'rtDashboardAjax', [
+            'ajax_url'       => admin_url('admin-ajax.php'),
+            'create_nonce'   => wp_create_nonce('cl_client_create_nonce'),
+            'edit_nonce'     => wp_create_nonce('cl_client_edit_nonce'),
+            'delete_nonce'   => wp_create_nonce('cl_client_delete_nonce'),
+            'convert_nonce'  => wp_create_nonce('cl_client_convert_nonce'),
+            'default_avatar' => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_lead_client_scripts');
+
+// ======================
+// Conditional Script Enqueues
+// ======================
+function mdk_enqueue_profile_scripts() {
+
+    if (!isset($_GET['tab'])) return;
+
+    $tab = sanitize_text_field($_GET['tab']);
+
+    // ------------------------------
+    // Realtor Profile (View/Edit)
+    // ------------------------------
+    if (in_array($tab, ['rt-settings-pi', 'rt-settings-pi-edit'], true)) {
+        wp_enqueue_script(
+            'rt-profile-script',
+            get_stylesheet_directory_uri() . '/assets/js/rt-realtor-profile.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-realtor-profile.js'),
+            true
+        );
+        wp_localize_script('rt-profile-script', 'rt_profile_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_profile_nonce'),
+        ]);
+    }
+
+    // ------------------------------
+    // Client Profile (View/Edit)
+    // ------------------------------
+    if (in_array($tab, ['cl-settings-pi', 'cl-settings-pi-edit'], true)) {
+        wp_enqueue_script(
+            'cl-profile-script',
+            get_stylesheet_directory_uri() . '/assets/js/cl-client-profile.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/cl-client-profile.js'),
+            true
+        );
+        wp_localize_script('cl-profile-script', 'cl_profile_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('cl_profile_nonce'),
+        ]);
+    }
+
+    // ------------------------------
+    // Address Book Page (Create + Edit + Delete Clients)
+    // ------------------------------
+
+    if ($tab === 'documents' || $tab === 'address-book') {
+        // -------------------------
+        // Document Type Script
+        // -------------------------
+        wp_enqueue_script(
+            'rt-document-type-script', // handle
+            get_stylesheet_directory_uri() . '/assets/js/rt-document-type.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-document-type.js'),
+            true
+        );
+
+        wp_localize_script('rt-document-type-script', 'rt_doc_type_ajax', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_doc_type_nonce'),
+        ]);
+
+        // -------------------------
+        // Documents Script
+        // -------------------------
+        wp_enqueue_script(
+            'rt-documents-script', // new handle
+            get_stylesheet_directory_uri() . '/assets/js/rt-documents.js',
+            ['jquery'],
+            filemtime(get_stylesheet_directory() . '/assets/js/rt-documents.js'),
+            true
+        );
+
+        wp_localize_script('rt-documents-script', 'rt_doc_ajax', [ // new object
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('rt_doc_nonce'),
+        ]);
+    }
+
+}
+add_action('wp_enqueue_scripts', 'mdk_enqueue_profile_scripts');
+
+// ======================
+// Password Update Script Enqueue
+// ======================
+function rt_enqueue_password_script() {
+    // Load script only on the "Change Password" tab
+    if (!isset($_GET['tab']) || $_GET['tab'] !== 'rt-settings-cp') return;
+
+    wp_enqueue_script(
+        'rt-password-script',
+        get_stylesheet_directory_uri() . '/assets/js/rt-settings-password.js',
+        ['jquery'],
+        filemtime(get_stylesheet_directory() . '/assets/js/rt-settings-password.js'),
+        true
+    );
+
+    wp_localize_script('rt-password-script', 'rt_password_ajax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('rt_password_nonce'),
+    ]);
+}
+add_action('wp_enqueue_scripts', 'rt_enqueue_password_script');
+
+// ======================
+// Client Password Script Enqueue
+// ======================
+function cl_enqueue_password_script() {
+    // Load script only on the "Client Change Password" tab
+    if (!isset($_GET['tab']) || $_GET['tab'] !== 'cl-settings-cp') return;
+
+    $script_path = get_stylesheet_directory() . '/assets/js/cl-settings-password.js';
+    wp_enqueue_script(
+        'cl-password-script',
+        get_stylesheet_directory_uri() . '/assets/js/cl-settings-password.js',
+        ['jquery'],
+        file_exists($script_path) ? filemtime($script_path) : '1.0.0',
+        true
+    );
+
+    wp_localize_script('cl-password-script', 'cl_password_ajax', [
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce'    => wp_create_nonce('cl_password_nonce'),
+    ]);
+}
+add_action('wp_enqueue_scripts', 'cl_enqueue_password_script');
+
+/**
+ * Conditionally enqueue dashboard assets
+ */
+function mdk_enqueue_dashboard_assets() {
+    global $post;
+    if (!is_admin() && is_a($post, 'WP_Post')) {
+        $dashboard_slugs = ['realtor-dashboard', 'admin-dashboard', 'client-dashboard'];
+
+        if (in_array($post->post_name, $dashboard_slugs)) {
+            $assets = [
+                'mdk-dashboard-style'  => 'assets/css/rt-dashboard.css',
+                'mdk-dashboard-script' => 'assets/js/rt-dashboard.js',
+            ];
+
+            foreach ($assets as $handle => $path) {
+                $full_path = get_stylesheet_directory() . '/' . $path;
+                $uri = get_stylesheet_directory_uri() . '/' . $path;
+
+                if (file_exists($full_path)) {
+                    $ext = pathinfo($path, PATHINFO_EXTENSION);
+                    if ($ext === 'css') {
+                        wp_enqueue_style($handle, $uri, [], filemtime($full_path));
+                    } else {
+                        wp_enqueue_script($handle, $uri, ['jquery'], filemtime($full_path), true);
+                    }
+                }
+            }
+        }
+    }
+}
+add_action('wp_enqueue_scripts', 'mdk_enqueue_dashboard_assets');
+
+/**
+ * Unified dashboard shortcode handler
+ */
+function mdk_dashboard_shortcode($atts, $content = null, $tag = '') {
+    $role = str_replace(['mdk_', '_dashboard'], '', $tag);
+
+    $capabilities = [
+        'admin'   => 'manage_options',
+        'realtor' => 'edit_properties',
+        'client'  => 'read_properties',
+    ];
+
+    if (!isset($capabilities[$role])) {
+        return '<div class="mdk-alert">Invalid dashboard role.</div>';
+    }
+
+    if (!is_user_logged_in() || !current_user_can($capabilities[$role])) {
+        return mdk_dashboard_login_message(ucfirst($role));
+    }
+
+    ob_start();
+
+    if ($role === 'client') {
+        $template = locate_template("dashboard-templates/cl/{$role}-dashboard.php");
+    } 
+    elseif ($role === 'realtor') {
+        $template = locate_template("dashboard-templates/rt/{$role}-dashboard.php");
+    }
+    elseif ($role === 'admin') {
+        $template = locate_template("dashboard-templates/am/admin-dashboard.php");
+    }
+
+    if ($template) {
+        include $template;
+    } else {
+        echo '<div class="mdk-alert">Dashboard template not found.</div>';
+    }
+
+    return ob_get_clean();
+}
+add_shortcode('mdk_realtor_dashboard', 'mdk_dashboard_shortcode');
+add_shortcode('mdk_client_dashboard', 'mdk_dashboard_shortcode');
+add_shortcode('mdk_admin_dashboard', 'mdk_dashboard_shortcode');
+
+/**
+ * Login message helper
+ */
+function mdk_dashboard_login_message($role) {
+    return sprintf(
+        '<div class="mdk-alert">%s <a href="%s">%s</a></div>',
+        sprintf(__('You need to be logged in as a %s to view this page.', 'astra-child'), esc_html($role)),
+        esc_url(wp_login_url()),
+        __('Login here', 'astra-child')
+    );
+}
