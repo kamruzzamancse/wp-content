@@ -200,8 +200,8 @@ tbody td:hover::after {
 
 /* Variant buttons */
 .ab-btn-import {
-    background-color: #fff;
-    color: #333;
+    background-color: #007bff;
+    color: #fff;
     border: 1px solid #ddd;
 }
 .ab-btn-export,
@@ -338,55 +338,6 @@ input {
     cursor: pointer;
 }
 
-/* ---------------------- Responsive ----------------------------*/
-@media (max-width: 768px) {
-    .ab-table-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    table:not(.client-details),
-    table:not(.client-details) thead,
-    table:not(.client-details) tbody,
-    table:not(.client-details) th,
-    table:not(.client-details) tr {
-        display: block;
-        width: 100%;
-    }
-
-    table:not(.client-details) thead { display: none; }
-
-    table:not(.client-details) tr {
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 12px;
-        background: #f9f9ff;
-    }
-
-    table:not(.client-details) td {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        border: none;
-        white-space: normal;
-    }
-
-    table:not(.client-details) td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        margin-bottom: 4px;
-    }
-
-    .ab-search-box { min-width: 100%; }
-}
-
-@media (max-width: 480px) {
-    .ab-container { padding: 10px; }
-    .ab-btn { padding: 8px 10px !important; }
-}
-
-
 /* ---------------------------------------
    FIX: Address Book Header Layout Restore
 -----------------------------------------*/
@@ -433,4 +384,108 @@ input {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* ---------------------- Mobile & Tablet Responsive ------------------ */
+@media (max-width: 768px) {
+    /* Header layout */
+    .ab-table-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .ab-header-right {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .ab-search-box {
+        width: 100%;
+    }
+    .ab-action-buttons {
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* Table becomes card-like */
+    table:not(.client-details),
+    table:not(.client-details) thead,
+    table:not(.client-details) tbody,
+    table:not(.client-details) th,
+    table:not(.client-details) tr,
+    table:not(.client-details) td {
+        display: block;
+        width: 100%;
+    }
+
+    table:not(.client-details) thead { display: none; }
+
+    table:not(.client-details) tr {
+        margin-bottom: 15px;
+        padding: 12px;
+        background-color: #f9f9ff;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+    }
+
+    table:not(.client-details) td {
+        justify-content: space-between;
+        padding: 6px 0;
+        border: none;
+        white-space: normal;
+    }
+
+    table:not(.client-details) td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #555;
+        margin-right: 6px;
+        flex: 1 0 40%;
+    }
+
+    /* Avatar adjustment */
+    .ab-sl-column img {
+        width: 35px;
+        height: 35px;
+    }
+
+    /* Action icons alignment */
+    .ab-action-icons {
+        justify-content: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    table td:first-child,
+    table td:last-child {
+        text-align: left;
+    }
+}
+
+@media (max-width: 480px) {
+    .ab-container {
+        padding: 10px;
+    }
+
+    .ab-btn {
+        padding: 6px 10px !important;
+        font-size: 13px;
+    }
+
+    .pt-search-input {
+        font-size: 13px;
+    }
+
+    /* Reduce table row padding on phones */
+    table:not(.client-details) tr {
+        padding: 10px;
+    }
+
+    .ab-sl-column img {
+        width: 30px;
+        height: 30px;
+    }
 }

@@ -17,7 +17,7 @@ $documents_table             = $wpdb->prefix . 'documents';
   <div class="assign-task-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
     <h3>Client Documents</h3>
     <div class="assign-task-filters" style="display:flex; gap:10px;">
-        <input type="text" id="assign-search" placeholder="Search client or address">
+        <input style="width:300px" type="text" id="assign-search" placeholder="Search client or address">
         <select id="assign-filter-status">
             <option value="">All Status</option>
             <option value="with_docs">With Docs</option>
@@ -106,6 +106,10 @@ $documents_table             = $wpdb->prefix . 'documents';
   text-align: center;
 }
 
+table td:first-child {
+    text-align: left;
+}
+
 /* ===== Mobile responsiveness ===== */
 @media screen and (max-width: 768px) {
   .assign-task-container table,
@@ -149,5 +153,27 @@ $documents_table             = $wpdb->prefix . 'documents';
     border-bottom: none;
     text-align: center;
   }
+  .assign-task-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px;
+  }
+
+  .assign-task-filters {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .assign-task-filters input,
+  .assign-task-filters select,
+  .assign-task-filters button {
+    width: 100% !important;
+  }
+
+  .assign-task-container tbody td:last-child {
+    text-align: left;
+  }
+
 }
 </style>

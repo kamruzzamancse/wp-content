@@ -31,12 +31,6 @@
     font-weight: 500;
 }
 
-.user-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
 .logout-btn {
     color: white;
     text-decoration: none;

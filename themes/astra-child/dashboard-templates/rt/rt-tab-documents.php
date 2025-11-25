@@ -82,7 +82,7 @@
                 <input type="text" id="documentSearchInput" placeholder="Search documents..." />
                 <ul id="documentSearchSuggestions" class="auto-suggest-list"></ul>
             </div>
-            <div style="display:flex; align-items:center; gap:5px;">
+            <div class="cld-dropdown" style="display:flex; align-items:center; gap:5px;">
                 <span>Show:</span>
                 <select id="rowsPerPage">
                     <option value="5" selected>5 rows</option>
@@ -652,64 +652,112 @@ document.addEventListener('DOMContentLoaded', function() {
 .auto-suggest-list li:hover { background: #f0f0f0; }
 
 /* ==========================
-   Responsive - Tablet & Mobile
+   Tablet Responsive (≤1024px)
 ========================== */
 @media (max-width: 1024px) {
-    .cld-top-flex {
+    /* Stack top controls */
+    .cld-doc-top-flex {
         flex-direction: column;
         align-items: flex-start;
+        gap: 15px;
     }
 
     .cld-doc-search-wrapper {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 10px;
+        margin-bottom: 15px;
         align-items: flex-start;
-        margin-top: 20px;
+    }
+
+    .cld-doc-type-tabs-wrapper {
+        flex-wrap: wrap;
+        gap: 8px;
     }
 }
 
+/* ==========================
+   Mobile / Tablet Responsive
+========================== */
 @media (max-width: 768px) {
-    .stats-grid { justify-content: center; gap: 15px; }
+    /* Stack top controls */
+    .cld-doc-top-flex {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px;
+    }
 
-    .documents-table, .doc-types-table,
-    .documents-table tbody, .doc-types-table tbody,
-    .documents-table tr, .doc-types-table tr,
-    .documents-table td, .doc-types-table td {
-        display: block;
+    /* Search + show wrapper */
+    .cld-doc-top-flex > div:last-child {
+        flex-basis: 100% !important;  /* take full width */
+        display: flex !important;
+        flex-direction: column;       /* stack input and dropdown */
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    /* Search input full width */
+    .cld-doc-search-wrapper input {
         width: 100% !important;
+        max-width: 100%;
+    }
+
+    /* Show dropdown full width */
+    .cld-doc-top-flex > div:last-child select {
+        width: 100% !important;
+        max-width: 200px;
+    }
+
+    /* Tables responsive */
+    .documents-table, .doc-types-table {
+        width: 100%;
+        border-collapse: collapse;
     }
 
     .documents-table thead, .doc-types-table thead { display: none; }
+    .documents-table tbody, .doc-types-table tbody { display: block; }
 
     .documents-table tr, .doc-types-table tr {
+        display: block;
         margin-bottom: 15px;
         border: 1px solid #ddd;
         border-radius: 8px;
         padding: 10px;
         background: #fff;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        box-sizing: border-box;
         position: relative;
     }
 
     .documents-table td, .doc-types-table td {
-        padding: 10px 10px 10px 45%;
+        display: block;
+        padding-left: 40%;
+        position: relative;
+        font-size: 13px;
         border: none;
         border-bottom: 1px solid #eee;
-        position: relative;
-        min-height: 20px;
-        box-sizing: border-box;
     }
 
-    .documents-table td:last-child, .doc-types-table td:last-child { border-bottom: none; }
+    .documents-table td:last-child, 
+    .doc-types-table td:last-child {
+        display: flex;
+        justify-content: left;
+        border-bottom: none; 
+    }
+
+    .cld-dropdown {
+        display:flex; 
+        align-items:left!important; 
+        gap:5px;
+    }
 
     .documents-table td::before, .doc-types-table td::before {
         content: attr(data-label);
         position: absolute;
         left: 10px;
-        width: 40%;
-        padding-right: 10px;
+        width: 35%;
         white-space: nowrap;
         font-weight: 600;
-        color: #333;
+        font-size: 12px;
     }
 
     .documents-table td[data-label="Actions"], .doc-types-table td[data-label="Actions"] {
@@ -719,20 +767,14 @@ document.addEventListener('DOMContentLoaded', function() {
         gap: 10px;
         padding: 10px 0;
     }
-
     .documents-table td[data-label="Actions"]::before,
     .doc-types-table td[data-label="Actions"]::before { display: none; }
 
-    .doc-action, .edit-doc-type, .delete-doc-type { font-size: 16px; margin: 0 5px; }
-
-    .cld-task-header { flex-direction: column; gap: 15px; align-items: flex-start; }
-    .cld-upload-btn { align-self: stretch; justify-content: center; }
+    /* Optional: stat cards and task section */
     .stat-card { max-width: 100%; padding: 15px; }
     .cld-task-section { padding: 10px; }
-
-    .documents-table td { padding-left: 40%; font-size: 13px; }
-    .documents-table td::before { width: 35%; font-size: 12px; }
 }
+
 
 /* Container for Tabs + Search (flex row) */
 .cld-doc-top-flex {
@@ -779,19 +821,6 @@ document.addEventListener('DOMContentLoaded', function() {
     right: 0;
     z-index: 1000;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .cld-doc-top-flex {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .cld-doc-search-wrapper input {
-        max-width: 100%;
-    }
 }
 
 /* Pagination buttons */

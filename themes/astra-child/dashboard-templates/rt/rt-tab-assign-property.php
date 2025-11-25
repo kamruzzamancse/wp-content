@@ -133,7 +133,6 @@ include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
 .assign-form {
   display: flex;
   align-items: flex-end;
-  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 15px;
   margin-bottom: 20px;
@@ -143,7 +142,7 @@ include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
 .assign-field {
   display: flex;
   flex-direction: column;
-  width: 200px;
+  width: 300px;
   position: relative;
 }
 
@@ -482,6 +481,10 @@ include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
   background: #0056b3;
 }
 
+table td:first-child {
+  text-align: left;
+}
+
 /* --- Responsive Design --- */
 @media screen and (max-width: 768px) {
   .assign-property-container table,
@@ -523,16 +526,12 @@ include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
 
   .assign-property-container td:last-child {
     border-bottom: none;
-    text-align: center;
+    text-align: left!important;
   }
 
   .assign-property-container td:last-child .button {
     display: inline-block;
     margin: 0 5px;
-  }
-
-  .assign-form {
-    justify-content: flex-start;
   }
 
   #assign-btn {
@@ -551,5 +550,10 @@ include locate_template('dashboard-templates/rt/rt-upload-document-modal.php');
   .clup-upload-box {
     padding: 20px;
   }
+
+  .assign-field {
+      width: 100%;
+  }
 }
+
 </style>
