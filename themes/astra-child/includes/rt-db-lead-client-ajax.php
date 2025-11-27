@@ -69,15 +69,37 @@ function rt_fetch_dashboard_lead_ajax() {
 
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
-    $lead = $wpdb->get_row($wpdb->prepare(
-        "SELECT client_id, full_name, email, phone, note, status, lead_status, profile_picture FROM {$table} WHERE client_id=%d AND deleted_at IS NULL",
-        $client_id
-    ), ARRAY_A);
+    
+    $lead = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT client_id, full_name, email, phone, address, note, status, lead_status, profile_picture 
+             FROM {$table} 
+             WHERE client_id=%d AND deleted_at IS NULL",
+            $client_id
+        ), 
+        ARRAY_A
+    );
 
     if (!$lead) wp_send_json_error('Lead not found');
+
+    // Ensure profile picture URL is always valid
+    if (!empty($lead['profile_picture'])) {
+        // If it's already a full URL, use it
+        if (strpos($lead['profile_picture'], 'http') === 0) {
+            $lead['profile_picture'] = esc_url($lead['profile_picture']);
+        } else {
+            // If stored as relative path, convert to full URL
+            $lead['profile_picture'] = site_url($lead['profile_picture']);
+        }
+    } else {
+        // Use default avatar if none exists
+        $lead['profile_picture'] = get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg';
+    }
+
     wp_send_json_success($lead);
 }
 add_action('wp_ajax_fetch_dashboard_lead_ajax','rt_fetch_dashboard_lead_ajax');
+
 
 /**
  * Create Lead (with WP user)
@@ -93,8 +115,7 @@ function rt_create_dashboard_lead_ajax() {
     $email     = sanitize_email($_POST['rt_db_lead_email'] ?? '');
     $phone     = sanitize_text_field($_POST['rt_db_lead_phone'] ?? '');
     $note      = sanitize_textarea_field($_POST['rt_db_lead_note'] ?? '');
-    $lead_status = sanitize_text_field($_POST['rt_db_lead_status'] ?? '');
-    $preferred_location = sanitize_text_field($_POST['rt_db_lead_preferred_location'] ?? '');
+    $address = sanitize_text_field($_POST['rt_db_lead_address'] ?? '');
 
     if (!$full_name || !$email) wp_send_json_error('Name & Email required');
 
@@ -131,9 +152,8 @@ function rt_create_dashboard_lead_ajax() {
             'email' => $email,
             'phone' => $phone,
             'note' => $note,
-            'preferred_location' => $preferred_location,
+            'address' => $address,
             'status' => 'lead',
-            'lead_status' => in_array($lead_status,['hot','warm','cold']) ? $lead_status : 'cold',
             'profile_picture' => $profile_url,
             'user_id' => $user_id,
             'created_at' => current_time('mysql'),
@@ -175,9 +195,9 @@ function rt_update_dashboard_lead_ajax() {
         'full_name'=>sanitize_text_field($_POST['full_name'] ?? ''),
         'email'=>sanitize_email($_POST['email'] ?? ''),
         'phone'=>sanitize_text_field($_POST['phone'] ?? ''),
+        'address'=>sanitize_text_field($_POST['address'] ?? ''),
         'note'=>sanitize_textarea_field($_POST['note'] ?? ''),
         'lead_status'=>sanitize_text_field($_POST['lead_status'] ?? 'cold'),
-        'status'=>sanitize_text_field($_POST['status'] ?? 'lead'),
         'updated_at'=>current_time('mysql'),
         'updated_by'=>get_current_user_id()
     ];

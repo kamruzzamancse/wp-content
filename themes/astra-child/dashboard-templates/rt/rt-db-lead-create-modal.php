@@ -43,22 +43,13 @@
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_lead_preferred_location">Preferred Location:</label>
-                            <input type="text" id="create_rt_db_lead_preferred_location" name="rt_db_lead_preferred_location" placeholder="Enter preferred location">
+                            <label for="create_rt_db_lead_preferred_address">Address:</label>
+                            <input type="text" id="create_rt_db_lead_preferred_address" name="rt_db_lead_address" placeholder="Enter address">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
                             <label for="create_rt_db_lead_note">Note:</label>
                             <textarea id="create_rt_db_lead_note" name="rt_db_lead_note" rows="4" placeholder="Enter note"></textarea>
-                        </div>
-
-                        <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_lead_status">Status: *</label>
-                            <select id="create_rt_db_lead_status" name="rt_db_lead_status" required>
-                                <option value="" disabled selected>Select Status</option>
-                                <option value="lead">Lead</option>
-                                <option value="active">Active</option>
-                            </select>
                         </div>
 
                     </div>

@@ -1295,3 +1295,7 @@
 .simcal-align-right {
     display: none;
 }
+
+table td:first-child, table td:last-child {
+    text-align: left;
+}

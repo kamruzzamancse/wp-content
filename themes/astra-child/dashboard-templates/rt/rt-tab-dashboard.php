@@ -14,6 +14,7 @@
                         <option value="10" selected>10 rows</option>
                         <option value="25">25 rows</option>
                     </select>
+                    <button id="addActiveBtn" class="btn-primary">+ Add Active Client</button>
                 </div>
             </div>
 
@@ -24,10 +25,11 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Notes</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="activeClientsBody">
-                    <tr><td colspan="4" style="text-align:center;">Loading...</td></tr>
+                    <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
                 </tbody>
             </table>
             <div id="activeClientsPagination" class="pagination"></div>
@@ -70,7 +72,7 @@
     <!-- RIGHT SIDE -->
     <div class="dashboard-top-right">
         <?php
-        $current_user = wp_get_current_user();
+        /* $current_user = wp_get_current_user();
         $user_email   = $current_user->user_email;
 
         if ($user_email) {
@@ -91,7 +93,7 @@
             }
         } else {
             echo '<p>Please login to see your calendar.</p>';
-        }
+        } */
         ?>
 
         <div class="notes-header">
@@ -107,6 +109,9 @@
 // Include modals
 include locate_template('dashboard-templates/rt/rt-db-lead-create-modal.php');
 include locate_template('dashboard-templates/rt/rt-db-lead-edit-modal.php');
+
+include locate_template('dashboard-templates/rt/rt-db-active-create-modal.php');
+include locate_template('dashboard-templates/rt/rt-db-active-edit-modal.php');
 ?>
 
 <style>
@@ -191,7 +196,7 @@ include locate_template('dashboard-templates/rt/rt-db-lead-edit-modal.php');
     margin-bottom: 20px;
 }
 
-#addLeadBtn, #saveLeadBtn {
+#addLeadBtn, #saveLeadBtn, #addActiveBtn {
     color: #fff!important;
 }
 

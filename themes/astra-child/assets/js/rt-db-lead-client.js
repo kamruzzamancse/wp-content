@@ -139,15 +139,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 const result = await ajaxFetch(fd);
                 if (result.success) {
                     const lead = result.data;
-                    document.getElementById('edit_rt_db_lead_id').value = lead.client_id;
+
+                    // Set form values
+                    document.getElementById('edit_rt_db_lead_id').value = lead.client_id || '';
                     document.getElementById('edit_rt_db_lead_full_name').value = lead.full_name || '';
                     document.getElementById('edit_rt_db_lead_email').value = lead.email || '';
                     document.getElementById('edit_rt_db_lead_phone').value = lead.phone || '';
+                    document.getElementById('edit_rt_db_lead_address').value = lead.address || '';
                     document.getElementById('edit_rt_db_lead_note').value = lead.note || '';
                     document.getElementById('edit_rt_db_lead_status').value = lead.status || 'lead';
                     document.getElementById('edit_rt_db_lead_lead_status').value = lead.lead_status || 'cold';
-                    document.getElementById('editRtDbLeadPreviewAvatar').src = lead.profile_picture || rtDashboardAjax.default_avatar;
 
+                    // Set profile picture
+                    if (lead.profile_picture && lead.profile_picture.trim() !== '') {
+                        document.getElementById('editRtDbLeadPreviewAvatar').src = lead.profile_picture;
+                    } else {
+                        document.getElementById('editRtDbLeadPreviewAvatar').src = rtDashboardAjax.default_avatar;
+                    }
+
+                    // Show/hide lead status row
                     document.getElementById('rtLeadStatusRow').style.display = lead.status === 'lead' ? 'block' : 'none';
                 } else {
                     showNotification('Error: ' + (result.data || 'Unknown error'), 'error');
@@ -284,6 +294,7 @@ document.addEventListener('DOMContentLoaded', function () {
             fd.append('full_name', document.getElementById('edit_rt_db_lead_full_name').value);
             fd.append('email', document.getElementById('edit_rt_db_lead_email').value);
             fd.append('phone', document.getElementById('edit_rt_db_lead_phone').value);
+            fd.append('address', document.getElementById('edit_rt_db_lead_address').value);
             fd.append('note', document.getElementById('edit_rt_db_lead_note').value);
             fd.append('status', document.getElementById('edit_rt_db_lead_status').value);
             fd.append('lead_status', document.getElementById('edit_rt_db_lead_lead_status').value);

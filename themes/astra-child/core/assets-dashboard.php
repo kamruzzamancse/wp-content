@@ -168,12 +168,15 @@ add_action('wp_enqueue_scripts', 'rt_enqueue_realtor_scripts');
 // Active Client Dashboard
 // ======================
 function rt_enqueue_active_client_dashboard_scripts() {
+
     $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : '';
     $is_dashboard_page = is_page('realtor-dashboard') || is_page('admin-dashboard');
-    $is_dashboard_tab = empty($current_tab) || $current_tab === 'dashboard';
+    $is_dashboard_tab  = empty($current_tab) || $current_tab === 'dashboard';
 
     if ($is_dashboard_page && $is_dashboard_tab) {
+
         $script_path = get_stylesheet_directory() . '/assets/js/rt-db-active-client.js';
+
         wp_enqueue_script(
             'rt-db-active-client-js',
             get_stylesheet_directory_uri() . '/assets/js/rt-db-active-client.js',
@@ -182,9 +185,21 @@ function rt_enqueue_active_client_dashboard_scripts() {
             true
         );
 
-        wp_localize_script('rt-db-active-client-js','rtActiveClientAjax', [
-            'ajax_url'         => admin_url('admin-ajax.php'),
-            'pagination_nonce' => wp_create_nonce('clients_pagination_nonce'),
+        wp_localize_script('rt-db-active-client-js', 'rtActiveClientAjax', [
+            'ajax_url'                => admin_url('admin-ajax.php'),
+            
+            // Pagination nonce (fetch)
+            'pagination_nonce'        => wp_create_nonce('clients_pagination_nonce'),
+            
+            // Create client nonce
+            'create_client_nonce'     => wp_create_nonce('create_dashboard_client_nonce'),
+
+            // NEW: Edit + Delete nonce
+            'edit_client_nonce'       => wp_create_nonce('edit_dashboard_client_nonce'),
+            'delete_client_nonce'     => wp_create_nonce('delete_dashboard_client_nonce'),
+
+            // Default avatar
+            'default_avatar'          => get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg',
         ]);
     }
 }
