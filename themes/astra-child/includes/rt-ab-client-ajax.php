@@ -19,26 +19,35 @@ function rt_fetch_clients_ajax() {
     $table = $wpdb->prefix . 'clients';
 
     $search = sanitize_text_field($_POST['search'] ?? '');
-    $page = max(1, intval($_POST['page'] ?? 1));
-    $rows = max(1, intval($_POST['rows'] ?? 10));
+    $page   = max(1, intval($_POST['page'] ?? 1));
+    $rows   = max(1, intval($_POST['rows'] ?? 10));
     $offset = ($page - 1) * $rows;
 
     $where = "WHERE deleted_at IS NULL AND user_id IS NOT NULL";
     $params = [];
+
     if ($search !== '') {
         $like = "%{$wpdb->esc_like($search)}%";
-        $where .= " AND (full_name LIKE %s OR email LIKE %s OR phone LIKE %s OR address LIKE %s)";
-        $params = [$like, $like, $like, $like]; // Include address in search
+        $where .= " AND (
+            first_name LIKE %s OR
+            second_name LIKE %s OR
+            first_email LIKE %s OR
+            second_email LIKE %s OR
+            first_phone LIKE %s OR
+            second_phone LIKE %s OR
+            address LIKE %s
+        )";
+        $params = [$like, $like, $like, $like, $like, $like, $like];
     }
 
-    // Count total clients for pagination
+    // Total count
     $count_query = !empty($params) 
         ? $wpdb->prepare("SELECT COUNT(*) FROM {$table} {$where}", $params) 
         : "SELECT COUNT(*) FROM {$table} {$where}";
     $total = intval($wpdb->get_var($count_query));
 
-    // Select only required columns including address
-    $select = "client_id, full_name, email, phone, address, note, status, profile_picture, created_at";
+    // Select columns
+    $select = "client_id, first_name, second_name, first_email, second_email, first_phone, second_phone, address, note, status, profile_picture, created_at";
 
     $sql = "SELECT {$select} FROM {$table} {$where} ORDER BY created_at DESC LIMIT %d, %d";
     if (!empty($params)) {
@@ -49,7 +58,7 @@ function rt_fetch_clients_ajax() {
         $prepared = $wpdb->prepare($sql, $offset, $rows);
     }
 
-    $clients = $wpdb->get_results($prepared);
+    $clients = $wpdb->get_results($prepared, ARRAY_A);
     $total_pages = ceil($total / $rows);
 
     wp_send_json_success([
@@ -105,7 +114,6 @@ function rt_fetch_realtor_client_full_ajax() {
     $table_assigned = $wpdb->prefix . 'assigned_property';
     $table_properties = $wpdb->prefix . 'rentcast_properties';
 
-    // Single client data
     $client = $wpdb->get_row(
         $wpdb->prepare(
             "SELECT * FROM $table_clients WHERE client_id = %d AND deleted_at IS NULL",
@@ -116,7 +124,6 @@ function rt_fetch_realtor_client_full_ajax() {
 
     if (!$client) wp_send_json_error('Client not found');
 
-    // Assigned properties for this client
     $assigned_props = $wpdb->get_results(
         $wpdb->prepare(
             "SELECT ap.property_id, rp.listing_id, rp.address, rp.city, rp.state, rp.zip, 
@@ -129,7 +136,6 @@ function rt_fetch_realtor_client_full_ajax() {
         ARRAY_A
     );
 
-    // Combine results
     $client['assigned_properties'] = $assigned_props;
 
     wp_send_json_success($client);
@@ -146,67 +152,68 @@ function rt_create_realtor_client_ajax() {
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
 
-    $full_name = sanitize_text_field($_POST['realtor_client_full_name'] ?? '');
-    $email = sanitize_email($_POST['realtor_client_email'] ?? '');
-    $status = sanitize_text_field($_POST['realtor_client_status'] ?? '');
-    $phone = sanitize_text_field($_POST['realtor_client_phone'] ?? '');
-    $address = sanitize_text_field($_POST['realtor_client_address'] ?? '');
-    $note = sanitize_textarea_field($_POST['realtor_client_note'] ?? '');
+    // Get and sanitize fields
+    $first_name   = sanitize_text_field($_POST['first_name'] ?? '');
+    $second_name  = sanitize_text_field($_POST['second_name'] ?? '');
+    $first_email  = sanitize_email($_POST['first_email'] ?? '');
+    $second_email = sanitize_email($_POST['second_email'] ?? '');
+    $first_phone  = sanitize_text_field($_POST['first_phone'] ?? '');
+    $second_phone = sanitize_text_field($_POST['second_phone'] ?? '');
+    $address      = sanitize_text_field($_POST['address'] ?? '');
+    $note         = sanitize_textarea_field($_POST['note'] ?? '');
+    $status       = sanitize_text_field($_POST['status'] ?? '');
     $preferred_location = sanitize_text_field($_POST['preferred_location'] ?? '');
 
-    if (!$full_name || !$email || !$status) {
-        wp_send_json_error('Name, Email, Status are required');
+    if (!$first_name || !$first_email || !$status) {
+        wp_send_json_error('First Name, Primary Email, and Status are required.');
     }
 
-    // Check existing client
+    // Check duplicate email
     $existing_client = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$table} WHERE email = %s AND deleted_at IS NULL",
-        $email
+        "SELECT COUNT(*) FROM {$table} WHERE first_email = %s AND deleted_at IS NULL",
+        $first_email
     ));
+    if ($existing_client > 0) wp_send_json_error('A client with this primary email already exists.');
 
-    if ($existing_client > 0) {
-        wp_send_json_error('A client with this email already exists');
-    }
-
-    // Upload profile picture
+    // Handle profile picture upload
     $profile_url = null;
     if (!empty($_FILES['realtor_client_profile_picture']['name'])) {
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/media.php');
         require_once(ABSPATH . 'wp-admin/includes/image.php');
-        
+
         $upload = wp_handle_upload($_FILES['realtor_client_profile_picture'], ['test_form' => false]);
-        if (isset($upload['error'])) {
-            wp_send_json_error('Upload Error: ' . $upload['error']);
-        }
+        if (isset($upload['error'])) wp_send_json_error('Upload Error: ' . $upload['error']);
         $profile_url = esc_url_raw($upload['url']);
     }
 
     $wpdb->query('START TRANSACTION');
 
     try {
+        // Create WP user
         $password = wp_generate_password(12, false);
-        $user_id = wp_create_user($email, $password, $email);
-        
-        if (is_wp_error($user_id)) {
-            throw new Exception('WP User creation failed: ' . $user_id->get_error_message());
-        }
+        $user_id = wp_create_user($first_email, $password, $first_email);
+        if (is_wp_error($user_id)) throw new Exception('WP User creation failed: ' . $user_id->get_error_message());
 
         wp_update_user([
             'ID' => $user_id,
-            'display_name' => $full_name,
-            'first_name' => $full_name
+            'display_name' => trim($first_name . ' ' . $second_name),
+            'first_name' => $first_name,
+            'last_name' => $second_name
         ]);
 
         $wp_user = new WP_User($user_id);
         $wp_user->set_role('client');
 
+        // Insert into clients table
         $data = [
-            'full_name' => $full_name,
-            'email' => $email,
-            'phone' => $phone,
+            'first_name' => $first_name,
+            'second_name' => $second_name,
+            'first_email' => $first_email,
+            'second_email' => $second_email,
+            'first_phone' => $first_phone,
+            'second_phone' => $second_phone,
             'address' => $address,
-            'preferred_location' => $preferred_location,
             'note' => $note,
             'status' => $status,
             'profile_picture' => $profile_url,
@@ -235,7 +242,7 @@ function rt_create_realtor_client_ajax() {
 add_action('wp_ajax_create_realtor_client_ajax', 'rt_create_realtor_client_ajax');
 
 // =====================
-// Update Client
+// Update Client  (lead_status removed)
 // =====================
 function rt_update_realtor_client_ajax() {
     check_ajax_referer('rt_client_edit_nonce', 'nonce');
@@ -251,10 +258,9 @@ function rt_update_realtor_client_ajax() {
         'full_name'   => sanitize_text_field($_POST['realtor_client_full_name'] ?? ''),
         'email'       => sanitize_email($_POST['realtor_client_email'] ?? ''),
         'phone'       => sanitize_text_field($_POST['realtor_client_phone'] ?? ''),
-        'address' => sanitize_text_field($_POST['realtor_client_address'] ?? ''),
+        'address'     => sanitize_text_field($_POST['realtor_client_address'] ?? ''),
         'note'        => sanitize_textarea_field($_POST['realtor_client_note'] ?? $_POST['realtor_client_notes'] ?? ''),
         'status'      => sanitize_text_field($_POST['realtor_client_status'] ?? ''),
-        'lead_status' => sanitize_text_field($_POST['realtor_lead_status'] ?? ''),
         'updated_at'  => current_time('mysql'),
         'updated_by'  => get_current_user_id()
     ];
@@ -263,7 +269,6 @@ function rt_update_realtor_client_ajax() {
         wp_send_json_error('Name, Email, and Status are required fields.');
     }
 
-    // Check for duplicate email
     $existing_email = $wpdb->get_var($wpdb->prepare(
         "SELECT COUNT(*) FROM {$table_clients} WHERE email = %s AND client_id != %d AND deleted_at IS NULL",
         $data['email'], $client_id
@@ -271,9 +276,8 @@ function rt_update_realtor_client_ajax() {
 
     if ($existing_email > 0) wp_send_json_error('A client with this email already exists.');
 
-    $format = ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d'];
+    $format = ['%s', '%s', '%s', '%s', '%s', '%s', '%d'];
 
-    // Handle profile picture
     if (!empty($_FILES['realtor_client_profile_picture']['name'])) {
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/media.php');
@@ -291,7 +295,6 @@ function rt_update_realtor_client_ajax() {
         $updated = $wpdb->update($table_clients, $data, ['client_id' => $client_id], $format, ['%d']);
         if ($updated === false) throw new Exception('Database update failed: ' . $wpdb->last_error);
 
-        // Update WordPress user
         $client_data = $wpdb->get_row($wpdb->prepare(
             "SELECT user_id FROM {$table_clients} WHERE client_id = %d",
             $client_id
@@ -318,8 +321,9 @@ function rt_update_realtor_client_ajax() {
 }
 add_action('wp_ajax_update_realtor_client_ajax', 'rt_update_realtor_client_ajax');
 
+
 // =====================
-// Delete Client (Soft Delete)
+// Delete Client
 // =====================
 function rt_delete_realtor_client_ajax() {
     rt_client_current_user_required();
@@ -346,6 +350,7 @@ function rt_delete_realtor_client_ajax() {
     wp_send_json_error('Could not delete client');
 }
 add_action('wp_ajax_delete_realtor_client_ajax', 'rt_delete_realtor_client_ajax');
+
 
 // =====================
 // Export Clients
@@ -383,13 +388,13 @@ function rt_export_clients_ajax() {
 }
 add_action('wp_ajax_export_clients_ajax', 'rt_export_clients_ajax');
 
+
 // =====================
-// Import Clients (CSV/XLSX) - Improved with WP user creation & Option B behavior
+// Import Clients
 // =====================
 function rt_import_clients_ajax() {
     rt_client_current_user_required();
 
-    // nonce check
     if (empty($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'rt_client_import_nonce')) {
         wp_send_json_error('Security verification failed');
     }
@@ -402,13 +407,11 @@ function rt_import_clients_ajax() {
     $filename = $_FILES['clients_file']['name'];
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-    // Support both CSV and XLSX
     if ($ext === 'csv') {
         $clients = rt_parse_csv_file($file);
     } elseif ($ext === 'xlsx') {
         if (!class_exists('\PhpOffice\PhpSpreadsheet\IOFactory')) {
             require_once ABSPATH . 'wp-admin/includes/file.php';
-            // Adjust path if PhpSpreadsheet is installed via composer
             require_once WP_CONTENT_DIR . '/vendor/autoload.php';
         }
         try {
@@ -417,13 +420,11 @@ function rt_import_clients_ajax() {
             $data = $sheet->toArray(null, true, true, true);
             $clients = [];
 
-            // Normalize header row
             $headers = array_map('strtolower', array_map('trim', $data[1] ?? []));
             unset($data[1]);
 
             foreach ($data as $row) {
                 $client = [];
-                $i = 0;
                 foreach ($headers as $key => $header) {
                     $value = trim($row[$key]);
                     if (!empty($header)) {
@@ -446,7 +447,7 @@ function rt_import_clients_ajax() {
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
     $current_user_id = get_current_user_id();
-    $duplicate_handling = sanitize_text_field($_POST['duplicate_handling'] ?? 'skip'); // 'skip' or 'update' or 'create'
+    $duplicate_handling = sanitize_text_field($_POST['duplicate_handling'] ?? 'skip');
 
     $inserted = 0;
     $updated = 0;
@@ -459,7 +460,7 @@ function rt_import_clients_ajax() {
         $full_name = sanitize_text_field($row['full_name'] ?? $row['name'] ?? $row['client_name'] ?? '');
         $email     = sanitize_email($row['email'] ?? '');
         $phone     = sanitize_text_field($row['phone'] ?? $row['mobile'] ?? $row['phone_number'] ?? '');
-        $address = sanitize_text_field($row['address'] ?? '');
+        $address   = sanitize_text_field($row['address'] ?? '');
         $note      = sanitize_textarea_field($row['note'] ?? $row['notes'] ?? '');
         $status    = sanitize_text_field($row['status'] ?? 'active');
 
@@ -476,7 +477,7 @@ function rt_import_clients_ajax() {
 
         $existing_wp_user_id = email_exists($email);
         if ($existing_wp_user_id) {
-            $errors[] = "Row {$row_num}: User with this email already exists in wp_users (email: {$email}).";
+            $errors[] = "Row {$row_num}: User already exists in wp_users ({$email}).";
             $skipped++;
             continue;
         }
@@ -487,7 +488,7 @@ function rt_import_clients_ajax() {
                 $phone
             ));
             if ($phone_exists) {
-                $errors[] = "Row {$row_num}: Phone number already exists for another client (phone: {$phone}).";
+                $errors[] = "Row {$row_num}: Duplicate phone ({$phone}).";
                 $skipped++;
                 continue;
             }
@@ -512,13 +513,13 @@ function rt_import_clients_ajax() {
             if ($res !== false) {
                 $updated++;
             } else {
-                $errors[] = "Row {$row_num}: Failed to update existing client (email: {$email}).";
+                $errors[] = "Row {$row_num}: Failed to update existing client ({$email}).";
             }
             continue;
         }
 
         if ($existing_client_id && $duplicate_handling !== 'update') {
-            $errors[] = "Row {$row_num}: Client already exists (email: {$email}), skipped.";
+            $errors[] = "Row {$row_num}: Client already exists ({$email}), skipped.";
             $skipped++;
             continue;
         }
@@ -526,7 +527,7 @@ function rt_import_clients_ajax() {
         $password = wp_generate_password(12, false);
         $user_id = wp_create_user($email, $password, $email);
         if (is_wp_error($user_id)) {
-            $errors[] = "Row {$row_num}: Failed to create WP user for {$email}. Error: " . $user_id->get_error_message();
+            $errors[] = "Row {$row_num}: WP user create failed ({$email}).";
             $skipped++;
             continue;
         }
@@ -543,8 +544,8 @@ function rt_import_clients_ajax() {
             'full_name'     => $full_name,
             'email'         => $email,
             'phone'         => $phone,
+            'address'       => $address,
             'note'          => $note,
-            'address'     => $address,
             'status'        => $status,
             'user_id'       => $user_id,
             'created_at'    => current_time('mysql'),
@@ -554,7 +555,7 @@ function rt_import_clients_ajax() {
         $insert_res = $wpdb->insert($table, $insert_data);
         if ($insert_res === false) {
             wp_delete_user($user_id);
-            $errors[] = "Row {$row_num}: Failed to insert client record into DB for {$email}. DB error: " . $wpdb->last_error;
+            $errors[] = "Row {$row_num}: DB insert failed ({$email}).";
             $skipped++;
             continue;
         }
@@ -577,8 +578,9 @@ function rt_import_clients_ajax() {
 }
 add_action('wp_ajax_import_clients_ajax', 'rt_import_clients_ajax');
 
+
 // =====================
-// CSV Parser Function
+// CSV Parser
 // =====================
 function rt_parse_csv_file($file_path) {
     $clients = [];

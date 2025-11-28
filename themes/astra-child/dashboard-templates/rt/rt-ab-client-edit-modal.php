@@ -11,45 +11,64 @@
                 <input type="hidden" id="edit_realtor_client_id" name="realtor_client_id">
 
                 <div class="edit-content-realtor-client">
+
+                    <!-- Profile Picture -->
                     <div class="edit-pic-container-realtor-client">
                         <label for="edit_realtor_client_profile_picture" title="Click to upload profile picture">
                             <img class="edit-realtor-client-avatar" id="editRealtorClientPreviewAvatar" 
-                                src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>" 
-                                alt="Profile Preview">
+                                 src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>" 
+                                 alt="Profile Preview">
                             <input type="file" id="edit_realtor_client_profile_picture" name="realtor_client_profile_picture" accept="image/*" style="display:none;">
                         </label>
                         <p>Click image to upload</p>
                     </div>
 
+                    <!-- Client Details -->
                     <div class="edit-details-realtor-client">
+
                         <div class="edit-detail-row-realtor-client">
-                            <label for="edit_realtor_client_full_name">Full Name: *</label>
-                            <input type="text" id="edit_realtor_client_full_name" name="realtor_client_full_name" required>
+                            <label for="edit_realtor_client_first_name">First Name: *</label>
+                            <input type="text" id="edit_realtor_client_first_name" name="first_name" required>
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label for="edit_realtor_client_email">Email: *</label>
-                            <input type="email" id="edit_realtor_client_email" name="realtor_client_email" required>
+                            <label for="edit_realtor_client_second_name">Second Name:</label>
+                            <input type="text" id="edit_realtor_client_second_name" name="second_name">
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label for="edit_realtor_client_phone">Phone:</label>
-                            <input type="text" id="edit_realtor_client_phone" name="realtor_client_phone">
+                            <label for="edit_realtor_client_first_email">Primary Email: *</label>
+                            <input type="email" id="edit_realtor_client_first_email" name="first_email" required>
+                        </div>
+
+                        <div class="edit-detail-row-realtor-client">
+                            <label for="edit_realtor_client_second_email">Secondary Email:</label>
+                            <input type="email" id="edit_realtor_client_second_email" name="second_email">
+                        </div>
+
+                        <div class="edit-detail-row-realtor-client">
+                            <label for="edit_realtor_client_first_phone">Primary Phone:</label>
+                            <input type="text" id="edit_realtor_client_first_phone" name="first_phone">
+                        </div>
+
+                        <div class="edit-detail-row-realtor-client">
+                            <label for="edit_realtor_client_second_phone">Secondary Phone:</label>
+                            <input type="text" id="edit_realtor_client_second_phone" name="second_phone">
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
                             <label for="edit_realtor_client_address">Address:</label>
-                            <input type="text" id="edit_realtor_client_address" name="realtor_client_address">
+                            <input type="text" id="edit_realtor_client_address" name="address">
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
                             <label for="edit_realtor_client_notes">Notes:</label>
-                            <textarea id="edit_realtor_client_notes" name="realtor_client_note" rows="4"></textarea>
+                            <textarea id="edit_realtor_client_notes" name="note" rows="4"></textarea>
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
                             <label for="edit_realtor_client_status">Status: *</label>
-                            <select id="edit_realtor_client_status" name="realtor_client_status" required>
+                            <select id="edit_realtor_client_status" name="status" required>
                                 <option value="" disabled>Select Status</option>
                                 <option value="lead">Lead</option>
                                 <option value="active">Active</option>
@@ -58,7 +77,7 @@
 
                         <div class="edit-detail-row-realtor-client" id="leadStatusRow" style="display:none;">
                             <label for="edit_realtor_lead_status">Lead Status:</label>
-                            <select id="edit_realtor_lead_status" name="realtor_lead_status">
+                            <select id="edit_realtor_lead_status" name="lead_status">
                                 <option value="hot">Hot</option>
                                 <option value="warm">Warm</option>
                                 <option value="cold" selected>Cold</option>
@@ -90,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if(closeBtn && editModal){
         closeBtn.addEventListener('click', () => editModal.style.display='none');
         editModal.addEventListener('click', e => { if(e.target === editModal) editModal.style.display='none'; });
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') editModal.style.display='none'; });
     }
 
     // Profile image preview
@@ -129,11 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('action', 'update_realtor_client_ajax');
                 formData.append('nonce', rtClientAjax.edit_nonce);
 
-                const res = await fetch(rtClientAjax.ajax_url, { 
-                    method: 'POST', 
-                    body: formData 
-                });
-                
+                const res = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
                 const result = await res.json();
 
                 if(result.success){
@@ -179,23 +195,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 const client = result.data;
                 
                 document.getElementById('edit_realtor_client_id').value = client.client_id;
-                document.getElementById('edit_realtor_client_full_name').value = client.full_name;
-                document.getElementById('edit_realtor_client_email').value = client.email;
-                document.getElementById('edit_realtor_client_phone').value = client.phone;
+                document.getElementById('edit_realtor_client_first_name').value = client.first_name || '';
+                document.getElementById('edit_realtor_client_second_name').value = client.second_name || '';
+                document.getElementById('edit_realtor_client_first_email').value = client.first_email || '';
+                document.getElementById('edit_realtor_client_second_email').value = client.second_email || '';
+                document.getElementById('edit_realtor_client_first_phone').value = client.first_phone || '';
+                document.getElementById('edit_realtor_client_second_phone').value = client.second_phone || '';
                 document.getElementById('edit_realtor_client_address').value = client.address || '';
-                document.getElementById('edit_realtor_client_notes').value = client.note;
-                document.getElementById('edit_realtor_client_status').value = client.status;
+                document.getElementById('edit_realtor_client_notes').value = client.note || '';
+                document.getElementById('edit_realtor_client_status').value = client.status || '';
 
                 const previewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
                 previewAvatar.src = client.profile_picture || '<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>';
 
                 // Lead status
-                if (leadStatusRow) {
-                    leadStatusRow.style.display = (client.status === 'lead') ? 'flex' : 'none';
-                }
-                if (client.lead_status) {
-                    document.getElementById('edit_realtor_lead_status').value = client.lead_status;
-                }
+                if (leadStatusRow) leadStatusRow.style.display = (client.status === 'lead') ? 'flex' : 'none';
+                if(client.lead_status) document.getElementById('edit_realtor_lead_status').value = client.lead_status;
             }
         } catch (error) {
             console.error('Error loading client data:', error);
@@ -204,32 +219,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- CSS -->
 <style>
-.modal-overlay-realtor-client {
-    display: none;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-}
-.modal-content-realtor-client {
-    background: #fff;
-    border-radius: 8px;
-    max-width: 600px;
-    width: 90%;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-    padding: 25px 30px;
-    max-height: 90vh;
-    overflow-y: auto;
-}
-.edit-header-realtor-client {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
+.modal-overlay-realtor-client { display: none; align-items:center; justify-content:center; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; }
+.modal-content-realtor-client { background:#fff; border-radius:8px; max-width:600px; width:90%; box-shadow:0 6px 18px rgba(0,0,0,0.12); padding:25px 30px; max-height:90vh; overflow-y:auto; }
+.edit-header-realtor-client { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }
 .close-button-realtor-client { font-size:28px; cursor:pointer; color:#555; transition: color 0.25s ease; }
 .close-button-realtor-client:hover { color:#0052cc; }
 .edit-content-realtor-client { display:flex; gap:30px; flex-wrap:wrap; }

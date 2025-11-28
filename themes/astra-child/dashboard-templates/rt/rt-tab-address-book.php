@@ -36,18 +36,21 @@
   <table>
     <thead>
       <tr>
-        <th class="ab-sl-column">Profile</th>
-        <th class="client-name">Client Name</th>
-        <th class="email">Email</th>
-        <th class="phone-number">Phone Number</th>
-        <th class="address">Address</th>
-        <th class="notes">Notes</th>
-        <th class="Status">Status</th>
-        <th class="ab-actions-column">Actions</th>
+        <th>Profile</th>
+        <th>1st Name</th>
+        <th>2nd Name</th>
+        <th>1st Email</th>
+        <th>2nd Email</th>
+        <th>1st Phone</th>
+        <th>2nd Phone</th>
+        <th>Address</th>
+        <th>Notes</th>
+        <th>Status</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody id="addressBookBody">
-      <tr><td colspan="7" style="text-align:center;">Loading...</td></tr>
+      <tr><td colspan="11" style="text-align:center;">Loading...</td></tr>
     </tbody>
   </table>
 
@@ -55,7 +58,7 @@
 </div>
 
 <?php
-// Include modals
+// Keep your modals as is
 include locate_template('dashboard-templates/rt/rt-ab-client-create-modal.php');
 include locate_template('dashboard-templates/rt/rt-ab-client-edit-modal.php');
 include locate_template('dashboard-templates/rt/rt-ab-client-details-modal.php');
@@ -87,13 +90,16 @@ include locate_template('dashboard-templates/rt/rt-ab-client-details-modal.php')
     <div class="ab-section">
       <label>Columns to include</label>
       <div class="ab-checkboxes">
-        <label><input type="checkbox" name="ab_export_columns" value="full_name" checked> Client Name</label>
-        <label><input type="checkbox" name="ab_export_columns" value="email" checked> Email</label>
-        <label><input type="checkbox" name="ab_export_columns" value="phone" checked> Phone</label>
-        <label><input type="checkbox" name="ab_export_columns" value="address" checked> Address</label> <!-- New -->
+        <label><input type="checkbox" name="ab_export_columns" value="profile_picture"> Profile</label>
+        <label><input type="checkbox" name="ab_export_columns" value="first_name" checked> 1st Name</label>
+        <label><input type="checkbox" name="ab_export_columns" value="second_name"> 2nd Name</label>
+        <label><input type="checkbox" name="ab_export_columns" value="first_email" checked> 1st Email</label>
+        <label><input type="checkbox" name="ab_export_columns" value="second_email"> 2nd Email</label>
+        <label><input type="checkbox" name="ab_export_columns" value="first_phone" checked> 1st Phone</label>
+        <label><input type="checkbox" name="ab_export_columns" value="second_phone"> 2nd Phone</label>
+        <label><input type="checkbox" name="ab_export_columns" value="address" checked> Address</label>
         <label><input type="checkbox" name="ab_export_columns" value="note" checked> Notes</label>
         <label><input type="checkbox" name="ab_export_columns" value="status" checked> Status</label>
-        <label><input type="checkbox" name="ab_export_columns" value="profile_picture"> Profile Picture URL</label>
         <label><input type="checkbox" name="ab_export_columns" value="created_at"> Created At</label>
       </div>
     </div>
@@ -201,29 +207,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const ext = file.name.split('.').pop().toLowerCase();
 
     try {
+      let rows = [];
       if (ext === 'csv') {
         const text = await file.text();
-        const rows = text.split('\n').slice(0, 5).map(r => r.split(','));
-        importPreview.innerHTML = `
-          <table class="ab-preview-table">
-            ${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
-          </table>
-        `;
+        rows = text.split('\n').slice(0, 5).map(r => r.split(','));
       } else if (ext === 'xlsx') {
         const data = await file.arrayBuffer();
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-        const previewRows = rows.slice(0, 5);
-        importPreview.innerHTML = `
-          <table class="ab-preview-table">
-            ${previewRows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
-          </table>
-        `;
+        rows = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }).slice(0, 5);
       } else {
         importPreview.textContent = 'Unsupported file format.';
         return;
       }
+
+      importPreview.innerHTML = `<table class="ab-preview-table">
+        ${rows.map(r => `<tr>${r.map(c => `<td>${c ?? ''}</td>`).join('')}</tr>`).join('')}
+      </table>`;
 
       importStatus.textContent = `Selected file: ${file.name}`;
       importStartBtn.disabled = false;
@@ -288,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
       exportStatus.textContent = 'Export completed!';
       setTimeout(() => closeModal(exportModal), 1000);
       showNotification('Export completed!');
-
     } catch (error) {
       exportStatus.textContent = 'Export failed: ' + error.message;
       showNotification('Export failed: ' + error.message, 'error');
@@ -318,8 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const csv = XLSX.utils.sheet_to_csv(firstSheet);
-        const csvBlob = new Blob([csv], { type: 'text/csv' });
-        file = new File([csvBlob], file.name.replace('.xlsx', '.csv'), { type: 'text/csv' });
+        file = new File([csv], file.name.replace('.xlsx', '.csv'), { type: 'text/csv' });
       }
 
       const formData = new FormData();
@@ -346,7 +344,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showNotification('Import failed: ' + errMsg, 'error');
       }
     } catch (error) {
-      console.error('Import error:', error);
       importStatus.textContent = 'Import failed: ' + error.message;
       showNotification('Import failed: ' + error.message, 'error');
     } finally {

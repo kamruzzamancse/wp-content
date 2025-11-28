@@ -25,7 +25,7 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Notes</th>
-                        <th>Actions</th>
+                        <th style="width:100px; text-align:center">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="activeClientsBody">
@@ -57,7 +57,7 @@
                         <th>Last Touch</th>
                         <th>Status</th>
                         <th>Notes</th>
-                        <th style="width:140px">Actions</th>
+                        <th style="width:100px; text-align:center">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="leadsBody">
@@ -72,7 +72,7 @@
     <!-- RIGHT SIDE -->
     <div class="dashboard-top-right">
         <?php
-        /* $current_user = wp_get_current_user();
+        $current_user = wp_get_current_user();
         $user_email   = $current_user->user_email;
 
         if ($user_email) {
@@ -93,7 +93,7 @@
             }
         } else {
             echo '<p>Please login to see your calendar.</p>';
-        } */
+        }
         ?>
 
         <div class="notes-header">

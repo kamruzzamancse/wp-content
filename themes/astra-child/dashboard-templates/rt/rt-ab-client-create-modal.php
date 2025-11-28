@@ -2,6 +2,7 @@
 <div id="rmRealtorClientCreateModal" class="modal-overlay-realtor-client">
     <div class="modal-content-realtor-client">
         <div class="realtor-client-create-container">
+
             <!-- Header -->
             <div class="create-header-realtor-client">
                 <h2>Create New Client</h2>
@@ -11,60 +12,84 @@
             <!-- Form -->
             <form id="createRealtorClientForm" method="POST" enctype="multipart/form-data">
                 <div class="create-content-realtor-client">
+
                     <!-- Profile Picture -->
                     <div class="create-pic-container-realtor-client">
-                        <label for="create_realtor_client_profile_picture" title="Click to upload profile picture">
-                            <img class="create-realtor-client-avatar" id="createRealtorClientPreviewAvatar" src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>" alt="Profile Preview">
-                            <input type="file" id="create_realtor_client_profile_picture" name="realtor_client_profile_picture" accept="image/*" style="display:none;">
+                        <label for="create_realtor_client_profile_picture">
+                            <img class="create-realtor-client-avatar" id="createRealtorClientPreviewAvatar"
+                                 src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>"
+                                 alt="Profile Preview">
+                            <input type="file" id="create_realtor_client_profile_picture"
+                                   name="realtor_client_profile_picture" accept="image/*" style="display:none;">
                         </label>
                         <p>Click image to upload</p>
                     </div>
 
                     <!-- Client Details -->
                     <div class="create-details-realtor-client">
+
                         <div class="create-detail-row-realtor-client">
-                            <label for="create_realtor_client_full_name">Full Name: *</label>
-                            <input type="text" id="create_realtor_client_full_name" name="realtor_client_full_name" required placeholder="Enter full name">
+                            <label for="create_realtor_client_first_name">First Name: *</label>
+                            <input type="text" id="create_realtor_client_first_name" name="first_name"
+                                   required placeholder="Enter first name">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label for="create_realtor_client_email">Email: *</label>
-                            <input type="email" id="create_realtor_client_email" name="realtor_client_email" required placeholder="Enter email address">
+                            <label for="create_realtor_client_second_name">Second Name:</label>
+                            <input type="text" id="create_realtor_client_second_name" name="second_name"
+                                   placeholder="Enter second name">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label for="create_realtor_client_phone">Phone:</label>
-                            <input type="text" id="create_realtor_client_phone" name="realtor_client_phone" placeholder="Enter phone number">
+                            <label for="create_realtor_client_first_email">Primary Email: *</label>
+                            <input type="email" id="create_realtor_client_first_email" name="first_email"
+                                   required placeholder="Enter primary email">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label for="create_realtor_client_preferred_location">Preferred Location:</label>
-                            <input type="text" id="create_realtor_client_preferred_location" name="preferred_location" placeholder="Enter preferred location">
+                            <label for="create_realtor_client_second_email">Secondary Email:</label>
+                            <input type="email" id="create_realtor_client_second_email" name="second_email"
+                                   placeholder="Enter secondary email">
+                        </div>
+
+                        <div class="create-detail-row-realtor-client">
+                            <label for="create_realtor_client_first_phone">Primary Phone:</label>
+                            <input type="text" id="create_realtor_client_first_phone" name="first_phone"
+                                   placeholder="Enter primary phone number">
+                        </div>
+
+                        <div class="create-detail-row-realtor-client">
+                            <label for="create_realtor_client_second_phone">Secondary Phone:</label>
+                            <input type="text" id="create_realtor_client_second_phone" name="second_phone"
+                                   placeholder="Enter secondary phone number">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
                             <label for="create_realtor_client_address">Address:</label>
-                            <input type="text" id="create_realtor_client_address" name="realtor_client_address" placeholder="Enter full address">
+                            <input type="text" id="create_realtor_client_address" name="address"
+                                   placeholder="Enter full address">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
                             <label for="create_realtor_client_note">Note:</label>
-                            <textarea id="create_realtor_client_note" name="realtor_client_note" rows="4" placeholder="Enter note"></textarea>
+                            <textarea id="create_realtor_client_note" name="note" rows="4"
+                                      placeholder="Enter note"></textarea>
                         </div>
 
                         <div class="create-detail-row-realtor-client">
                             <label for="create_realtor_client_status">Status: *</label>
-                            <select id="create_realtor_client_status" name="realtor_client_status" required>
+                            <select id="create_realtor_client_status" name="status" required>
                                 <option value="" disabled selected>Select Status</option>
                                 <option value="lead">Lead</option>
                                 <option value="active">Active</option>
                             </select>
                         </div>
+
                     </div>
                 </div>
 
-                <!-- Submit Button -->
-                <div style="text-align: right; margin-top: 20px;">
+                <!-- Submit -->
+                <div style="text-align:right; margin-top:20px;">
                     <button type="submit" class="create-submit-btn-realtor-client">Create Client</button>
                 </div>
             </form>
@@ -75,30 +100,22 @@
 <!-- JS -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const createModal = document.getElementById('rmRealtorClientCreateModal');
-    const addContactBtn = document.querySelector('.ab-btn-create');
+
+    const modal = document.getElementById('rmRealtorClientCreateModal');
+    const openBtn = document.querySelector('.ab-btn-create');
     const closeBtn = document.getElementById('closeRealtorClientCreateModal');
     const form = document.getElementById('createRealtorClientForm');
     const profileInput = document.getElementById('create_realtor_client_profile_picture');
     const previewAvatar = document.getElementById('createRealtorClientPreviewAvatar');
 
-    // Open modal
-    if(addContactBtn && createModal){
-        addContactBtn.addEventListener('click', () => createModal.style.display='flex');
+    if(openBtn) openBtn.addEventListener('click', () => modal.style.display = 'flex');
+
+    if(closeBtn){
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        modal.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') modal.style.display = 'none'; });
     }
 
-    // Close modal
-    if(closeBtn && createModal){
-        closeBtn.addEventListener('click', () => createModal.style.display='none');
-        createModal.addEventListener('click', e => {
-            if(e.target === createModal) createModal.style.display='none';
-        });
-        document.addEventListener('keydown', e => {
-            if(e.key==='Escape') createModal.style.display='none';
-        });
-    }
-
-    // Image preview
     if(profileInput){
         profileInput.addEventListener('change', function() {
             const file = this.files[0];
@@ -111,52 +128,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // AJAX submit
-    if(form){
-        form.addEventListener('submit', async function(e){
-            e.preventDefault();
-            
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Creating...';
+    form.addEventListener('submit', async function(e){
+        e.preventDefault();
 
-            const formData = new FormData(form);
-            formData.append('action', 'create_realtor_client_ajax');
-            formData.append('nonce', rtClientAjax.create_nonce);
+        const btn = form.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Creating...';
 
-            try {
-                const response = await fetch(rtClientAjax.ajax_url, {
-                    method:'POST',
-                    body: formData
-                });
-                const result = await response.json();
-                
-                if(result.success){
-                    alert('Client created successfully!');
-                    form.reset();
-                    previewAvatar.src = rtClientAjax.default_avatar;
-                    createModal.style.display = 'none';
-                    
-                    // Refresh clients table if function exists
-                    if(typeof fetchClients === 'function'){
-                        fetchClients({
-                            page:1,
-                            rows:10,
-                            search:'',
-                            bodyId:'addressBookBody',
-                            paginationId:'addressBookPagination'
-                        });
-                    }
-                } else {
-                    alert('Error: ' + result.data);
+        const data = new FormData(form);
+        data.append('action', 'create_realtor_client_ajax');
+        data.append('nonce', rtClientAjax.create_nonce);
+
+        try {
+            const res = await fetch(rtClientAjax.ajax_url, { method:'POST', body:data });
+            const json = await res.json();
+
+            if(json.success){
+                alert('Client created successfully!');
+                form.reset();
+                previewAvatar.src = rtClientAjax.default_avatar;
+                modal.style.display = 'none';
+
+                if(typeof fetchClients === 'function'){
+                    fetchClients({ page:1, rows:10, search:'', bodyId:'addressBookBody', paginationId:'addressBookPagination' });
                 }
-            } catch(err){
-                alert('Network error: ' + err.message);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Client';
+            } else {
+                alert('Error: ' + json.data);
             }
-        });
-    }
+
+        } catch(err){
+            alert('Network error: ' + err.message);
+
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Client';
+        }
+    });
 });
 </script>
 
