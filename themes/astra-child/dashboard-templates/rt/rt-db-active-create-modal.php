@@ -1,4 +1,5 @@
-<div id="rtDbClientCreateModal" class="modal-overlay-rt-db-lead">
+<!-- Active Client Create Modal -->
+<div id="rtDbClientCreateModal" class="modal-overlay-rt-db-lead" style="display:none;">
     <div class="modal-content-rt-db-lead">
         <div class="rt-db-lead-create-container">
 
@@ -14,7 +15,7 @@
 
                     <!-- Profile Picture -->
                     <div class="create-pic-container-rt-db-lead">
-                        <label for="create_rt_db_client_profile_picture" title="Click to upload profile picture">
+                        <label for="create_rt_db_client_profile_picture">
                             <img class="create-rt-db-lead-avatar" id="createRtDbClientPreviewAvatar"
                                  src="<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>"
                                  alt="Profile Preview">
@@ -28,28 +29,51 @@
                     <div class="create-details-rt-db-lead">
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_client_full_name">Full Name: *</label>
-                            <input type="text" id="create_rt_db_client_full_name" name="rt_db_client_full_name" required placeholder="Enter full name">
+                            <label for="create_rt_db_client_first_name">First Name: *</label>
+                            <input type="text" id="create_rt_db_client_first_name" name="first_name"
+                                   required placeholder="Enter first name">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_client_email">Email: *</label>
-                            <input type="email" id="create_rt_db_client_email" name="rt_db_client_email" required placeholder="Enter email address">
+                            <label for="create_rt_db_client_second_name">Second Name:</label>
+                            <input type="text" id="create_rt_db_client_second_name" name="second_name"
+                                   placeholder="Enter second name">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_client_phone">Phone:</label>
-                            <input type="text" id="create_rt_db_client_phone" name="rt_db_client_phone" placeholder="Enter phone number">
+                            <label for="create_rt_db_client_first_email">Primary Email: *</label>
+                            <input type="email" id="create_rt_db_client_first_email" name="first_email"
+                                   required placeholder="Enter primary email">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_client_second_email">Secondary Email:</label>
+                            <input type="email" id="create_rt_db_client_second_email" name="second_email"
+                                   placeholder="Enter secondary email">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_client_first_phone">Primary Phone:</label>
+                            <input type="text" id="create_rt_db_client_first_phone" name="first_phone"
+                                   placeholder="Enter primary phone number">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_client_second_phone">Secondary Phone:</label>
+                            <input type="text" id="create_rt_db_client_second_phone" name="second_phone"
+                                   placeholder="Enter secondary phone number">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
                             <label for="create_rt_db_client_address">Address:</label>
-                            <input type="text" id="create_rt_db_client_address" name="rt_db_client_address" placeholder="Enter address">
+                            <input type="text" id="create_rt_db_client_address" name="address"
+                                   placeholder="Enter full address">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
                             <label for="create_rt_db_client_note">Note:</label>
-                            <textarea id="create_rt_db_client_note" name="rt_db_client_note" rows="4" placeholder="Enter note"></textarea>
+                            <textarea id="create_rt_db_client_note" name="note" rows="4"
+                                      placeholder="Enter note"></textarea>
                         </div>
 
                     </div>
@@ -57,7 +81,9 @@
 
                 <!-- Submit Button -->
                 <div style="text-align: right; margin-top: 20px;">
-                    <button type="submit" class="create-submit-btn-rt-db-lead">Create Client</button>
+                    <button type="submit" id="createClientSubmitBtn" class="create-submit-btn-rt-db-lead">
+                        Create Client
+                    </button>
                 </div>
             </form>
         </div>
@@ -66,25 +92,41 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const createModal = document.getElementById('rtDbClientCreateModal');
-    const addActiveBtn = document.getElementById('addActiveBtn');
+
+    const modal = document.getElementById('rtDbClientCreateModal');
+    const openBtn = document.getElementById('addActiveBtn');
     const closeBtn = document.getElementById('closeRtDbClientCreateModal');
     const form = document.getElementById('createRtDbClientForm');
+    const submitBtn = document.getElementById('createClientSubmitBtn');
+
     const profileInput = document.getElementById('create_rt_db_client_profile_picture');
     const previewAvatar = document.getElementById('createRtDbClientPreviewAvatar');
 
-    // Open modal
-    if(addActiveBtn && createModal){
-        addActiveBtn.addEventListener('click', () => createModal.style.display='flex');
+    let createSubmitting = false; // Prevent multiple submissions
+
+    /* ----------------------
+       BLOCK ENTER KEY
+    ---------------------- */
+    form.addEventListener('keydown', function(e){
+        if(e.key === "Enter"){
+            e.preventDefault();
+        }
+    });
+
+    /* ----------------------
+        OPEN / CLOSE MODAL
+    ---------------------- */
+    if(openBtn) openBtn.addEventListener('click', () => modal.style.display = 'flex');
+
+    if(closeBtn){
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        modal.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') modal.style.display = 'none'; });
     }
 
-    // Close modal
-    if(closeBtn && createModal){
-        closeBtn.addEventListener('click', () => createModal.style.display='none');
-        createModal.addEventListener('click', e => { if(e.target === createModal) createModal.style.display='none'; });
-    }
-
-    // Image preview
+    /* ----------------------
+       PROFILE PREVIEW
+    ---------------------- */
     if(profileInput){
         profileInput.addEventListener('change', function() {
             const file = this.files[0];
@@ -95,6 +137,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
 
+});
 </script>

@@ -26,7 +26,7 @@
                             <input 
                                 type="file" 
                                 id="edit_rt_db_client_profile_picture" 
-                                name="rt_db_client_profile_picture" 
+                                name="profile_picture" 
                                 accept="image/*" 
                                 style="display:none;"
                             >
@@ -38,38 +38,23 @@
                     <div class="edit-details-rt-db-lead-edit">
 
                         <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_client_first_name">First Name: *</label>
-                            <input type="text" id="edit_rt_db_client_first_name" name="first_name" required>
+                            <label for="edit_rt_db_client_full_name">Full Name: *</label>
+                            <input type="text" id="edit_rt_db_client_full_name" name="full_name" required>
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_client_second_name">Second Name:</label>
-                            <input type="text" id="edit_rt_db_client_second_name" name="second_name">
+                            <label for="edit_rt_db_client_email">Email: *</label>
+                            <input type="email" id="edit_rt_db_client_email" name="email" required>
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_client_first_email">Primary Email: *</label>
-                            <input type="email" id="edit_rt_db_client_first_email" name="first_email" required>
-                        </div>
-
-                        <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_client_second_email">Secondary Email:</label>
-                            <input type="email" id="edit_rt_db_client_second_email" name="second_email">
-                        </div>
-
-                        <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_client_first_phone">Primary Phone:</label>
-                            <input type="text" id="edit_rt_db_client_first_phone" name="first_phone">
-                        </div>
-
-                        <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_client_second_phone">Secondary Phone:</label>
-                            <input type="text" id="edit_rt_db_client_second_phone" name="second_phone">
+                            <label for="edit_rt_db_client_phone">Phone:</label>
+                            <input type="text" id="edit_rt_db_client_phone" name="phone">
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
                             <label for="edit_rt_db_client_address">Address:</label>
-                            <textarea id="edit_rt_db_client_address" name="address" rows="4"></textarea>
+                            <textarea id="edit_rt_db_client_address" name="address" rows="4" placeholder="Enter address"></textarea>
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
@@ -91,9 +76,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
     const editModal = document.getElementById('rtDbClientEditModal');
     const closeBtn = document.getElementById('closeRtDbClientEditModal');
     const profileInput = document.getElementById('edit_rt_db_client_profile_picture');
+    const editForm = document.getElementById('editRtDbClientForm');
 
     // Close modal
     if (closeBtn && editModal) {
@@ -108,10 +95,12 @@ document.addEventListener('DOMContentLoaded', function () {
         profileInput.addEventListener('change', function () {
             const file = this.files[0];
             if (!file) return;
+
             const reader = new FileReader();
             reader.onload = e => document.getElementById('editRtDbClientPreviewAvatar').src = e.target.result;
             reader.readAsDataURL(file);
         });
     }
+
 });
 </script>

@@ -46,9 +46,9 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
         <tbody id="assigned-list">
             <?php
             $results = $wpdb->get_results("
-                SELECT a.id, c.full_name, p.address, a.created_at, a.client_id, a.property_id
+                SELECT a.id, c.first_name, c.second_name, p.address, a.created_at, a.client_id, a.property_id
                 FROM {$assigned_table} a
-                LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
+                LEFT JOIN {$clients_table} c ON a.client_id = c.user_id
                 LEFT JOIN {$properties_table} p ON a.property_id = p.id
                 WHERE a.deleted_at IS NULL
                 ORDER BY a.created_at DESC
@@ -56,8 +56,9 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
 
             if ($results) {
                 foreach ($results as $row) {
+                    $full_name = trim($row->first_name . ' ' . $row->second_name);
                     echo "<tr data-id='" . esc_attr($row->id) . "' data-client-id='" . esc_attr($row->client_id) . "' data-property-id='" . esc_attr($row->property_id) . "'>
-                            <td>" . esc_html($row->full_name) . "</td>
+                            <td>" . esc_html($full_name) . "</td>
                             <td>" . esc_html($row->address) . "</td>
                             <td>" . esc_html($row->created_at) . "</td>
                             <td>

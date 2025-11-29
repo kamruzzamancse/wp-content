@@ -24,17 +24,17 @@ function search_clients_ajax() {
     }
 
     $table = $wpdb->prefix . 'clients';
+    $search_term = '%' . $wpdb->esc_like($term) . '%';
 
     $results = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT client_id, full_name 
-             FROM $table 
-             WHERE full_name LIKE %s 
-             AND deleted_at IS NULL
-             ORDER BY full_name ASC 
-             LIMIT 10",
-            '%' . $wpdb->esc_like($term) . '%'
-        )
+        $wpdb->prepare("
+            SELECT user_id AS client_id, CONCAT(first_name, ' ', second_name) AS full_name
+            FROM $table
+            WHERE CONCAT(first_name, ' ', second_name) LIKE %s
+            AND deleted_at IS NULL
+            ORDER BY first_name ASC, second_name ASC
+            LIMIT 10
+        ", $search_term)
     );
 
     wp_send_json_success($results ?: []);
@@ -59,20 +59,18 @@ function search_properties_for_assignment_ajax() {
     }
 
     $table = $wpdb->prefix . 'rentcast_properties';
-
     $search_term = '%' . $wpdb->esc_like($term) . '%';
     
     $results = $wpdb->get_results(
-        $wpdb->prepare(
-            "SELECT id, address 
-             FROM $table 
-             WHERE address IS NOT NULL 
-               AND address != '' 
-               AND address LIKE %s
-             ORDER BY address ASC 
-             LIMIT 10",
-            $search_term
-        )
+        $wpdb->prepare("
+            SELECT id, address 
+            FROM $table 
+            WHERE address IS NOT NULL 
+              AND address != '' 
+              AND address LIKE %s
+            ORDER BY address ASC 
+            LIMIT 10
+        ", $search_term)
     );
 
     wp_send_json_success($results ?: []);
@@ -100,7 +98,6 @@ function assign_property_to_client_ajax() {
 
     $assigned_table = $wpdb->prefix . 'assigned_property';
     $clients_table = $wpdb->prefix . 'clients';
-    $properties_table = $wpdb->prefix . 'rentcast_properties';
 
     // Check if assignment already exists
     $existing_assignment = $wpdb->get_var($wpdb->prepare(
@@ -122,10 +119,10 @@ function assign_property_to_client_ajax() {
 
     if ($property_assigned_to_other) {
         $existing_client = $wpdb->get_row($wpdb->prepare(
-            "SELECT c.full_name 
-             FROM $assigned_table a 
-             LEFT JOIN $clients_table c ON a.client_id = c.client_id 
-             WHERE a.property_id = %d AND a.deleted_at IS NULL 
+            "SELECT CONCAT(first_name, ' ', second_name) AS full_name 
+             FROM $clients_table c
+             LEFT JOIN $assigned_table a ON a.client_id = c.user_id
+             WHERE a.property_id = %d AND a.deleted_at IS NULL
              LIMIT 1",
             $property_id
         ));
@@ -217,9 +214,7 @@ function update_assignment_ajax() {
             'updated_by' => $current_user_id,
             'updated_at' => current_time('mysql')
         ],
-        [
-            'id' => $assignment_id
-        ],
+        ['id' => $assignment_id],
         ['%d', '%d', '%d', '%s'],
         ['%d']
     );
@@ -263,9 +258,7 @@ function delete_assignment_ajax() {
             'deleted_at' => current_time('mysql'),
             'deleted_by' => $current_user_id
         ],
-        [
-            'id' => $assignment_id
-        ],
+        ['id' => $assignment_id],
         ['%s', '%d'],
         ['%d']
     );

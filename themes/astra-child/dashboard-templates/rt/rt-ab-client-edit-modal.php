@@ -102,8 +102,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeBtn = document.getElementById('closeRealtorClientEditModal');
     const profileInput = document.getElementById('edit_realtor_client_profile_picture');
     const form = document.getElementById('editRealtorClientForm');
-    const statusSelect = document.getElementById('edit_realtor_client_status');
-    const leadStatusRow = document.getElementById('leadStatusRow');
+    // const statusSelect = document.getElementById('edit_realtor_client_status');
+    // const leadStatusRow = document.getElementById('leadStatusRow');
 
     // Close modal
     if(closeBtn && editModal){
@@ -124,12 +124,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Lead status toggle
-    if(statusSelect){
-        statusSelect.addEventListener('change', function(){
-            leadStatusRow.style.display = (this.value === 'lead') ? 'flex' : 'none';
-        });
-    }
+    // Lead status toggle - REMOVED
+    // if(statusSelect){
+    //     statusSelect.addEventListener('change', function(){
+    //         leadStatusRow.style.display = (this.value === 'lead') ? 'flex' : 'none';
+    //     });
+    // }
 
     // Submit update via AJAX
     if(form){
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             try {
                 const formData = new FormData(form);
-                formData.append('action', 'update_realtor_client_ajax');
+                formData.append('action', 'realtor_update_client');
                 formData.append('nonce', rtClientAjax.edit_nonce);
 
                 const res = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
@@ -208,9 +208,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const previewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
                 previewAvatar.src = client.profile_picture || '<?php echo esc_url(get_stylesheet_directory_uri() . '/assets/images/default-avatar.jpg'); ?>';
 
-                // Lead status
-                if (leadStatusRow) leadStatusRow.style.display = (client.status === 'lead') ? 'flex' : 'none';
-                if(client.lead_status) document.getElementById('edit_realtor_lead_status').value = client.lead_status;
+                // Lead status row removed
+                // if (leadStatusRow) leadStatusRow.style.display = (client.status === 'lead') ? 'flex' : 'none';
+                // if(client.lead_status) document.getElementById('edit_realtor_lead_status').value = client.lead_status;
             }
         } catch (error) {
             console.error('Error loading client data:', error);

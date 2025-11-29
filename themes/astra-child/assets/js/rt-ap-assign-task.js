@@ -32,6 +32,7 @@ jQuery(document).ready(function($){
         $('#selected-file-name').text('');
     }
 
+    // ===== Upload Document AJAX =====
     $('#upload-document-form').on('submit', function(e){
         e.preventDefault();
         var formData = new FormData(this);
@@ -141,8 +142,10 @@ jQuery(document).ready(function($){
     // Pagination click (delegated)
     $(document).on('click', '.pagination a', function(e){
         e.preventDefault();
-        let page = $(this).attr('href').split('paged=')[1];
-        if(page) loadAssignTable(page);
+        var href = $(this).attr('href');
+        var match = href.match(/paged=(\d+)/);
+        var page = match ? parseInt(match[1]) : 1;
+        loadAssignTable(page);
     });
 
 });

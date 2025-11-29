@@ -38,31 +38,46 @@
                     <div class="edit-details-rt-db-lead-edit">
 
                         <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_lead_full_name">Full Name: *</label>
-                            <input type="text" id="edit_rt_db_lead_full_name" name="full_name" required>
+                            <label for="edit_rt_db_lead_first_name">First Name: *</label>
+                            <input type="text" id="edit_rt_db_lead_first_name" name="first_name" required>
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_lead_email">Email: *</label>
-                            <input type="email" id="edit_rt_db_lead_email" name="email" required>
+                            <label for="edit_rt_db_lead_second_name">Second Name:</label>
+                            <input type="text" id="edit_rt_db_lead_second_name" name="second_name">
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_lead_phone">Phone:</label>
-                            <input type="text" id="edit_rt_db_lead_phone" name="phone">
+                            <label for="edit_rt_db_lead_first_email">Primary Email: *</label>
+                            <input type="email" id="edit_rt_db_lead_first_email" name="first_email" required>
+                        </div>
+
+                        <div class="edit-detail-row-rt-db-lead-edit">
+                            <label for="edit_rt_db_lead_second_email">Secondary Email:</label>
+                            <input type="email" id="edit_rt_db_lead_second_email" name="second_email">
+                        </div>
+
+                        <div class="edit-detail-row-rt-db-lead-edit">
+                            <label for="edit_rt_db_lead_first_phone">Primary Phone:</label>
+                            <input type="text" id="edit_rt_db_lead_first_phone" name="first_phone">
+                        </div>
+
+                        <div class="edit-detail-row-rt-db-lead-edit">
+                            <label for="edit_rt_db_lead_second_phone">Secondary Phone:</label>
+                            <input type="text" id="edit_rt_db_lead_second_phone" name="second_phone">
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
                             <label for="edit_rt_db_lead_address">Address:</label>
-                            <textarea id="edit_rt_db_lead_address" name="address" rows="4" placeholder="Enter address"></textarea>
+                            <input type="text" id="edit_rt_db_lead_address" name="address">
                         </div>
 
                         <div class="edit-detail-row-rt-db-lead-edit">
-                            <label for="edit_rt_db_lead_note">Notes:</label>
+                            <label for="edit_rt_db_lead_note">Note:</label>
                             <textarea id="edit_rt_db_lead_note" name="note" rows="4"></textarea>
                         </div>
 
-                        <div class="edit-detail-row-rt-db-lead-edit" id="rtLeadStatusRow">
+                        <div class="edit-detail-row-rt-db-lead-edit">
                             <label for="edit_rt_db_lead_lead_status">Lead Status:</label>
                             <select id="edit_rt_db_lead_lead_status" name="lead_status">
                                 <option value="hot">Hot</option>
@@ -84,129 +99,117 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-
-    const editModal = document.getElementById('rtDbLeadEditModal');
-    const profileInput = document.getElementById('edit_rt_db_lead_profile_picture');
-    const leadRow = document.getElementById('rtLeadStatusRow');
-    const editLeadForm = document.getElementById('editRtDbLeadForm');
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('rtDbLeadEditModal');
+    const closeBtn = document.getElementById('closeRtDbLeadEditModal');
+    const form = document.getElementById('editRtDbLeadForm');
+    const avatarPreview = document.getElementById('editRtDbLeadPreviewAvatar');
+    let isProcessing = false;
 
     // Close modal
-    const closeBtn = document.getElementById('closeRtDbLeadEditModal');
-    if (closeBtn && editModal) {
-        closeBtn.addEventListener('click', () => editModal.style.display = 'none');
-        editModal.addEventListener('click', e => { if (e.target === editModal) editModal.style.display = 'none'; });
-    }
+    closeBtn.addEventListener('click', ()=>modal.style.display='none');
+    modal.addEventListener('click', e=>{if(e.target===modal) modal.style.display='none';});
 
-    // Profile image preview on file select
-    if (profileInput) {
-        profileInput.addEventListener('change', function () {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = e => document.getElementById('editRtDbLeadPreviewAvatar').src = e.target.result;
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+    // Profile preview
+    const profileInput = document.getElementById('edit_rt_db_lead_profile_picture');
+    profileInput.addEventListener('change', ()=> {
+        const file = profileInput.files[0];
+        if(file) avatarPreview.src = URL.createObjectURL(file);
+    });
 
-    // Edit Lead button click handler
+    // Edit button click handler
     document.querySelectorAll('.editLeadBtn').forEach(btn => {
-        btn.addEventListener('click', async function () {
+        btn.addEventListener('click', async function() {
+            if(isProcessing) return;
+            isProcessing = true;
+
             const row = this.closest('tr');
             const clientId = row.dataset.clientId;
-            if (!clientId) return;
+            if(!clientId) { isProcessing=false; return; }
 
-            editModal.style.display = 'flex';
+            modal.style.display='flex';
 
+            // Reset loading
+            ['first_name','second_name','first_email','second_email','first_phone','second_phone','address','note','lead_status']
+                .forEach(id => {document.getElementById('edit_rt_db_lead_'+id).value='Loading...';});
+            avatarPreview.src = rtDashboardAjax.default_avatar;
+
+            // Fetch lead
             const fd = new FormData();
-            fd.append('action', 'fetch_dashboard_lead_ajax');
-            fd.append('nonce', rtDashboardAjax.edit_nonce);
+            fd.append('action','fetch_dashboard_lead_ajax');
+            fd.append('nonce',rtDashboardAjax.edit_nonce);
             fd.append('client_id', clientId);
 
-            try {
-                const res = await fetch(rtDashboardAjax.ajax_url, { method: 'POST', body: fd });
+            try{
+                const res = await fetch(rtDashboardAjax.ajax_url,{method:'POST',body:fd});
                 const result = await res.json();
 
-                if (result.success) {
+                if(result.success && result.data){
                     const lead = result.data;
-
-                    // Populate form fields
                     document.getElementById('edit_rt_db_lead_id').value = lead.client_id || '';
-                    document.getElementById('edit_rt_db_lead_full_name').value = lead.full_name || '';
-                    document.getElementById('edit_rt_db_lead_email').value = lead.email || '';
-                    document.getElementById('edit_rt_db_lead_phone').value = lead.phone || '';
+                    document.getElementById('edit_rt_db_lead_first_name').value = lead.first_name || '';
+                    document.getElementById('edit_rt_db_lead_second_name').value = lead.second_name || '';
+                    document.getElementById('edit_rt_db_lead_first_email').value = lead.first_email || '';
+                    document.getElementById('edit_rt_db_lead_second_email').value = lead.second_email || '';
+                    document.getElementById('edit_rt_db_lead_first_phone').value = lead.first_phone || '';
+                    document.getElementById('edit_rt_db_lead_second_phone').value = lead.second_phone || '';
                     document.getElementById('edit_rt_db_lead_address').value = lead.address || '';
                     document.getElementById('edit_rt_db_lead_note').value = lead.note || '';
-                    document.getElementById('edit_rt_db_lead_status').value = lead.status || 'lead';
                     document.getElementById('edit_rt_db_lead_lead_status').value = lead.lead_status || 'cold';
-
-                    // Robust profile picture handling
-                    const avatarImg = document.getElementById('editRtDbLeadPreviewAvatar');
-                    if (lead.profile_picture && lead.profile_picture.trim() !== '') {
-                        avatarImg.src = lead.profile_picture.startsWith('http')
-                            ? lead.profile_picture
-                            : `${window.location.origin}${lead.profile_picture}`;
-                    } else {
-                        avatarImg.src = rtDashboardAjax.default_avatar;
-                    }
-
-                    // Show/hide lead status row
-                    leadRow.style.display = lead.status === 'lead' ? 'block' : 'none';
+                    avatarPreview.src = lead.profile_picture || rtDashboardAjax.default_avatar;
                 } else {
-                    alert('Error fetching lead: ' + (result.data || 'Unknown'));
-                    editModal.style.display = 'none';
+                    alert('Error fetching lead data.');
+                    modal.style.display='none';
                 }
-            } catch (err) {
-                alert('Network error: ' + err.message);
-                editModal.style.display = 'none';
+
+            } catch(err){
+                alert('Network error.');
+                modal.style.display='none';
             }
+            isProcessing=false;
         });
     });
 
-    // Submit update via AJAX
-    if (editLeadForm) {
-        editLeadForm.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const submitBtn = this.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Updating...';
+    // Submit handler
+    form.addEventListener('submit', async function(e){
+        e.preventDefault();
+        if(isProcessing) return;
+        isProcessing = true;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled=true;
+        submitBtn.textContent='Updating...';
 
-            const fd = new FormData(this);
-            fd.append('action', 'update_dashboard_lead_ajax');
-            fd.append('nonce', rtDashboardAjax.edit_nonce);
+        const fd = new FormData(form);
+        fd.append('action','update_dashboard_lead_ajax');
+        fd.append('nonce',rtDashboardAjax.edit_nonce);
 
-            try {
-                const res = await fetch(rtDashboardAjax.ajax_url, { method: 'POST', body: fd });
-                const result = await res.json();
-
-                if (result.success) {
-                    alert('Lead updated successfully!');
-                    editModal.style.display = 'none';
-                    // Refresh leads table if fetchLeads exists
-                    if (typeof fetchLeads === 'function') {
-                        fetchLeads({
-                            page: 1,
-                            rows: parseInt(document.getElementById('leadsRows').value, 10),
-                            search: document.getElementById('leadsSearch').value.trim(),
-                            bodyId: 'leadsBody',
-                            paginationId: 'leadsPagination'
-                        });
-                    }
-                } else {
-                    alert('Error: ' + (result.data || 'Unknown error'));
+        try{
+            const res = await fetch(rtDashboardAjax.ajax_url,{method:'POST',body:fd});
+            const result = await res.json();
+            if(result.success){
+                alert('Lead updated successfully!');
+                modal.style.display='none';
+                // Refresh table
+                if(typeof fetchLeads==='function'){
+                    fetchLeads({
+                        page:1,
+                        rows:parseInt(document.getElementById('leadsRows').value,10),
+                        search:document.getElementById('leadsSearch').value.trim(),
+                        bodyId:'leadsBody',
+                        paginationId:'leadsPagination'
+                    });
                 }
-            } catch (err) {
-                alert('Network error: ' + err.message);
-            }
-
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Update Lead';
-        });
-    }
+            } else alert('Error: '+(result.data||'Unknown'));
+        } catch(err){
+            alert('Network error.');
+        }
+        submitBtn.disabled=false;
+        submitBtn.textContent='Update Lead';
+        isProcessing=false;
+    });
 });
-
 </script>
+
 
 <style>
 .modal-overlay-rt-db-lead-edit {

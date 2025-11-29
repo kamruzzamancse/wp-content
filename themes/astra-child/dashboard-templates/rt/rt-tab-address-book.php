@@ -46,7 +46,7 @@
         <th>Address</th>
         <th>Notes</th>
         <th>Status</th>
-        <th>Actions</th>
+        <th style="width: 100px">Actions</th>
       </tr>
     </thead>
     <tbody id="addressBookBody">

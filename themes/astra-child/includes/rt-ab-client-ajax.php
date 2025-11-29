@@ -242,7 +242,7 @@ function rt_create_realtor_client_ajax() {
 add_action('wp_ajax_create_realtor_client_ajax', 'rt_create_realtor_client_ajax');
 
 // =====================
-// Update Client  (lead_status removed)
+// Update Client (Safe WP Users update)
 // =====================
 function rt_update_realtor_client_ajax() {
     check_ajax_referer('rt_client_edit_nonce', 'nonce');
@@ -254,30 +254,37 @@ function rt_update_realtor_client_ajax() {
 
     $table_clients = $wpdb->prefix . 'clients';
 
+    // Build data array from modal fields
     $data = [
-        'full_name'   => sanitize_text_field($_POST['realtor_client_full_name'] ?? ''),
-        'email'       => sanitize_email($_POST['realtor_client_email'] ?? ''),
-        'phone'       => sanitize_text_field($_POST['realtor_client_phone'] ?? ''),
-        'address'     => sanitize_text_field($_POST['realtor_client_address'] ?? ''),
-        'note'        => sanitize_textarea_field($_POST['realtor_client_note'] ?? $_POST['realtor_client_notes'] ?? ''),
-        'status'      => sanitize_text_field($_POST['realtor_client_status'] ?? ''),
-        'updated_at'  => current_time('mysql'),
-        'updated_by'  => get_current_user_id()
+        'first_name'   => sanitize_text_field($_POST['first_name'] ?? ''),
+        'second_name'  => sanitize_text_field($_POST['second_name'] ?? ''),
+        'first_email'  => sanitize_email($_POST['first_email'] ?? ''),
+        'second_email' => sanitize_email($_POST['second_email'] ?? ''),
+        'first_phone'  => sanitize_text_field($_POST['first_phone'] ?? ''),
+        'second_phone' => sanitize_text_field($_POST['second_phone'] ?? ''),
+        'address'      => sanitize_text_field($_POST['address'] ?? ''),
+        'note'         => sanitize_textarea_field($_POST['note'] ?? ''),
+        'status'       => sanitize_text_field($_POST['status'] ?? ''),
+        'lead_status'  => sanitize_text_field($_POST['lead_status'] ?? ''),
+        'updated_at'   => current_time('mysql'),
+        'updated_by'   => get_current_user_id(),
     ];
 
-    if (empty($data['full_name']) || empty($data['email']) || empty($data['status'])) {
-        wp_send_json_error('Name, Email, and Status are required fields.');
+    // Required fields validation
+    if (empty($data['first_name']) || empty($data['first_email']) || empty($data['status'])) {
+        wp_send_json_error('First Name, Primary Email & Status are required.');
     }
 
+    // Duplicate primary email check
     $existing_email = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$table_clients} WHERE email = %s AND client_id != %d AND deleted_at IS NULL",
-        $data['email'], $client_id
+        "SELECT COUNT(*) FROM {$table_clients} WHERE first_email = %s AND client_id != %d AND deleted_at IS NULL",
+        $data['first_email'],
+        $client_id
     ));
+    if ($existing_email > 0) wp_send_json_error('A client with this primary email already exists.');
 
-    if ($existing_email > 0) wp_send_json_error('A client with this email already exists.');
-
-    $format = ['%s', '%s', '%s', '%s', '%s', '%s', '%d'];
-
+    // Handle profile picture
+    $format = ['%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%d'];
     if (!empty($_FILES['realtor_client_profile_picture']['name'])) {
         require_once(ABSPATH . 'wp-admin/includes/file.php');
         require_once(ABSPATH . 'wp-admin/includes/media.php');
@@ -290,20 +297,36 @@ function rt_update_realtor_client_ajax() {
         $format[] = '%s';
     }
 
+    // Start transaction
     $wpdb->query('START TRANSACTION');
     try {
-        $updated = $wpdb->update($table_clients, $data, ['client_id' => $client_id], $format, ['%d']);
+        // Update clients table
+        $updated = $wpdb->update(
+            $table_clients,
+            $data,
+            ['client_id' => $client_id],
+            $format,
+            ['%d']
+        );
         if ($updated === false) throw new Exception('Database update failed: ' . $wpdb->last_error);
 
+        // Update corresponding WP user fields safely
         $client_data = $wpdb->get_row($wpdb->prepare(
             "SELECT user_id FROM {$table_clients} WHERE client_id = %d",
             $client_id
         ));
+
         if ($client_data && $client_data->user_id) {
+            $user_id = intval($client_data->user_id);
+            $user_email = $data['first_email'];
+            $user_nicename = sanitize_title($data['first_email']); // safe slug based on email
+            $display_name = $data['first_name'];
+
             wp_update_user([
-                'ID' => $client_data->user_id,
-                'display_name' => $data['full_name'],
-                'user_email' => $data['email']
+                'ID'            => $user_id,
+                'user_nicename' => $user_nicename,
+                'user_email'    => $user_email,
+                'display_name'  => $display_name,
             ]);
         }
 
@@ -319,8 +342,7 @@ function rt_update_realtor_client_ajax() {
         wp_send_json_error('Update failed: ' . $e->getMessage());
     }
 }
-add_action('wp_ajax_update_realtor_client_ajax', 'rt_update_realtor_client_ajax');
-
+add_action('wp_ajax_realtor_update_client', 'rt_update_realtor_client_ajax');
 
 // =====================
 // Delete Client

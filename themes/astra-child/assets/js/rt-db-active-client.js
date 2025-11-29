@@ -45,9 +45,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 tr.dataset.clientId = client.client_id;
 
                 tr.innerHTML = `
-                    <td>${client.full_name || ''}</td>
-                    <td>${client.email || ''}</td>
-                    <td>${client.phone || ''}</td>
+                    <td>${client.first_name || ''} ${client.second_name || ''}</td>
+                    <td>${client.first_email || ''}</td>
+                    <td>${client.first_phone || ''}</td>
                     <td>${client.note || ''}</td>
                     <td>
                         <span class="editClientBtn" style="cursor:pointer;color:#0052cc;">✏️</span>
@@ -79,17 +79,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const tbody = document.getElementById('activeClientsBody');
         if (!tbody) return;
 
-        // Remove previous listeners
-        tbody.querySelectorAll('.editClientBtn, .deleteClientBtn')
-            .forEach(btn => btn.replaceWith(btn.cloneNode(true)));
-
         // EDIT
         tbody.querySelectorAll('.editClientBtn').forEach(btn => {
-            btn.addEventListener('click', async function () {
+            btn.onclick = async function () {
                 const row = this.closest('tr');
                 const clientId = row.dataset.clientId;
                 const modal = document.getElementById('rtDbClientEditModal');
-                if (!modal) { alert('Edit modal not found!'); return; }
+                if (!modal) return alert('Edit modal not found!');
 
                 const fd = new FormData();
                 fd.append('action', 'fetch_dashboard_client_ajax');
@@ -97,31 +93,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 fd.append('client_id', clientId);
 
                 const result = await ajaxFetch(fd);
-
                 if (result.success) {
                     const client = result.data;
-
                     document.getElementById('edit_rt_db_client_id').value = client.client_id || '';
-                    document.getElementById('edit_rt_db_client_full_name').value = client.full_name || '';
-                    document.getElementById('edit_rt_db_client_email').value = client.email || '';
-                    document.getElementById('edit_rt_db_client_phone').value = client.phone || '';
+                    document.getElementById('edit_rt_db_client_first_name').value = client.first_name || '';
+                    document.getElementById('edit_rt_db_client_second_name').value = client.second_name || '';
+                    document.getElementById('edit_rt_db_client_first_email').value = client.first_email || '';
+                    document.getElementById('edit_rt_db_client_second_email').value = client.second_email || '';
+                    document.getElementById('edit_rt_db_client_first_phone').value = client.first_phone || '';
+                    document.getElementById('edit_rt_db_client_second_phone').value = client.second_phone || '';
                     document.getElementById('edit_rt_db_client_address').value = client.address || '';
                     document.getElementById('edit_rt_db_client_note').value = client.note || '';
-
-                    const avatar = document.getElementById('editRtDbClientPreviewAvatar');
-                    avatar.src = client.profile_picture && client.profile_picture.trim() !== '' ? client.profile_picture : defaultAvatar;
-
-                    modal.style.display = 'flex'; // <-- This opens the modal
+                    document.getElementById('editRtDbClientPreviewAvatar').src = client.profile_picture && client.profile_picture.trim() !== '' ? client.profile_picture : defaultAvatar;
+                    modal.style.display = 'flex';
                 } else {
-                    alert('Error fetching client!');
+                    alert('Error fetching client data');
                 }
-            });
-
+            };
         });
 
         // DELETE
         tbody.querySelectorAll('.deleteClientBtn').forEach(btn => {
-            btn.addEventListener('click', async function () {
+            btn.onclick = async function () {
                 const row = this.closest('tr');
                 const clientId = row.dataset.clientId;
                 if (!confirm('Are you sure you want to delete this client?')) return;
@@ -140,9 +133,9 @@ document.addEventListener('DOMContentLoaded', function () {
                         search: document.getElementById('activeClientsSearch').value
                     });
                 } else {
-                    alert('Error deleting client!');
+                    alert('Error deleting client: ' + result.data);
                 }
-            });
+            };
         });
     }
 
@@ -175,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // --------------------------
-    // CREATE CLIENT
+    // CREATE CLIENT MODAL
     // --------------------------
     const createModal = document.getElementById('rtDbClientCreateModal');
     const addActiveBtn = document.getElementById('addActiveBtn');
@@ -183,93 +176,121 @@ document.addEventListener('DOMContentLoaded', function () {
     const createForm = document.getElementById('createRtDbClientForm');
     const createProfileInput = document.getElementById('create_rt_db_client_profile_picture');
     const createPreviewAvatar = document.getElementById('createRtDbClientPreviewAvatar');
+    let createSubmitting = false;
 
-    if (addActiveBtn) addActiveBtn.addEventListener('click', () => createModal.style.display = 'flex');
-    if (closeCreateBtn) closeCreateBtn.addEventListener('click', () => createModal.style.display = 'none');
-    if (createModal) createModal.addEventListener('click', e => { if (e.target === createModal) createModal.style.display = 'none'; });
+    // OPEN / CLOSE
+    if(addActiveBtn) addActiveBtn.addEventListener('click', () => createModal.style.display = 'flex');
+    if(closeCreateBtn){
+        closeCreateBtn.addEventListener('click', () => createModal.style.display = 'none');
+        createModal.addEventListener('click', e => { if(e.target === createModal) createModal.style.display = 'none'; });
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') createModal.style.display = 'none'; });
+    }
 
-    if (createProfileInput) {
-        createProfileInput.addEventListener('change', function () {
+    // Avatar preview
+    if(createProfileInput){
+        createProfileInput.addEventListener('change', function() {
             const file = this.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = e => createPreviewAvatar.src = e.target.result;
-            reader.readAsDataURL(file);
+            if(file){
+                const reader = new FileReader();
+                reader.onload = e => createPreviewAvatar.src = e.target.result;
+                reader.readAsDataURL(file);
+            }
         });
     }
 
-    if (createForm) {
-        createForm.addEventListener('submit', async function (e) {
+    // Submit create form
+    if(createForm){
+        createForm.addEventListener('submit', async function(e){
             e.preventDefault();
-            const fd = new FormData(this);
+            if(createSubmitting) return; // prevent double submit
+            createSubmitting = true;
+
+            const btn = createForm.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            const fd = new FormData(createForm);
             fd.append('action', 'create_dashboard_client_ajax');
             fd.append('nonce', createClientNonce);
 
-            const result = await ajaxFetch(fd);
-            if (result.success) {
-                alert('Client created successfully!');
-                createForm.reset();
-                createPreviewAvatar.src = defaultAvatar;
-                createModal.style.display = 'none';
-                fetchClients({
-                    page: 1,
-                    rows: parseInt(document.getElementById('activeClientsRows').value),
-                    search: document.getElementById('activeClientsSearch').value
-                });
-            } else {
-                alert('Error creating client!');
+            try{
+                const result = await ajaxFetch(fd);
+                if(result.success){
+                    alert('Client created successfully!');
+                    createForm.reset();
+                    createPreviewAvatar.src = defaultAvatar;
+                    createModal.style.display = 'none';
+
+                    fetchClients({
+                        page: 1,
+                        rows: parseInt(document.getElementById('activeClientsRows').value),
+                        search: document.getElementById('activeClientsSearch').value
+                    });
+                } else {
+                    alert('Error creating client: ' + result.data);
+                }
+            } catch(err){
+                alert('Network error: ' + err.message);
+            } finally {
+                createSubmitting = false;
+                btn.disabled = false;
+                btn.textContent = originalText;
             }
         });
     }
 
     // --------------------------
-    // EDIT CLIENT
+    // EDIT CLIENT MODAL
     // --------------------------
     const editForm = document.getElementById('editRtDbClientForm');
     const editProfileInput = document.getElementById('edit_rt_db_client_profile_picture');
+    let editSubmitting = false;
 
-    if (editProfileInput) {
-        editProfileInput.addEventListener('change', function () {
-            const f = this.files[0];
-            if (!f) return;
-            const r = new FileReader();
-            r.onload = e => document.getElementById('editRtDbClientPreviewAvatar').src = e.target.result;
-            r.readAsDataURL(f);
+    if(editProfileInput){
+        editProfileInput.addEventListener('change', function(){
+            const file = this.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = e => document.getElementById('editRtDbClientPreviewAvatar').src = e.target.result;
+            reader.readAsDataURL(file);
         });
     }
 
-    if (editForm) {
-        editForm.addEventListener('submit', async function (e) {
+    if(editForm){
+        editForm.addEventListener('submit', async function(e){
             e.preventDefault();
+            if(editSubmitting) return;
+            editSubmitting = true;
+
+            const btn = editForm.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
             const fd = new FormData(editForm);
             fd.append('action', 'update_dashboard_client_ajax');
             fd.append('nonce', editClientNonce);
 
-            const result = await ajaxFetch(fd);
-
-            if (result.success) {
-                const updatedClient = result.data;
-
-                // Update table row
-                const row = document.querySelector(`tr[data-client-id='${updatedClient.client_id}']`);
-                if (row) {
-                    row.innerHTML = `
-                        <td>${updatedClient.full_name || ''}</td>
-                        <td>${updatedClient.email || ''}</td>
-                        <td>${updatedClient.phone || ''}</td>
-                        <td>${updatedClient.note || ''}</td>
-                        <td>
-                            <span class="editClientBtn" style="cursor:pointer;color:#0052cc;">✏️</span>
-                            <span class="deleteClientBtn" style="cursor:pointer;color:red;margin-left:5px;">🗑️</span>
-                        </td>
-                    `;
+            try{
+                const result = await ajaxFetch(fd);
+                if(result.success){
+                    alert('Client updated successfully!');
+                    document.getElementById('rtDbClientEditModal').style.display = 'none';
+                    fetchClients({
+                        page: 1,
+                        rows: parseInt(document.getElementById('activeClientsRows').value),
+                        search: document.getElementById('activeClientsSearch').value
+                    });
+                } else {
+                    alert('Error updating client: ' + result.data);
                 }
-
-                setupRowButtons(); // Reattach edit/delete listeners
-                alert('Client updated successfully!');
-                document.getElementById('rtDbClientEditModal').style.display = 'none';
-            } else {
-                alert('Error updating client!');
+            } catch(err){
+                alert('Network error: ' + err.message);
+            } finally {
+                editSubmitting = false;
+                btn.disabled = false;
+                btn.textContent = originalText;
             }
         });
     }
@@ -284,5 +305,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     setupSearchAndRows();
-
 });

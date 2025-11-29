@@ -1,4 +1,5 @@
-<div id="rtDbLeadCreateModal" class="modal-overlay-rt-db-lead">
+<!-- Active Lead Create Modal -->
+<div id="rtDbLeadCreateModal" class="modal-overlay-rt-db-lead" style="display:none;">
     <div class="modal-content-rt-db-lead">
         <div class="rt-db-lead-create-container">
 
@@ -28,28 +29,51 @@
                     <div class="create-details-rt-db-lead">
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_lead_full_name">Full Name: *</label>
-                            <input type="text" id="create_rt_db_lead_full_name" name="rt_db_lead_full_name" required placeholder="Enter full name">
+                            <label for="create_rt_db_lead_first_name">First Name: *</label>
+                            <input type="text" id="create_rt_db_lead_first_name" name="first_name"
+                                   required placeholder="Enter first name">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_lead_email">Email: *</label>
-                            <input type="email" id="create_rt_db_lead_email" name="rt_db_lead_email" required placeholder="Enter email address">
+                            <label for="create_rt_db_lead_second_name">Second Name:</label>
+                            <input type="text" id="create_rt_db_lead_second_name" name="second_name"
+                                   placeholder="Enter second name">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_lead_phone">Phone:</label>
-                            <input type="text" id="create_rt_db_lead_phone" name="rt_db_lead_phone" placeholder="Enter phone number">
+                            <label for="create_rt_db_lead_first_email">Primary Email: *</label>
+                            <input type="email" id="create_rt_db_lead_first_email" name="first_email"
+                                   required placeholder="Enter primary email">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
-                            <label for="create_rt_db_lead_preferred_address">Address:</label>
-                            <input type="text" id="create_rt_db_lead_preferred_address" name="rt_db_lead_address" placeholder="Enter address">
+                            <label for="create_rt_db_lead_second_email">Secondary Email:</label>
+                            <input type="email" id="create_rt_db_lead_second_email" name="second_email"
+                                   placeholder="Enter secondary email">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_first_phone">Primary Phone:</label>
+                            <input type="text" id="create_rt_db_lead_first_phone" name="first_phone"
+                                   placeholder="Enter primary phone number">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_second_phone">Secondary Phone:</label>
+                            <input type="text" id="create_rt_db_lead_second_phone" name="second_phone"
+                                   placeholder="Enter secondary phone number">
+                        </div>
+
+                        <div class="create-detail-row-rt-db-lead">
+                            <label for="create_rt_db_lead_address">Address:</label>
+                            <input type="text" id="create_rt_db_lead_address" name="address"
+                                   placeholder="Enter full address">
                         </div>
 
                         <div class="create-detail-row-rt-db-lead">
                             <label for="create_rt_db_lead_note">Note:</label>
-                            <textarea id="create_rt_db_lead_note" name="rt_db_lead_note" rows="4" placeholder="Enter note"></textarea>
+                            <textarea id="create_rt_db_lead_note" name="note" rows="4"
+                                      placeholder="Enter note"></textarea>
                         </div>
 
                     </div>
@@ -57,7 +81,9 @@
 
                 <!-- Submit Button -->
                 <div style="text-align: right; margin-top: 20px;">
-                    <button type="submit" class="create-submit-btn-rt-db-lead">Create Lead</button>
+                    <button type="submit" id="createLeadSubmitBtn" class="create-submit-btn-rt-db-lead">
+                        Create Lead
+                    </button>
                 </div>
             </form>
         </div>
@@ -66,25 +92,41 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const createModal = document.getElementById('rtDbLeadCreateModal');
-    const addLeadBtn = document.getElementById('addLeadBtn');
+
+    const modal = document.getElementById('rtDbLeadCreateModal');
+    const openBtn = document.getElementById('addLeadBtn');
     const closeBtn = document.getElementById('closeRtDbLeadCreateModal');
     const form = document.getElementById('createRtDbLeadForm');
+    const submitBtn = document.getElementById('createLeadSubmitBtn');
+
     const profileInput = document.getElementById('create_rt_db_lead_profile_picture');
     const previewAvatar = document.getElementById('createRtDbLeadPreviewAvatar');
 
-    // Open modal
-    if(addLeadBtn && createModal){
-        addLeadBtn.addEventListener('click', () => createModal.style.display='flex');
+    let createSubmitting = false; // Prevent multiple submissions
+
+    /* ----------------------
+       BLOCK ENTER KEY
+    ---------------------- */
+    form.addEventListener('keydown', function(e){
+        if(e.key === "Enter"){
+            e.preventDefault();
+        }
+    });
+
+    /* ----------------------
+        OPEN / CLOSE MODAL
+    ---------------------- */
+    if(openBtn) openBtn.addEventListener('click', () => modal.style.display = 'flex');
+
+    if(closeBtn){
+        closeBtn.addEventListener('click', () => modal.style.display = 'none');
+        modal.addEventListener('click', e => { if(e.target === modal) modal.style.display = 'none'; });
+        document.addEventListener('keydown', e => { if(e.key === 'Escape') modal.style.display = 'none'; });
     }
 
-    // Close modal
-    if(closeBtn && createModal){
-        closeBtn.addEventListener('click', () => createModal.style.display='none');
-        createModal.addEventListener('click', e => { if(e.target === createModal) createModal.style.display='none'; });
-    }
-
-    // Image preview
+    /* ----------------------
+       PROFILE PREVIEW
+    ---------------------- */
     if(profileInput){
         profileInput.addEventListener('change', function() {
             const file = this.files[0];
@@ -96,45 +138,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // AJAX submit
+    /* ----------------------
+       AJAX SUBMIT
+    ---------------------- */
     if(form){
         form.addEventListener('submit', async function(e){
             e.preventDefault();
+
+            if(createSubmitting) return;
+            createSubmitting = true;
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
             const formData = new FormData(form);
-            formData.append('action', 'create_dashboard_lead_ajax'); // Must match PHP action
+            formData.append('action', 'create_dashboard_lead_ajax');
             formData.append('nonce', rtDashboardAjax.create_nonce);
 
             try {
-                const response = await fetch(rtDashboardAjax.ajax_url, { method:'POST', body: formData });
-                const text = await response.text();
+                const res = await fetch(rtDashboardAjax.ajax_url, { method: 'POST', body: formData });
+                const json = await res.json();
 
-                let result;
-                try {
-                    result = JSON.parse(text);
-                } catch (err) {
-                    console.error('Invalid JSON:', text);
-                    alert('Server error: invalid JSON (see console)');
-                    return;
-                }
-
-                if(result.success){
+                if(json.success){
                     alert('Lead created successfully!');
                     form.reset();
                     previewAvatar.src = rtDashboardAjax.default_avatar;
-                    createModal.style.display = 'none';
+                    modal.style.display = 'none';
 
                     if(typeof fetchLeads === 'function'){
                         fetchLeads({ page:1, rows:10, search:'', bodyId:'leadsBody', paginationId:'leadsPagination' });
                     }
                 } else {
-                    alert('Error: ' + (result.data || 'Unknown error'));
+                    alert('Error: ' + (json.data || 'Unknown error'));
                 }
 
             } catch(err){
                 alert('Network error: ' + err.message);
+            } finally {
+                createSubmitting = false;
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Lead';
             }
         });
     }
+
 });
 </script>
 

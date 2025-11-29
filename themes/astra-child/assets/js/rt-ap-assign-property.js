@@ -61,10 +61,12 @@ jQuery(document).ready(function($) {
             $('#property-suggestions').hide();
         });
 
-        // Client search
+        // ---------------------------
+        // CLIENT SEARCH AUTOCOMPLETE
+        // ---------------------------
         $('#client-search').on('input', function() {
             let term = $(this).val().trim().replace(/\s+/g, ' ');
-            
+
             if (term.length < 2) { 
                 $('#client-suggestions').hide().empty(); 
                 return; 
@@ -113,7 +115,9 @@ jQuery(document).ready(function($) {
             $('#client-suggestions').hide();
         });
 
-        // Assign button
+        // ---------------------------
+        // ASSIGN PROPERTY BUTTON
+        // ---------------------------
         $('#assign-btn').on('click', function() {
             const client_id = $('#client-id').val();
             const property_id = $('#property-id').val();
@@ -152,76 +156,9 @@ jQuery(document).ready(function($) {
             });
         });
 
-        // Upload button click handler
-        $(document).on('click', '.upload-assignment', function() {
-            const assignmentId = $(this).data('assignment-id');
-            
-            const uploadModal = $('#cl-upload-document-modal');
-            if (uploadModal.length) {
-                $('input[name="property_id"]').val(assignmentId);
-                uploadModal.show();
-                $('#upload-document-form')[0].reset();
-                $('#selected-file-name').hide();
-            } else {
-                alert('Upload modal not found. Please refresh the page.');
-            }
-        });
-
-        // Close modal handler
-        $(document).on('click', '.clup-close-btn', function() {
-            $('#cl-upload-document-modal').hide();
-        });
-
-        // Close modal when clicking outside
-        $(document).on('click', '#cl-upload-document-modal', function(e) {
-            if (e.target === this) {
-                $(this).hide();
-            }
-        });
-
-        // File upload browse button
-        $(document).on('click', '.clup-browse', function() {
-            $('.clup-file-input').click();
-        });
-
-        // Show selected file name
-        $(document).on('change', '.clup-file-input', function() {
-            const fileName = $(this).val().split('\\').pop();
-            if (fileName) {
-                $('#selected-file-name').text('Selected: ' + fileName).show();
-            } else {
-                $('#selected-file-name').hide();
-            }
-        });
-
-        // Form submission handler
-        $(document).on('submit', '#upload-document-form', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            const assignmentId = $('input[name="property_id"]').val();
-
-            $.ajax({
-                url: rtAssignPropertyAjax.ajax_url,
-                type: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    if (response.success) {
-                        alert('Document uploaded successfully!');
-                        $('#cl-upload-document-modal').hide();
-                    } else {
-                        alert('Error: ' + (response.data.message || 'Upload failed'));
-                    }
-                },
-                error: function() {
-                    alert('Network error occurred. Please try again.');
-                }
-            });
-        });
-
-        // Edit button click handler
+        // ---------------------------
+        // EDIT ASSIGNMENT MODAL
+        // ---------------------------
         $(document).on('click', '.edit-assignment', function() {
             const assignmentId = $(this).data('assignment-id');
             const currentClientId = $(this).data('client-id');
@@ -249,7 +186,7 @@ jQuery(document).ready(function($) {
         // Edit modal client search
         $('#edit-client-search').on('input', function() {
             let term = $(this).val().trim().replace(/\s+/g, ' ');
-            
+
             if (term.length < 2) { 
                 $('#edit-client-suggestions').hide().empty(); 
                 return; 
@@ -336,7 +273,7 @@ jQuery(document).ready(function($) {
             }, 300);
         });
 
-        // Edit modal suggestion click handlers
+        // Click handlers for edit modal suggestions
         $(document).on('click', '#edit-client-suggestions .suggestion-item', function() {
             const clientId = $(this).data('id');
             const clientName = $(this).text();
@@ -355,7 +292,7 @@ jQuery(document).ready(function($) {
             $('#edit-property-suggestions').hide();
         });
 
-        // Edit form submission
+        // Edit assignment form submission
         $(document).on('submit', '#edit-assignment-form', function(e) {
             e.preventDefault();
             
@@ -399,7 +336,9 @@ jQuery(document).ready(function($) {
             });
         });
 
-        // Delete assignment button
+        // ---------------------------
+        // DELETE ASSIGNMENT BUTTON
+        // ---------------------------
         $(document).on('click', '.delete-assignment', function() {
             const assignmentId = $(this).data('assignment-id');
             
@@ -433,6 +372,9 @@ jQuery(document).ready(function($) {
             }
         });
 
+        // ---------------------------
+        // MODAL HANDLERS
+        // ---------------------------
         // Cancel button for edit modal
         $(document).on('click', '.clup-cancel', function() {
             $('#edit-assignment-modal').hide();
@@ -450,7 +392,7 @@ jQuery(document).ready(function($) {
             }
         });
 
-        // Escape key to close ALL modals
+        // Escape key closes all modals
         $(document).on('keydown', function(e) {
             if (e.key === 'Escape') {
                 $('#cl-upload-document-modal').hide();
@@ -458,7 +400,7 @@ jQuery(document).ready(function($) {
             }
         });
 
-        // Hide ALL suggestion boxes when clicking outside
+        // Hide suggestion boxes when clicking outside
         $(document).on('click', function(e) {
             if (!$(e.target).closest('.assign-field').length) {
                 $('#property-suggestions, #client-suggestions, #edit-property-suggestions, #edit-client-suggestions').hide();

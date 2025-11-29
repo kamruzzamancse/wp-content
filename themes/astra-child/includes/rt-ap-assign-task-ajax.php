@@ -32,10 +32,8 @@ function rt_upload_document_handler() {
 
     // Handle file upload
     if (isset($_FILES['file_name']) && $_FILES['file_name']['error'] === 0) {
-
         $uploaded_file = $_FILES['file_name'];
 
-        // Custom folder "realtor-documents"
         add_filter('upload_dir', function ($dirs) {
             $custom_dir = 'realtor-documents';
             $dirs['path']     = $dirs['basedir'] . '/' . $custom_dir;
@@ -60,15 +58,10 @@ function rt_upload_document_handler() {
         wp_die();
     }
 
-    /*
-    ===========================================================
-    CHECK IF DOCUMENT EXISTS (client_id + property_id)
-    ===========================================================
-    */
+    // Check if document exists for client + property
     $existing_doc = $wpdb->get_row(
         $wpdb->prepare(
-            "SELECT id FROM $documents_table 
-             WHERE client_id=%d AND property_id=%d LIMIT 1",
+            "SELECT id FROM $documents_table WHERE client_id=%d AND property_id=%d LIMIT 1",
             $client_id, $property_id
         )
     );
@@ -93,7 +86,6 @@ function rt_upload_document_handler() {
             ['%d']
         );
         $document_id = $existing_doc->id;
-
     } else {
         // INSERT new document
         $wpdb->insert(
@@ -117,14 +109,10 @@ function rt_upload_document_handler() {
         }
     }
 
-    /*
-    ===========================================================
-    CHECK IF ASSIGNED TASK EXISTS (client_id + property_id)
-    ===========================================================
-    */
+    // Check if assignment exists
     $existing_assign = $wpdb->get_row(
         $wpdb->prepare(
-            "SELECT id, deleted_at, deleted_by FROM $assigned_table 
+            "SELECT id, deleted_at, deleted_by FROM {$wpdb->prefix}assigned_tasks 
              WHERE client_id=%d AND property_id=%d LIMIT 1",
             $client_id, $property_id
         )
@@ -144,7 +132,7 @@ function rt_upload_document_handler() {
         }
 
         $wpdb->update(
-            $assigned_table,
+            $wpdb->prefix . 'assigned_tasks',
             $update_data,
             ['id' => $existing_assign->id],
             ['%d','%s','%d','%s','%d'],
@@ -154,7 +142,7 @@ function rt_upload_document_handler() {
     } else {
         // INSERT new assignment
         $wpdb->insert(
-            $assigned_table,
+            $wpdb->prefix . 'assigned_tasks',
             [
                 'client_id'     => $client_id,
                 'property_id'   => $property_id,
@@ -172,11 +160,10 @@ function rt_upload_document_handler() {
 }
 
 /*
-|----------------------------------------------------------------------
+|----------------------------------------------------------------------|
 | AJAX: Soft Delete Assigned Task
-|----------------------------------------------------------------------
+|----------------------------------------------------------------------|
 */
-
 add_action('wp_ajax_rt_delete_assignment', 'rt_delete_assignment_handler');
 
 function rt_delete_assignment_handler() {
@@ -225,12 +212,12 @@ function rt_delete_assignment_handler() {
 }
 
 /*
-|----------------------------------------------------------------------
+|----------------------------------------------------------------------|
 | AJAX: Load Assign Table
-|----------------------------------------------------------------------
+|----------------------------------------------------------------------|
 */
-
 add_action('wp_ajax_rt_load_assign_table', 'rt_load_assign_table');
+
 function rt_load_assign_table() {
     global $wpdb;
 
@@ -240,42 +227,62 @@ function rt_load_assign_table() {
     $search_query    = sanitize_text_field($_POST['search'] ?? '');
     $filter_status   = sanitize_text_field($_POST['filter_status'] ?? '');
 
-    $clients_table               = $wpdb->prefix . 'clients';
-    $rentcast_properties_table   = $wpdb->prefix . 'rentcast_properties';
-    $assigned_property_table     = $wpdb->prefix . 'assigned_property';
-    $assigned_tasks_table        = $wpdb->prefix . 'assigned_tasks';
-    $documents_table             = $wpdb->prefix . 'documents';
-    $reply_docs_table            = $wpdb->prefix . 'reply_docs'; // <-- Reply Docs table
+    $clients_table             = $wpdb->prefix . 'clients';
+    $rentcast_properties_table = $wpdb->prefix . 'rentcast_properties';
+    $assigned_property_table   = $wpdb->prefix . 'assigned_property';
+    $assigned_tasks_table      = $wpdb->prefix . 'assigned_tasks';
+    $documents_table           = $wpdb->prefix . 'documents';
+    $reply_docs_table          = $wpdb->prefix . 'reply_docs';
 
     // Build WHERE clause
     $where_clause = ' WHERE a.deleted_at IS NULL ';
     if ($search_query) {
-        $where_clause .= $wpdb->prepare(" AND (c.full_name LIKE %s OR p.address LIKE %s) ", "%$search_query%", "%$search_query%");
+        $where_clause .= $wpdb->prepare(
+            " AND (CONCAT(c.first_name,' ',c.second_name) LIKE %s OR p.address LIKE %s) ",
+            "%$search_query%", "%$search_query%"
+        );
     }
+
     if ($filter_status === 'with_docs') {
-        $where_clause .= " AND EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
+        $where_clause .= " AND EXISTS (
+            SELECT 1 FROM $assigned_tasks_table t 
+            WHERE t.client_id = a.client_id 
+              AND t.property_id = a.property_id 
+              AND t.deleted_at IS NULL
+        ) ";
     }
     if ($filter_status === 'no_docs') {
-        $where_clause .= " AND NOT EXISTS (SELECT 1 FROM $assigned_tasks_table t WHERE t.client_id = a.client_id AND t.property_id = a.property_id AND t.deleted_at IS NULL) ";
+        $where_clause .= " AND NOT EXISTS (
+            SELECT 1 FROM $assigned_tasks_table t 
+            WHERE t.client_id = a.client_id 
+              AND t.property_id = a.property_id 
+              AND t.deleted_at IS NULL
+        ) ";
     }
 
     // Count total items
-    $total_items = $wpdb->get_var("SELECT COUNT(a.id)
-                                   FROM {$assigned_property_table} a
-                                   LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
-                                   LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
-                                   $where_clause");
+    $total_items = $wpdb->get_var(
+        "SELECT COUNT(a.id)
+         FROM {$assigned_property_table} a
+         LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
+         LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
+         $where_clause"
+    );
 
     // Fetch data
-    $results = $wpdb->get_results("
-      SELECT a.id AS assignment_id, a.client_id, a.property_id, a.created_at, c.full_name, p.address
-      FROM {$assigned_property_table} a
-      LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
-      LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
-      $where_clause
-      ORDER BY a.created_at DESC
-      LIMIT $items_per_page OFFSET $offset
-    ");
+    $results = $wpdb->get_results(
+        "SELECT a.id AS assignment_id, a.client_id, a.property_id, a.created_at,
+                c.first_name, c.second_name, p.address
+         FROM {$assigned_property_table} a
+         LEFT JOIN {$clients_table} c ON a.client_id = c.user_id
+         LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
+         $where_clause
+         ORDER BY a.created_at DESC
+         LIMIT $items_per_page OFFSET $offset"
+    );
+
+// Log the SQL query
+error_log("rt_load_assign_table SQL Query: " . $sql);
 
     ob_start();
     if ($results) {
@@ -291,26 +298,29 @@ function rt_load_assign_table() {
                   </tr>
                 </thead>
                 <tbody>';
+
         foreach ($results as $row) {
             $doc_name = $note_text = $reply_doc_name = '';
             $task_id = 0;
 
             // Fetch latest assigned task
-            $task = $wpdb->get_row($wpdb->prepare("
-                SELECT t.id AS task_id, t.document_id
-                FROM {$assigned_tasks_table} t
-                WHERE t.client_id=%d AND t.property_id=%d AND t.deleted_at IS NULL
-                ORDER BY t.id DESC LIMIT 1
-            ", $row->client_id, $row->property_id));
+            $task = $wpdb->get_row($wpdb->prepare(
+                "SELECT t.id AS task_id, t.document_id
+                 FROM {$assigned_tasks_table} t
+                 WHERE t.client_id=%d AND t.property_id=%d AND t.deleted_at IS NULL
+                 ORDER BY t.id DESC LIMIT 1",
+                $row->client_id, $row->property_id
+            ));
 
             if ($task) {
                 $task_id = $task->task_id;
                 if ($task->document_id) {
-                    $doc = $wpdb->get_row($wpdb->prepare("
-                        SELECT title, file_name, note
-                        FROM {$documents_table}
-                        WHERE id=%d AND deleted_at IS NULL
-                    ", $task->document_id));
+                    $doc = $wpdb->get_row($wpdb->prepare(
+                        "SELECT title, file_name, note
+                         FROM {$documents_table}
+                         WHERE id=%d AND deleted_at IS NULL",
+                        $task->document_id
+                    ));
                     if ($doc) {
                         $file_short = basename($doc->file_name);
                         $doc_name = '<a href="' . esc_url($doc->file_name) . '" target="_blank">' . esc_html($file_short) . '</a>';
@@ -321,19 +331,21 @@ function rt_load_assign_table() {
 
             // Fetch reply docs
             if ($task_id) {
-                $reply = $wpdb->get_row($wpdb->prepare("
-                    SELECT r.document_id
-                    FROM {$reply_docs_table} r
-                    WHERE r.assigned_task_id = %d AND r.client_id = %d AND r.property_id = %d AND r.deleted_at IS NULL
-                    ORDER BY r.id DESC LIMIT 1
-                ", $task_id, $row->client_id, $row->property_id));
+                $reply = $wpdb->get_row($wpdb->prepare(
+                    "SELECT r.document_id
+                     FROM {$reply_docs_table} r
+                     WHERE r.assigned_task_id = %d AND r.client_id = %d AND r.property_id = %d AND r.deleted_at IS NULL
+                     ORDER BY r.id DESC LIMIT 1",
+                    $task_id, $row->client_id, $row->property_id
+                ));
 
                 if ($reply && $reply->document_id) {
-                    $reply_doc = $wpdb->get_row($wpdb->prepare("
-                        SELECT title, file_name
-                        FROM {$documents_table}
-                        WHERE id = %d AND deleted_at IS NULL
-                    ", $reply->document_id));
+                    $reply_doc = $wpdb->get_row($wpdb->prepare(
+                        "SELECT title, file_name
+                         FROM {$documents_table}
+                         WHERE id = %d AND deleted_at IS NULL",
+                        $reply->document_id
+                    ));
 
                     if ($reply_doc) {
                         $file_short = basename($reply_doc->file_name);
@@ -342,12 +354,15 @@ function rt_load_assign_table() {
                 }
             }
 
+            $full_name = trim($row->first_name . ' ' . $row->second_name);
+            if (!$full_name) $full_name = 'N/A';
+
             echo '<tr 
                     data-assignment-id="'.esc_attr($row->assignment_id).'" 
                     data-task-id="'.esc_attr($task_id).'" 
                     data-client-id="'.esc_attr($row->client_id).'" 
                     data-property-id="'.esc_attr($row->property_id).'">
-                    <td data-label="Client">'.esc_html($row->full_name).'</td>
+                    <td data-label="Client">'.esc_html($full_name).'</td>
                     <td data-label="Address">'.esc_html($row->address).'</td>
                     <td data-label="Assigned Docs">'.$doc_name.'</td>
                     <td data-label="Note">'.$note_text.'</td>

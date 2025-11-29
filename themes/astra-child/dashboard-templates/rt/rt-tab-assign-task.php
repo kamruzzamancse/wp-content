@@ -9,7 +9,6 @@ $rentcast_properties_table   = $wpdb->prefix . 'rentcast_properties';
 $assigned_property_table     = $wpdb->prefix . 'assigned_property';
 $assigned_tasks_table        = $wpdb->prefix . 'assigned_tasks';
 $documents_table             = $wpdb->prefix . 'documents';
-
 ?>
 
 <div class="assign-task-container">

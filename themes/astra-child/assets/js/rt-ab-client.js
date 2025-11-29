@@ -143,42 +143,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ===== Create Client Form =====
     const createForm = document.getElementById('createRealtorClientForm');
-    createForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const submitBtn = this.querySelector('button[type="submit"]');
-        if (submitBtn.disabled) return;
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Creating...';
+    if (createForm) {
+        createForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
 
-        const formData = new FormData(this);
+            const formData = new FormData(this);
 
-        // Validate required fields
-        const first_name = (formData.get('first_name') || '').trim();
-        const first_email = (formData.get('first_email') || '').trim();
-        const status = formData.get('status') || '';
+            const first_name = (formData.get('first_name') || '').trim();
+            const first_email = (formData.get('first_email') || '').trim();
+            const status = formData.get('status') || '';
 
-        if (!first_name) { showNotification('First Name is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
-        if (!first_email) { showNotification('Primary Email is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
-        if (!status) { showNotification('Status is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
+            if (!first_name) { showNotification('First Name is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
+            if (!first_email) { showNotification('Primary Email is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
+            if (!status) { showNotification('Status is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
 
-        // Map JS fields to PHP expected names
-        formData.set('first_name', first_name);
-        formData.set('second_name', (formData.get('second_name') || '').trim());
-        formData.set('first_email', first_email);
-        formData.set('second_email', (formData.get('second_email') || '').trim());
-        formData.set('first_phone', (formData.get('first_phone') || '').trim());
-        formData.set('second_phone', (formData.get('second_phone') || '').trim());
-        formData.set('address', (formData.get('address') || '').trim());
-        formData.set('note', (formData.get('note') || '').trim());
-        formData.set('status', status);
+            formData.set('first_name', first_name);
+            formData.set('second_name', (formData.get('second_name') || '').trim());
+            formData.set('first_email', first_email);
+            formData.set('second_email', (formData.get('second_email') || '').trim());
+            formData.set('first_phone', (formData.get('first_phone') || '').trim());
+            formData.set('second_phone', (formData.get('second_phone') || '').trim());
+            formData.set('address', (formData.get('address') || '').trim());
+            formData.set('note', (formData.get('note') || '').trim());
+            formData.set('status', status);
 
-        // Append action and nonce
-        formData.append('action', 'create_realtor_client_ajax');
-        formData.append('nonce', rtClientAjax.create_nonce);
+            formData.append('action', 'create_realtor_client_ajax');
+            formData.append('nonce', rtClientAjax.create_nonce);
 
-        try {
-            const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-            const result = await response.json();
+            const result = await ajaxFetch(formData);
 
             if (result.success) {
                 showNotification('Client created successfully!');
@@ -196,13 +192,57 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 showNotification('Error: ' + result.data, 'error');
             }
-        } catch (err) {
-            showNotification('Network error. Please try again.', 'error');
-        } finally {
+
             submitBtn.disabled = false;
             submitBtn.textContent = 'Create Client';
-        }
-    });
+        });
+    }
+
+    // ===== Edit Client Form =====
+    const editForm = document.getElementById('editRealtorClientForm');
+    if (editForm) {
+        editForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Updating...';
+
+            const clientId = document.getElementById('edit_realtor_client_id').value;
+            if (!clientId) { showNotification('Missing client ID', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
+
+            const formData = new FormData(this);
+            formData.append('action', 'update_realtor_client_ajax');
+            formData.append('nonce', rtClientAjax.edit_nonce);
+
+            const first_name = (formData.get('first_name') || '').trim();
+            const first_email = (formData.get('first_email') || '').trim();
+            const status = formData.get('status') || '';
+
+            if (!first_name) { showNotification('First Name is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
+            if (!first_email) { showNotification('Primary Email is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
+            if (!status) { showNotification('Status is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
+
+            const result = await ajaxFetch(formData);
+
+            if (result.success) {
+                showNotification('Client updated successfully!');
+                document.getElementById('rmRealtorClientEditModal').style.display = 'none';
+                fetchClients({
+                    page: 1,
+                    rows: parseInt(document.getElementById('addressBookRows').value, 10),
+                    search: document.getElementById('addressBookSearch').value.trim(),
+                    bodyId: 'addressBookBody',
+                    paginationId: 'addressBookPagination'
+                });
+            } else {
+                showNotification('Error: ' + result.data, 'error');
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Update Client';
+        });
+    }
 
     // ===== Image Preview =====
     const profileInputs = [
@@ -226,6 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ===== Modal open/close =====
     function initializeModalFunctionality() {
+        // Create modal
         const createModal = document.getElementById('rmRealtorClientCreateModal');
         const addContactBtn = document.querySelector('.ab-btn-create');
         const closeBtn = document.getElementById('closeRealtorClientCreateModal');
@@ -234,6 +275,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (closeBtn && createModal) {
             closeBtn.addEventListener('click', () => createModal.style.display = 'none');
             createModal.addEventListener('click', e => { if (e.target === createModal) createModal.style.display = 'none'; });
+        }
+
+        // Edit modal
+        const editModal = document.getElementById('rmRealtorClientEditModal');
+        const closeEditBtn = document.getElementById('closeRealtorClientEditModal');
+        if (closeEditBtn && editModal) {
+            closeEditBtn.addEventListener('click', () => editModal.style.display = 'none');
+            editModal.addEventListener('click', e => { if (e.target === editModal) editModal.style.display = 'none'; });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') editModal.style.display = 'none'; });
         }
     }
 
@@ -259,8 +309,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     formData.append('nonce', rtClientAjax.edit_nonce);
                     formData.append('client_id', clientId);
 
-                    const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                    const result = await response.json();
+                    const result = await ajaxFetch(formData);
                     if (!result.success) throw new Error(result.data || 'Failed to fetch client data');
 
                     const client = result.data;
@@ -278,9 +327,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const previewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
                     if (previewAvatar) previewAvatar.src = client.profile_picture || rtClientAjax.default_avatar;
-
                 } catch (error) {
-                    alert('Error loading client data: ' + error.message);
+                    showNotification('Error loading client data: ' + error.message, 'error');
                 }
             });
         });
@@ -303,8 +351,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     formData.append('nonce', rtClientAjax.delete_nonce);
                     formData.append('client_id', clientId);
 
-                    const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                    const result = await response.json();
+                    const result = await ajaxFetch(formData);
 
                     if (result.success) {
                         showNotification('Client deleted successfully!', 'success');
