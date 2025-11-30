@@ -274,7 +274,7 @@ function rt_load_assign_table() {
         "SELECT a.id AS assignment_id, a.client_id, a.property_id, a.created_at,
                 c.first_name, c.second_name, p.address
          FROM {$assigned_property_table} a
-         LEFT JOIN {$clients_table} c ON a.client_id = c.user_id
+         LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
          LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
          $where_clause
          ORDER BY a.created_at DESC

@@ -9,6 +9,9 @@ add_action('wp_ajax_cl_delete_reply_doc', 'cl_delete_reply_doc_handler');
 // new ajax action for refreshing table dynamically
 add_action('wp_ajax_rt_refresh_documents_table', 'rt_refresh_documents_table_handler');
 
+/**
+ * Upload or update a reply document
+ */
 function cl_upload_reply_doc_handler() {
     global $wpdb;
 
@@ -60,7 +63,7 @@ function cl_upload_reply_doc_handler() {
     $now = current_time('mysql');
     $current_user = get_current_user_id();
 
-    // Step 1: Documents টেবিলে ইনসার্ট / আপডেট (with doc_type = 'replied')
+    // Step 1: Insert/update in documents table (doc_type = 'replied')
     $existing_doc = $wpdb->get_row($wpdb->prepare("
         SELECT id FROM $documents_table 
         WHERE client_id=%d AND property_id=%d AND doc_type='replied' AND deleted_at IS NULL LIMIT 1
@@ -104,7 +107,7 @@ function cl_upload_reply_doc_handler() {
         wp_die();
     }
 
-    // Step 2: Reply Docs টেবিলে ইনসার্ট / আপডেট
+    // Step 2: Insert/update in reply_docs table
     $existing_reply = $wpdb->get_row($wpdb->prepare("
         SELECT id FROM $reply_docs_table
         WHERE client_id=%d AND property_id=%d AND assigned_task_id=%d AND deleted_at IS NULL LIMIT 1
@@ -137,12 +140,13 @@ function cl_upload_reply_doc_handler() {
         );
     }
 
-    // send success + signal to reload table via JS
     wp_send_json_success(['message' => 'Reply document uploaded successfully.', 'reload_table' => true]);
     wp_die();
 }
 
-// Delete Reply Document (soft delete)
+/**
+ * Soft delete a reply document
+ */
 function cl_delete_reply_doc_handler() {
     global $wpdb;
 
@@ -182,7 +186,9 @@ function cl_delete_reply_doc_handler() {
     wp_die();
 }
 
-// New function: reload document table content dynamically
+/**
+ * Refresh documents table dynamically via AJAX
+ */
 function rt_refresh_documents_table_handler() {
     global $wpdb;
 
@@ -196,9 +202,11 @@ function rt_refresh_documents_table_handler() {
 
     ob_start();
 
+    // Updated query to concatenate first_name + second_name
     $results = $wpdb->get_results($wpdb->prepare("
         SELECT a.id, a.client_id, a.property_id, a.created_at,
-               c.full_name, p.address
+               CONCAT_WS(' ', c.first_name, c.second_name) AS full_name,
+               p.address
         FROM {$assigned_property_table} a
         LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
         LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id

@@ -17,11 +17,15 @@ $image_url = $upload_dir['baseurl'];
 
         <div class="modal-body">
             <table class="client-details-rt">
-                <tr><td>Client Name</td><td id="clientNameCell">—</td></tr>
-                <tr><td>Email</td><td id="clientEmailCell">—</td></tr>
-                <tr><td>Phone Number</td><td id="clientPhoneCell">—</td></tr>
+                <tr><td>Full Name</td><td id="clientNameCell">—</td></tr>
+                <tr><td>Primary Email</td><td id="clientEmailCell">—</td></tr>
+                <tr><td>Secondary Email</td><td id="clientSecondEmailCell">—</td></tr>
+                <tr><td>Primary Phone</td><td id="clientPhoneCell">—</td></tr>
+                <tr><td>Secondary Phone</td><td id="clientSecondPhoneCell">—</td></tr>
+                <tr><td>Address</td><td id="clientAddressCell">—</td></tr>
                 <tr><td>Notes</td><td id="clientNotesCell">—</td></tr>
                 <tr><td>Status</td><td id="clientStatusCell">—</td></tr>
+                <tr><td>Lead Status</td><td id="clientLeadStatusCell">—</td></tr>
             </table>
 
             <h2 class="modal-title" style="margin-bottom: 10px">Associated Properties</h2>
@@ -38,9 +42,6 @@ $image_url = $upload_dir['baseurl'];
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    let currentClientId = null;
-    let currentClientData = null;
-
     const clientModal = document.getElementById('clientDetailsModal');
     const closeModalBtn = document.getElementById('closeClientDetailsModal');
     const propertiesContainer = document.getElementById('clientPropertiesContainer');
@@ -66,10 +67,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const result = await response.json();
             if (!result.success) throw new Error(result.data || 'API returned failure');
 
-            currentClientData = result.data;
-            currentClientId = clientId;
             updateClientUI(result.data);
-
         } catch(error) {
             alert('Error loading client data: ' + error.message);
             showErrorState();
@@ -79,23 +77,44 @@ document.addEventListener("DOMContentLoaded", function () {
     function showLoadingState() {
         document.getElementById('clientName').textContent = 'Loading...';
         document.getElementById('clientNameCell').textContent = 'Loading...';
+        document.getElementById('clientEmailCell').textContent = 'Loading...';
+        document.getElementById('clientSecondEmailCell').textContent = 'Loading...';
+        document.getElementById('clientPhoneCell').textContent = 'Loading...';
+        document.getElementById('clientSecondPhoneCell').textContent = 'Loading...';
+        document.getElementById('clientAddressCell').textContent = 'Loading...';
+        document.getElementById('clientNotesCell').textContent = 'Loading...';
+        document.getElementById('clientStatusCell').textContent = 'Loading...';
+        document.getElementById('clientLeadStatusCell').textContent = 'Loading...';
         propertiesContainer.innerHTML = '<p>Loading properties...</p>';
     }
 
     function showErrorState() {
         document.getElementById('clientName').textContent = 'Error Loading';
         document.getElementById('clientNameCell').textContent = 'Error';
+        document.getElementById('clientEmailCell').textContent = 'Error';
+        document.getElementById('clientSecondEmailCell').textContent = 'Error';
+        document.getElementById('clientPhoneCell').textContent = 'Error';
+        document.getElementById('clientSecondPhoneCell').textContent = 'Error';
+        document.getElementById('clientAddressCell').textContent = 'Error';
+        document.getElementById('clientNotesCell').textContent = 'Error';
+        document.getElementById('clientStatusCell').textContent = 'Error';
+        document.getElementById('clientLeadStatusCell').textContent = 'Error';
         propertiesContainer.innerHTML = '<p>Failed to load properties</p>';
     }
 
     function updateClientUI(client) {
         document.getElementById('clientAvatar').src = client.profile_picture || (rtClientAjax?.default_avatar || '<?php echo esc_url($image_url . '/2025/08/client-photo.jpg'); ?>');
-        document.getElementById('clientName').textContent = client.full_name || '—';
-        document.getElementById('clientNameCell').textContent = client.full_name || '—';
-        document.getElementById('clientEmailCell').textContent = client.email || '—';
-        document.getElementById('clientPhoneCell').textContent = client.phone || '—';
+        const fullName = `${client.first_name || ''} ${client.second_name || ''}`.trim() || '—';
+        document.getElementById('clientName').textContent = fullName;
+        document.getElementById('clientNameCell').textContent = fullName;
+        document.getElementById('clientEmailCell').textContent = client.first_email || '—';
+        document.getElementById('clientSecondEmailCell').textContent = client.second_email || '—';
+        document.getElementById('clientPhoneCell').textContent = client.first_phone || '—';
+        document.getElementById('clientSecondPhoneCell').textContent = client.second_phone || '—';
+        document.getElementById('clientAddressCell').textContent = client.address || '—';
         document.getElementById('clientNotesCell').textContent = client.note || '—';
         document.getElementById('clientStatusCell').textContent = client.status || '—';
+        document.getElementById('clientLeadStatusCell').textContent = client.lead_status || '—';
 
         updatePropertiesUI(client.assigned_properties || []);
     }
@@ -132,7 +151,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function numberWithCommas(x) {
         return x ? x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0';
     }
-
 });
 </script>
 

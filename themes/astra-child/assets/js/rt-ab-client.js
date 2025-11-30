@@ -56,14 +56,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ===== Fetch Clients =====
-    window.fetchClients = async function({ page = 1, rows = 10, search = '', bodyId, paginationId }) {
+   // ===== Fetch Clients (with working sorting, search, pagination) =====
+    window.fetchClients = async function(params) {
+        const {
+            page = 1,
+            rows = 10,
+            search = '',
+            sort_by,
+            sort_order,
+            bodyId,
+            paginationId
+        } = params;
+
+        // Apply default sorting ONLY when not provided
+        const finalSortBy = sort_by || 'created_at';
+        const finalSortOrder = sort_order || 'DESC';
+
         const formData = new FormData();
         formData.append('action', 'fetch_clients_ajax');
         formData.append('nonce', rtClientAjax.edit_nonce);
         formData.append('page', page);
         formData.append('rows', rows);
         formData.append('search', search);
+        formData.append('sort_by', finalSortBy);
+        formData.append('sort_order', finalSortOrder);
 
         const result = await ajaxFetch(formData);
         const tbody = document.getElementById(bodyId);
@@ -74,12 +90,22 @@ document.addEventListener('DOMContentLoaded', function () {
         pagination.innerHTML = '';
 
         if (result.success && result.data.clients.length > 0) {
+
             result.data.clients.forEach(client => {
                 const tr = document.createElement('tr');
                 tr.dataset.clientId = client.client_id;
+
                 tr.innerHTML = `
-                    <td><img src="${client.profile_picture || rtClientAjax.default_avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></td>
-                    <td class="client-name-cell" style="cursor:pointer;color:#007bff;font-weight:500;">${client.first_name || ''}</td>
+                    <td>
+                        <img src="${client.profile_picture || rtClientAjax.default_avatar}"
+                            style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                    </td>
+
+                    <td class="client-name-cell" 
+                        style="cursor:pointer;color:#007bff;font-weight:500;">
+                        ${client.first_name || ''}
+                    </td>
+
                     <td>${client.second_name || ''}</td>
                     <td>${client.first_email || ''}</td>
                     <td>${client.second_email || ''}</td>
@@ -88,28 +114,71 @@ document.addEventListener('DOMContentLoaded', function () {
                     <td>${client.address || ''}</td>
                     <td>${client.note || ''}</td>
                     <td>${client.status || ''}</td>
+
                     <td>
                         <span class="editClientBtn" style="cursor:pointer;margin-right:10px;">✏️</span>
                         <span class="deleteClientBtn" style="cursor:pointer;margin-right:10px;">🗑️</span>
                     </td>
                 `;
+
                 tbody.appendChild(tr);
             });
 
+            // ===== Pagination Buttons =====
             for (let i = 1; i <= result.data.total_pages; i++) {
                 const btn = document.createElement('button');
                 btn.textContent = i;
+
                 if (i === page) btn.classList.add('active');
-                btn.addEventListener('click', () => fetchClients({ page: i, rows, search, bodyId, paginationId }));
+
+                btn.addEventListener('click', () => fetchClients({
+                    page: i,
+                    rows,
+                    search,
+                    sort_by: finalSortBy,
+                    sort_order: finalSortOrder,
+                    bodyId,
+                    paginationId
+                }));
+
                 pagination.appendChild(btn);
             }
 
+            // Re-bind click handlers after rows load
             setupRowButtons(bodyId);
             setupClientDetailsHandlers();
+
         } else {
-            tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;">No clients found</td></tr>`;
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="11" style="text-align:center;">No clients found</td>
+                </tr>`;
         }
     };
+
+
+    // ===== Sorting by clicking table headers =====
+    document.querySelectorAll('#addressBookTable th.sortable').forEach(th => {
+        th.style.cursor = "pointer";
+        th.dataset.order = "ASC";
+
+        th.addEventListener('click', () => {
+            const sort_by = th.dataset.column;
+            const sort_order = th.dataset.order === 'ASC' ? 'DESC' : 'ASC';
+            th.dataset.order = sort_order;
+
+            fetchClients({
+                page: 1,
+                rows: parseInt(document.getElementById('addressBookRows').value, 10),
+                search: document.getElementById('addressBookSearch').value.trim(),
+                sort_by,
+                sort_order,
+                bodyId: 'addressBookBody',
+                paginationId: 'addressBookPagination'
+            });
+        });
+    });
+
 
     function setupClientDetailsHandlers() {
         document.removeEventListener('click', handleClientNameClick);
@@ -152,7 +221,6 @@ document.addEventListener('DOMContentLoaded', function () {
             submitBtn.textContent = 'Creating...';
 
             const formData = new FormData(this);
-
             const first_name = (formData.get('first_name') || '').trim();
             const first_email = (formData.get('first_email') || '').trim();
             const status = formData.get('status') || '';

@@ -40,6 +40,11 @@ function rt_fetch_clients_ajax() {
         $params = [$like, $like, $like, $like, $like, $like, $like];
     }
 
+    // Sorting
+    $allowed_sort_columns = ['first_name','second_name','first_email','second_email','first_phone','second_phone','address','status','created_at'];
+    $sort_by = in_array($_POST['sort_by'] ?? '', $allowed_sort_columns) ? $_POST['sort_by'] : 'created_at';
+    $sort_order = strtoupper($_POST['sort_order'] ?? 'DESC') === 'ASC' ? 'ASC' : 'DESC';
+
     // Total count
     $count_query = !empty($params) 
         ? $wpdb->prepare("SELECT COUNT(*) FROM {$table} {$where}", $params) 
@@ -49,7 +54,7 @@ function rt_fetch_clients_ajax() {
     // Select columns
     $select = "client_id, first_name, second_name, first_email, second_email, first_phone, second_phone, address, note, status, profile_picture, created_at";
 
-    $sql = "SELECT {$select} FROM {$table} {$where} ORDER BY created_at DESC LIMIT %d, %d";
+    $sql = "SELECT {$select} FROM {$table} {$where} ORDER BY {$sort_by} {$sort_order} LIMIT %d, %d";
     if (!empty($params)) {
         $params[] = $offset;
         $params[] = $rows;
@@ -384,7 +389,14 @@ function rt_export_clients_ajax() {
     global $wpdb;
     $table = $wpdb->prefix . 'clients';
 
-    $allowed_cols = ['full_name', 'email', 'phone', 'address', 'note', 'status', 'profile_picture', 'created_at'];
+    // Allowed columns based on table structure
+    $allowed_cols = [
+        'client_id', 'user_id', 'first_name', 'second_name', 'first_email', 'second_email',
+        'first_phone', 'second_phone', 'address', 'note', 'status', 'lead_status',
+        'profile_picture', 'created_at', 'created_by', 'updated_at', 'updated_by', 
+        'deleted_at', 'deleted_by'
+    ];
+
     $columns = json_decode(stripslashes($_POST['columns'] ?? '[]'), true);
     $columns = array_intersect($allowed_cols, $columns);
     if (empty($columns)) $columns = $allowed_cols;
@@ -403,7 +415,10 @@ function rt_export_clients_ajax() {
     }
 
     $select = implode(',', array_map('esc_sql', $columns));
-    $sql = !empty($params) ? $wpdb->prepare("SELECT {$select} FROM {$table} {$where}", $params) : "SELECT {$select} FROM {$table} {$where}";
+    $sql = !empty($params) 
+        ? $wpdb->prepare("SELECT {$select} FROM {$table} {$where}", $params) 
+        : "SELECT {$select} FROM {$table} {$where}";
+
     $results = $wpdb->get_results($sql, ARRAY_A);
 
     wp_send_json_success(['clients' => $results]);
@@ -428,10 +443,18 @@ function rt_import_clients_ajax() {
     $file = $_FILES['clients_file']['tmp_name'];
     $filename = $_FILES['clients_file']['name'];
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $clients = [];
 
+    // =====================
+    // Parse CSV
+    // =====================
     if ($ext === 'csv') {
         $clients = rt_parse_csv_file($file);
-    } elseif ($ext === 'xlsx') {
+    }
+    // =====================
+    // Parse XLSX
+    // =====================
+    elseif ($ext === 'xlsx') {
         if (!class_exists('\PhpOffice\PhpSpreadsheet\IOFactory')) {
             require_once ABSPATH . 'wp-admin/includes/file.php';
             require_once WP_CONTENT_DIR . '/vendor/autoload.php';
@@ -440,7 +463,6 @@ function rt_import_clients_ajax() {
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file);
             $sheet = $spreadsheet->getActiveSheet();
             $data = $sheet->toArray(null, true, true, true);
-            $clients = [];
 
             $headers = array_map('strtolower', array_map('trim', $data[1] ?? []));
             unset($data[1]);
@@ -448,12 +470,9 @@ function rt_import_clients_ajax() {
             foreach ($data as $row) {
                 $client = [];
                 foreach ($headers as $key => $header) {
-                    $value = trim($row[$key]);
-                    if (!empty($header)) {
-                        $client[$header] = $value;
-                    }
+                    if (!empty($header)) $client[$header] = trim($row[$key] ?? '');
                 }
-                $clients[] = $client;
+                if (!empty($client)) $clients[] = $client;
             }
         } catch (Exception $e) {
             wp_send_json_error('Failed to read Excel file: ' . $e->getMessage());
@@ -479,105 +498,112 @@ function rt_import_clients_ajax() {
     foreach ($clients as $index => $row) {
         $row_num = $index + 1;
 
-        $full_name = sanitize_text_field($row['full_name'] ?? $row['name'] ?? $row['client_name'] ?? '');
-        $email     = sanitize_email($row['email'] ?? '');
-        $phone     = sanitize_text_field($row['phone'] ?? $row['mobile'] ?? $row['phone_number'] ?? '');
-        $address   = sanitize_text_field($row['address'] ?? '');
-        $note      = sanitize_textarea_field($row['note'] ?? $row['notes'] ?? '');
-        $status    = sanitize_text_field($row['status'] ?? 'active');
+        // Sanitize all fields
+        $first_name = sanitize_text_field($row['first_name'] ?? '');
+        $second_name = sanitize_text_field($row['second_name'] ?? '');
+        $first_email = sanitize_email($row['first_email'] ?? '');
+        $second_email = sanitize_email($row['second_email'] ?? '');
+        $first_phone = sanitize_text_field($row['first_phone'] ?? '');
+        $second_phone = sanitize_text_field($row['second_phone'] ?? '');
+        $address = sanitize_text_field($row['address'] ?? '');
+        $note = sanitize_textarea_field($row['note'] ?? '');
+        $status = sanitize_text_field($row['status'] ?? 'active');
+        $lead_status = in_array($row['lead_status'] ?? '', ['hot','warm','cold']) ? $row['lead_status'] : 'cold';
+        $profile_picture = sanitize_text_field($row['profile_picture'] ?? '');
 
-        if (empty($full_name) || empty($email)) {
-            $errors[] = "Row {$row_num}: Missing required fields (name or email).";
+        // Required fields
+        if (empty($first_name) || empty($first_email)) {
+            $errors[] = "Row {$row_num}: Missing required fields (first_name or first_email).";
             $skipped++;
             continue;
         }
-        if (!is_email($email)) {
-            $errors[] = "Row {$row_num}: Invalid email format ({$email}).";
+        if (!is_email($first_email)) {
+            $errors[] = "Row {$row_num}: Invalid email format ({$first_email}).";
             $skipped++;
             continue;
         }
 
-        $existing_wp_user_id = email_exists($email);
+        // Check existing WP user
+        $existing_wp_user_id = email_exists($first_email);
         if ($existing_wp_user_id) {
-            $errors[] = "Row {$row_num}: User already exists in wp_users ({$email}).";
+            $errors[] = "Row {$row_num}: WP user already exists ({$first_email}).";
             $skipped++;
             continue;
         }
 
-        if (!empty($phone)) {
-            $phone_exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT client_id FROM {$table} WHERE phone = %s AND deleted_at IS NULL",
-                $phone
-            ));
-            if ($phone_exists) {
-                $errors[] = "Row {$row_num}: Duplicate phone ({$phone}).";
-                $skipped++;
-                continue;
-            }
-        }
-
+        // Check existing client
         $existing_client_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT client_id FROM {$table} WHERE email = %s AND deleted_at IS NULL",
-            $email
+            "SELECT client_id FROM {$table} WHERE first_email = %s AND deleted_at IS NULL",
+            $first_email
         ));
 
         if ($existing_client_id && $duplicate_handling === 'update') {
             $update_data = [
-                'full_name'   => $full_name,
-                'phone'       => $phone,
-                'address'     => $address,
-                'note'        => $note,
-                'status'      => $status,
-                'updated_at'  => current_time('mysql'),
-                'updated_by'  => $current_user_id
+                'first_name' => $first_name,
+                'second_name' => $second_name,
+                'second_email' => $second_email,
+                'first_phone' => $first_phone,
+                'second_phone' => $second_phone,
+                'address' => $address,
+                'note' => $note,
+                'status' => $status,
+                'lead_status' => $lead_status,
+                'profile_picture' => $profile_picture,
+                'updated_at' => current_time('mysql'),
+                'updated_by' => $current_user_id
             ];
             $res = $wpdb->update($table, $update_data, ['client_id' => $existing_client_id]);
-            if ($res !== false) {
-                $updated++;
-            } else {
-                $errors[] = "Row {$row_num}: Failed to update existing client ({$email}).";
-            }
+            if ($res !== false) $updated++;
+            else $errors[] = "Row {$row_num}: Failed to update existing client ({$first_email}).";
             continue;
         }
 
         if ($existing_client_id && $duplicate_handling !== 'update') {
-            $errors[] = "Row {$row_num}: Client already exists ({$email}), skipped.";
+            $errors[] = "Row {$row_num}: Client already exists ({$first_email}), skipped.";
             $skipped++;
             continue;
         }
 
+        // Create WP user
         $password = wp_generate_password(12, false);
-        $user_id = wp_create_user($email, $password, $email);
+        $user_id = wp_create_user($first_email, $password, $first_email);
         if (is_wp_error($user_id)) {
-            $errors[] = "Row {$row_num}: WP user create failed ({$email}).";
+            $errors[] = "Row {$row_num}: WP user creation failed ({$first_email}).";
             $skipped++;
             continue;
         }
 
         wp_update_user([
             'ID' => $user_id,
-            'display_name' => $full_name,
-            'first_name' => $full_name
+            'display_name' => trim($first_name . ' ' . $second_name),
+            'first_name' => $first_name,
+            'last_name' => $second_name
         ]);
         $wp_user = new WP_User($user_id);
         $wp_user->set_role('client');
 
+        // Insert into clients table
         $insert_data = [
-            'full_name'     => $full_name,
-            'email'         => $email,
-            'phone'         => $phone,
-            'address'       => $address,
-            'note'          => $note,
-            'status'        => $status,
-            'user_id'       => $user_id,
-            'created_at'    => current_time('mysql'),
-            'created_by'    => $current_user_id
+            'first_name' => $first_name,
+            'second_name' => $second_name,
+            'first_email' => $first_email,
+            'second_email' => $second_email,
+            'first_phone' => $first_phone,
+            'second_phone' => $second_phone,
+            'address' => $address,
+            'note' => $note,
+            'status' => $status,
+            'lead_status' => $lead_status,
+            'profile_picture' => $profile_picture,
+            'user_id' => $user_id,
+            'created_at' => current_time('mysql'),
+            'created_by' => $current_user_id
         ];
 
         $insert_res = $wpdb->insert($table, $insert_data);
         if ($insert_res === false) {
             wp_delete_user($user_id);
-            $errors[] = "Row {$row_num}: DB insert failed ({$email}).";
+            $errors[] = "Row {$row_num}: DB insert failed ({$first_email}).";
             $skipped++;
             continue;
         }
@@ -586,9 +612,7 @@ function rt_import_clients_ajax() {
     }
 
     $message = "Import finished: {$inserted} inserted, {$updated} updated, {$skipped} skipped.";
-    if (!empty($errors)) {
-        $message .= ' ' . count($errors) . ' errors.';
-    }
+    if (!empty($errors)) $message .= ' ' . count($errors) . ' errors.';
 
     wp_send_json_success([
         'message' => $message,
@@ -602,30 +626,33 @@ add_action('wp_ajax_import_clients_ajax', 'rt_import_clients_ajax');
 
 
 // =====================
-// CSV Parser
+// CSV Parser (Updated)
 // =====================
-function rt_parse_csv_file($file_path) {
+function rt_parse_csv_file($file) {
     $clients = [];
-    if (!file_exists($file_path)) return $clients;
+    if (!file_exists($file) || !is_readable($file)) return $clients;
 
-    if (($handle = fopen($file_path, "r")) !== false) {
-        $headers = fgetcsv($handle);
-        if ($headers === false) { fclose($handle); return $clients; }
+    if (($handle = fopen($file, 'r')) !== false) {
+        $header = null;
+        while (($row = fgetcsv($handle, 0, ",")) !== false) {
+            // Skip empty rows
+            if (count(array_filter($row)) === 0) continue;
 
-        $headers = array_map(function($header) {
-            $header = preg_replace('/^\xEF\xBB\xBF/', '', $header);
-            return strtolower(trim($header));
-        }, $headers);
-
-        while (($row = fgetcsv($handle)) !== false) {
-            if (empty(array_filter($row))) continue;
-            if (count($row) !== count($headers)) {
-                $row = count($row) < count($headers) ? array_pad($row, count($headers), '') : array_slice($row, 0, count($headers));
+            if (!$header) {
+                $header = array_map('strtolower', array_map('trim', $row));
+                continue;
             }
-            $client_data = array_combine($headers, array_map('trim', $row));
-            if (!empty($client_data['full_name']) || !empty($client_data['email'])) $clients[] = $client_data;
+
+            // Map row values to headers
+            $client = [];
+            foreach ($header as $i => $key) {
+                if (isset($row[$i]) && $key !== '') $client[$key] = trim($row[$i]);
+            }
+
+            if (!empty($client)) $clients[] = $client;
         }
         fclose($handle);
     }
+
     return $clients;
 }

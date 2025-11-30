@@ -7,7 +7,15 @@ jQuery(document).ready(function ($) {
         var propertyId = $(this).data('property-id');
         var assignedTaskId = $(this).data('assigned-task-id');
 
+        if (!assignedTaskId || assignedTaskId === 0) {
+            alert("No assigned task found for this client/property.");
+            return;
+        }
+
+        // Show modal
         $('#cl-upload-document-modal').addClass('show');
+
+        // Set hidden inputs
         $('#cl-upload-document-form input[name="client_id"]').val(clientId);
         $('#cl-upload-document-form input[name="property_id"]').val(propertyId);
         $('#cl-upload-document-form input[name="assigned_task_id"]').val(assignedTaskId);
@@ -42,8 +50,18 @@ jQuery(document).ready(function ($) {
     $('#cl-upload-document-form').on('submit', function (e) {
         e.preventDefault();
 
-        if (!$('input[name="file_name"]').val()) {
+        var fileInput = $('input[name="file_name"]');
+        if (!fileInput.val()) {
             alert("Please select a file before uploading.");
+            return;
+        }
+
+        var clientId = $('input[name="client_id"]').val();
+        var propertyId = $('input[name="property_id"]').val();
+        var assignedTaskId = $('input[name="assigned_task_id"]').val();
+
+        if (!clientId || !propertyId || !assignedTaskId) {
+            alert("Please fill all required fields.");
             return;
         }
 

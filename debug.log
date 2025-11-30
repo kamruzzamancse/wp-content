@@ -2,3 +2,289 @@
 [27-Nov-2025 08:31:21 UTC] PHP Parse error:  syntax error, unexpected token "=", expecting "]" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-db-lead-client-ajax.php on line 177
 [27-Nov-2025 08:31:34 UTC] PHP Parse error:  syntax error, unexpected token "=", expecting "]" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-db-lead-client-ajax.php on line 177
 [27-Nov-2025 08:31:47 UTC] PHP Parse error:  syntax error, unexpected token "=", expecting "]" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-db-lead-client-ajax.php on line 177
+[30-Nov-2025 04:19:39 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 04:19:39 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 04:20:42 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 04:20:42 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 04:21:16 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 04:21:16 UTC] Current WP User ID: 3
+[30-Nov-2025 04:21:16 UTC] Found client_id: 2
+[30-Nov-2025 04:21:16 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 2
+        LIMIT 6
+    
+[30-Nov-2025 04:21:16 UTC] Number of properties fetched: 2
+[30-Nov-2025 04:22:04 UTC] WordPress database error Unknown column 'c.full_name' in 'field list' for query 
+            SELECT a.id, a.client_id, a.property_id, a.created_at,
+                   c.full_name, p.address
+            FROM wp_assigned_property a
+            LEFT JOIN wp_clients c ON a.client_id = c.client_id
+            LEFT JOIN wp_rentcast_properties p ON a.property_id = p.id
+            WHERE a.deleted_at IS NULL
+              AND c.user_id = 3
+            ORDER BY a.created_at DESC
+         made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/cl/client-dashboard.php'), include('/themes/astra-child/dashboard-templates/cl/cl-tab-documents.php')
+[30-Nov-2025 04:22:12 UTC] WordPress database error Unknown column 'c.full_name' in 'field list' for query 
+            SELECT a.id, a.client_id, a.property_id, a.created_at,
+                   c.full_name, p.address
+            FROM wp_assigned_property a
+            LEFT JOIN wp_clients c ON a.client_id = c.client_id
+            LEFT JOIN wp_rentcast_properties p ON a.property_id = p.id
+            WHERE a.deleted_at IS NULL
+              AND c.user_id = 3
+            ORDER BY a.created_at DESC
+         made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/cl/client-dashboard.php'), include('/themes/astra-child/dashboard-templates/cl/cl-tab-documents.php')
+[30-Nov-2025 04:24:43 UTC] WordPress database error Unknown column 'c.full_name' in 'field list' for query 
+            SELECT a.id, a.client_id, a.property_id, a.created_at,
+                   c.full_name, p.address
+            FROM wp_assigned_property a
+            LEFT JOIN wp_clients c ON a.client_id = c.client_id
+            LEFT JOIN wp_rentcast_properties p ON a.property_id = p.id
+            WHERE a.deleted_at IS NULL
+              AND c.user_id = 3
+            ORDER BY a.created_at DESC
+         made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/cl/client-dashboard.php'), include('/themes/astra-child/dashboard-templates/cl/cl-tab-documents.php')
+[30-Nov-2025 04:29:48 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 04:29:48 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 04:30:17 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 04:30:17 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 04:30:31 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 04:30:31 UTC] Current WP User ID: 3
+[30-Nov-2025 04:30:31 UTC] Found client_id: 2
+[30-Nov-2025 04:30:31 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 2
+        LIMIT 6
+    
+[30-Nov-2025 04:30:31 UTC] Number of properties fetched: 2
+[30-Nov-2025 04:31:31 UTC] WordPress database error Unknown column 'c.full_name' in 'field list' for query 
+            SELECT a.id, a.client_id, a.property_id, a.created_at,
+                   c.full_name, p.address
+            FROM wp_assigned_property a
+            LEFT JOIN wp_clients c ON a.client_id = c.client_id
+            LEFT JOIN wp_rentcast_properties p ON a.property_id = p.id
+            WHERE a.deleted_at IS NULL
+              AND c.user_id = 3
+            ORDER BY a.created_at DESC
+         made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/cl/client-dashboard.php'), include('/themes/astra-child/dashboard-templates/cl/cl-tab-documents.php')
+[30-Nov-2025 04:31:34 UTC] WordPress database error Unknown column 'c.full_name' in 'field list' for query 
+            SELECT a.id, a.client_id, a.property_id, a.created_at,
+                   c.full_name, p.address
+            FROM wp_assigned_property a
+            LEFT JOIN wp_clients c ON a.client_id = c.client_id
+            LEFT JOIN wp_rentcast_properties p ON a.property_id = p.id
+            WHERE a.deleted_at IS NULL
+              AND c.user_id = 3
+            ORDER BY a.created_at DESC
+         made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/cl/client-dashboard.php'), include('/themes/astra-child/dashboard-templates/cl/cl-tab-documents.php')
+[30-Nov-2025 04:34:28 UTC] WordPress database error Unknown column 'c.full_name' in 'field list' for query 
+            SELECT a.id, a.client_id, a.property_id, a.created_at,
+                   c.full_name, p.address
+            FROM wp_assigned_property a
+            LEFT JOIN wp_clients c ON a.client_id = c.user_id
+            LEFT JOIN wp_rentcast_properties p ON a.property_id = p.id
+            WHERE a.deleted_at IS NULL
+              AND c.user_id = 3
+            ORDER BY a.created_at DESC
+         made by require('wp-blog-header.php'), require_once('wp-includes/template-loader.php'), include('/themes/astra/page.php'), astra_content_page_loop, do_action('astra_content_page_loop'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->loop_markup_page, Astra_Loop->loop_markup, do_action('astra_page_template_parts_content'), WP_Hook->do_action, WP_Hook->apply_filters, Astra_Loop->template_parts_page, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/content-page.php'), astra_entry_content_single_page, do_action('astra_entry_content_single_page'), WP_Hook->do_action, WP_Hook->apply_filters, astra_entry_content_single_page_template, get_template_part, locate_template, load_template, require('/themes/astra/template-parts/single/content-header.php'), the_content, apply_filters('the_content'), WP_Hook->apply_filters, do_shortcode, preg_replace_callback, do_shortcode_tag, mdk_dashboard_shortcode, include('/themes/astra-child/dashboard-templates/cl/client-dashboard.php'), include('/themes/astra-child/dashboard-templates/cl/cl-tab-documents.php')
+[30-Nov-2025 05:09:09 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:09:09 UTC] Current WP User ID: 3
+[30-Nov-2025 05:09:09 UTC] Found client_id: 2
+[30-Nov-2025 05:09:09 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 2
+        LIMIT 6
+    
+[30-Nov-2025 05:09:09 UTC] Number of properties fetched: 2
+[30-Nov-2025 05:10:03 UTC] PHP Warning:  Array to string conversion in C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\cl\cl-tab-documents.php on line 34
+[30-Nov-2025 05:16:22 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:16:22 UTC] Current WP User ID: 32
+[30-Nov-2025 05:16:22 UTC] Found client_id: 30
+[30-Nov-2025 05:16:22 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 30
+        LIMIT 6
+    
+[30-Nov-2025 05:16:22 UTC] No properties found for client_id 30.
+[30-Nov-2025 05:18:07 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:18:07 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:18:40 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:18:40 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:18:55 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:18:55 UTC] Current WP User ID: 32
+[30-Nov-2025 05:18:55 UTC] Found client_id: 30
+[30-Nov-2025 05:18:55 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 30
+        LIMIT 6
+    
+[30-Nov-2025 05:18:55 UTC] No properties found for client_id 30.
+[30-Nov-2025 05:30:08 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:30:08 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:42:37 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:42:37 UTC] Current WP User ID: 3
+[30-Nov-2025 05:42:37 UTC] Found client_id: 2
+[30-Nov-2025 05:42:37 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 2
+        LIMIT 6
+    
+[30-Nov-2025 05:42:37 UTC] Number of properties fetched: 2
+[30-Nov-2025 05:43:26 UTC] PHP Fatal error:  Uncaught SimpleCalendar\plugin_deps\GuzzleHttp\Exception\ConnectException: cURL error 28: Failed to connect to www.googleapis.com port 443: Timed out (see https://curl.haxx.se/libcurl/c/libcurl-errors.html) for https://www.googleapis.com/calendar/v3/calendars/kamruzzamancse%40gmail.com/events?singleEvents=true&maxResults=2500&timeZone=UTC&timeMin=2025-10-31T00%3A00%3A00%2B00%3A00&timeMax=2026-11-29T23%3A59%3A59%2B00%3A00&orderBy=startTime&key=AIzaSyB5gGKavEKU_PEFq7BW60BwztkTMW-S-lQ in C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\CurlFactory.php:191
+Stack trace:
+#0 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\CurlFactory.php(160): SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlFactory::createRejection(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Handler\EasyHandle), Array)
+#1 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\CurlFactory.php(129): SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlFactory::finishError(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlHandler), Object(SimpleCalendar\plugin_deps\GuzzleHttp\Handler\EasyHandle), Object(SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlFactory))
+#2 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\CurlHandler.php(41): SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlFactory::finish(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlHandler), Object(SimpleCalendar\plugin_deps\GuzzleHttp\Handler\EasyHandle), Object(SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlFactory))
+#3 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\Proxy.php(27): SimpleCalendar\plugin_deps\GuzzleHttp\Handler\CurlHandler->__invoke(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#4 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\Proxy.php(46): SimpleCalendar\plugin_deps\GuzzleHttp\Handler\Proxy::SimpleCalendar\plugin_deps\GuzzleHttp\Handler\{closure}(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#5 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\auth\src\Middleware\SimpleMiddleware.php(83): SimpleCalendar\plugin_deps\GuzzleHttp\Handler\Proxy::SimpleCalendar\plugin_deps\GuzzleHttp\Handler\{closure}(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#6 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\PrepareBodyMiddleware.php(31): SimpleCalendar\plugin_deps\Google\Auth\Middleware\SimpleMiddleware->SimpleCalendar\plugin_deps\Google\Auth\Middleware\{closure}(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#7 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Middleware.php(30): SimpleCalendar\plugin_deps\GuzzleHttp\PrepareBodyMiddleware->__invoke(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#8 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\RedirectMiddleware.php(55): SimpleCalendar\plugin_deps\GuzzleHttp\Middleware::SimpleCalendar\plugin_deps\GuzzleHttp\{closure}(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#9 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Middleware.php(56): SimpleCalendar\plugin_deps\GuzzleHttp\RedirectMiddleware->__invoke(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#10 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\HandlerStack.php(67): SimpleCalendar\plugin_deps\GuzzleHttp\Middleware::SimpleCalendar\plugin_deps\GuzzleHttp\{closure}(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#11 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Client.php(281): SimpleCalendar\plugin_deps\GuzzleHttp\HandlerStack->__invoke(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#12 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Client.php(94): SimpleCalendar\plugin_deps\GuzzleHttp\Client->transfer(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#13 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Client.php(107): SimpleCalendar\plugin_deps\GuzzleHttp\Client->sendAsync(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#14 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\auth\src\HttpHandler\Guzzle6HttpHandler.php(45): SimpleCalendar\plugin_deps\GuzzleHttp\Client->send(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), Array)
+#15 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\apiclient\src\Http\REST.php(70): SimpleCalendar\plugin_deps\Google\Auth\HttpHandler\Guzzle6HttpHandler->__invoke(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request))
+#16 [internal function]: SimpleCalendar\plugin_deps\Google\Http\REST::doExecute(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Client), Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), 'SimpleCalendar\\...')
+#17 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\apiclient\src\Task\Runner.php(153): call_user_func_array(Array, Array)
+#18 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\apiclient\src\Http\REST.php(53): SimpleCalendar\plugin_deps\Google\Task\Runner->run()
+#19 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\apiclient\src\Client.php(738): SimpleCalendar\plugin_deps\Google\Http\REST::execute(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Client), Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), 'SimpleCalendar\\...', Array, NULL)
+#20 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\apiclient\src\Service\Resource.php(150): SimpleCalendar\plugin_deps\Google\Client->execute(Object(SimpleCalendar\plugin_deps\GuzzleHttp\Psr7\Request), 'SimpleCalendar\\...')
+#21 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\google\apiclient-services\src\Calendar\Resource\Events.php(285): SimpleCalendar\plugin_deps\Google\Service\Resource->call('list', Array, 'SimpleCalendar\\...')
+#22 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\feeds\google.php(582): SimpleCalendar\plugin_deps\Google\Service\Calendar\Resource\Events->listEvents('kamruzzamancse@...', Array)
+#23 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\feeds\google.php(163): SimpleCalendar\Feeds\Google->make_request('kamruzzamancse@...')
+#24 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\feeds\google.php(122): SimpleCalendar\Feeds\Google->get_events()
+#25 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\objects.php(280): SimpleCalendar\Feeds\Google->__construct(Object(SimpleCalendar\Calendars\Default_Calendar))
+#26 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\objects.php(206): SimpleCalendar\Objects->get_object('google', 'feed', Object(SimpleCalendar\Calendars\Default_Calendar))
+#27 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\functions\shared.php(88): SimpleCalendar\Objects->get_feed(Object(SimpleCalendar\Calendars\Default_Calendar))
+#28 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\abstracts\calendar.php(258): simcal_get_feed(Object(SimpleCalendar\Calendars\Default_Calendar))
+#29 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\calendars\default-calendar.php(117): SimpleCalendar\Abstracts\Calendar->__construct(Object(WP_Post))
+#30 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\objects.php(280): SimpleCalendar\Calendars\Default_Calendar->__construct(Object(WP_Post))
+#31 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\objects.php(148): SimpleCalendar\Objects->get_object('default-calenda...', 'calendar', Object(WP_Post))
+#32 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\functions\shared.php(116): SimpleCalendar\Objects->get_calendar(65)
+#33 C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\includes\shortcodes.php(83): simcal_get_calendar(65)
+#34 C:\xampp\htdocs\mary\wp-includes\shortcodes.php(434): SimpleCalendar\Shortcodes->print_calendar(Array, '', 'calendar')
+#35 [internal function]: do_shortcode_tag(Array)
+#36 C:\xampp\htdocs\mary\wp-includes\shortcodes.php(273): preg_replace_callback('/\\[(\\[?)(calend...', 'do_shortcode_ta...', '[calendar id="6...')
+#37 C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\cl\cl-tab-dashboard.php(65): do_shortcode('[calendar id="6...')
+#38 C:\xampp\htdocs\mary\wp-content\themes\astra-child\dashboard-templates\cl\client-dashboard.php(77): include('C:\\xampp\\htdocs...')
+#39 C:\xampp\htdocs\mary\wp-content\themes\astra-child\core\dashboard-shortcodes.php(37): include('C:\\xampp\\htdocs...')
+#40 C:\xampp\htdocs\mary\wp-includes\shortcodes.php(434): mdk_dashboard_shortcode(Array, '', 'mdk_client_dash...')
+#41 [internal function]: do_shortcode_tag(Array)
+#42 C:\xampp\htdocs\mary\wp-includes\shortcodes.php(273): preg_replace_callback('/\\[(\\[?)(mdk_cl...', 'do_shortcode_ta...', '[mdk_client_das...')
+#43 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(324): do_shortcode('[mdk_client_das...')
+#44 C:\xampp\htdocs\mary\wp-includes\plugin.php(205): WP_Hook->apply_filters('[mdk_client_das...', Array)
+#45 C:\xampp\htdocs\mary\wp-includes\post-template.php(256): apply_filters('the_content', '<!-- wp:shortco...')
+#46 C:\xampp\htdocs\mary\wp-content\themes\astra\template-parts\single\content-header.php(37): the_content()
+#47 C:\xampp\htdocs\mary\wp-includes\template.php(812): require('C:\\xampp\\htdocs...')
+#48 C:\xampp\htdocs\mary\wp-includes\template.php(745): load_template('C:\\xampp\\htdocs...', false, Array)
+#49 C:\xampp\htdocs\mary\wp-includes\general-template.php(206): locate_template(Array, true, false, Array)
+#50 C:\xampp\htdocs\mary\wp-content\themes\astra\inc\template-parts.php(370): get_template_part('template-parts/...')
+#51 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(324): astra_entry_content_single_page_template('')
+#52 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#53 C:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#54 C:\xampp\htdocs\mary\wp-content\themes\astra\inc\core\theme-hooks.php(450): do_action('astra_entry_con...')
+#55 C:\xampp\htdocs\mary\wp-content\themes\astra\template-parts\content-page.php(28): astra_entry_content_single_page()
+#56 C:\xampp\htdocs\mary\wp-includes\template.php(812): require('C:\\xampp\\htdocs...')
+#57 C:\xampp\htdocs\mary\wp-includes\template.php(745): load_template('C:\\xampp\\htdocs...', false, Array)
+#58 C:\xampp\htdocs\mary\wp-includes\general-template.php(206): locate_template(Array, true, false, Array)
+#59 C:\xampp\htdocs\mary\wp-content\themes\astra\inc\class-astra-loop.php(109): get_template_part('template-parts/...', 'page')
+#60 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(324): Astra_Loop->template_parts_page('')
+#61 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#62 C:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#63 C:\xampp\htdocs\mary\wp-content\themes\astra\inc\class-astra-loop.php(197): do_action('astra_page_temp...')
+#64 C:\xampp\htdocs\mary\wp-content\themes\astra\inc\class-astra-loop.php(174): Astra_Loop->loop_markup(true)
+#65 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(324): Astra_Loop->loop_markup_page('')
+#66 C:\xampp\htdocs\mary\wp-includes\class-wp-hook.php(348): WP_Hook->apply_filters('', Array)
+#67 C:\xampp\htdocs\mary\wp-includes\plugin.php(517): WP_Hook->do_action(Array)
+#68 C:\xampp\htdocs\mary\wp-content\themes\astra\inc\core\theme-hooks.php(265): do_action('astra_content_p...')
+#69 C:\xampp\htdocs\mary\wp-content\themes\astra\page.php(32): astra_content_page_loop()
+#70 C:\xampp\htdocs\mary\wp-includes\template-loader.php(106): include('C:\\xampp\\htdocs...')
+#71 C:\xampp\htdocs\mary\wp-blog-header.php(19): require_once('C:\\xampp\\htdocs...')
+#72 C:\xampp\htdocs\mary\index.php(17): require('C:\\xampp\\htdocs...')
+#73 {main}
+  thrown in C:\xampp\htdocs\mary\wp-content\plugins\google-calendar-events\third-party\guzzlehttp\guzzle\src\Handler\CurlFactory.php on line 191
+[30-Nov-2025 05:50:11 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:50:11 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:53:57 UTC] PHP Parse error:  syntax error, unexpected token "else" in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 376
+[30-Nov-2025 05:54:02 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:54:02 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:54:15 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:54:15 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:55:37 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:55:37 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:56:39 UTC] PHP Warning:  Undefined variable $sql in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ap-assign-task-ajax.php on line 285
+[30-Nov-2025 05:56:39 UTC] rt_load_assign_table SQL Query: 
+[30-Nov-2025 05:56:56 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:56:56 UTC] Current WP User ID: 32
+[30-Nov-2025 05:56:56 UTC] Found client_id: 30
+[30-Nov-2025 05:56:56 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 30
+        LIMIT 6
+    
+[30-Nov-2025 05:56:56 UTC] Number of properties fetched: 1
+[30-Nov-2025 05:57:57 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:57:57 UTC] Current WP User ID: 32
+[30-Nov-2025 05:57:57 UTC] Found client_id: 30
+[30-Nov-2025 05:57:57 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 30
+        LIMIT 6
+    
+[30-Nov-2025 05:57:57 UTC] Number of properties fetched: 1
+[30-Nov-2025 05:58:25 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:58:25 UTC] Current WP User ID: 32
+[30-Nov-2025 05:58:25 UTC] Found client_id: 30
+[30-Nov-2025 05:58:25 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 30
+        LIMIT 6
+    
+[30-Nov-2025 05:58:25 UTC] Number of properties fetched: 1
+[30-Nov-2025 05:59:10 UTC] === get_rentcast_chart_data called ===
+[30-Nov-2025 05:59:10 UTC] Current WP User ID: 32
+[30-Nov-2025 05:59:10 UTC] Found client_id: 30
+[30-Nov-2025 05:59:10 UTC] SQL Query: 
+        SELECT p.id, p.address, p.price, p.property_value
+        FROM wp_rentcast_properties AS p
+        INNER JOIN wp_assigned_property AS a
+        ON p.id = a.property_id
+        WHERE a.client_id = 30
+        LIMIT 6
+    
+[30-Nov-2025 05:59:10 UTC] Number of properties fetched: 1
+[30-Nov-2025 10:50:15 UTC] PHP Fatal error:  Cannot redeclare rt_export_clients_ajax() (previously declared in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php:92) in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php on line 442
+[30-Nov-2025 10:50:28 UTC] PHP Fatal error:  Cannot redeclare rt_export_clients_ajax() (previously declared in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php:92) in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php on line 442
+[30-Nov-2025 10:50:41 UTC] PHP Fatal error:  Cannot redeclare rt_export_clients_ajax() (previously declared in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php:92) in C:\xampp\htdocs\mary\wp-content\themes\astra-child\includes\rt-ab-client-ajax.php on line 442

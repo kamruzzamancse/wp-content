@@ -30,9 +30,15 @@ $current_user_id = get_current_user_id();
         <tbody id="assigned-list">
 
         <?php
+        // UPDATED QUERY USING first_name + second_name
         $results = $wpdb->get_results($wpdb->prepare("
-            SELECT a.id, a.client_id, a.property_id, a.created_at,
-                   c.full_name, p.address
+            SELECT 
+                a.id, 
+                a.client_id, 
+                a.property_id, 
+                a.created_at,
+                CONCAT_WS(' ', c.first_name, c.second_name) AS full_name,
+                p.address
             FROM {$assigned_property_table} a
             LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
             LEFT JOIN {$rentcast_properties_table} p ON a.property_id = p.id
@@ -40,6 +46,8 @@ $current_user_id = get_current_user_id();
               AND c.user_id = %d
             ORDER BY a.created_at DESC
         ", $current_user_id));
+
+        //var_dump($results);
 
         if ($results) {
             foreach ($results as $row) {

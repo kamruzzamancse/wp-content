@@ -48,7 +48,7 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
             $results = $wpdb->get_results("
                 SELECT a.id, c.first_name, c.second_name, p.address, a.created_at, a.client_id, a.property_id
                 FROM {$assigned_table} a
-                LEFT JOIN {$clients_table} c ON a.client_id = c.user_id
+                LEFT JOIN {$clients_table} c ON a.client_id = c.client_id
                 LEFT JOIN {$properties_table} p ON a.property_id = p.id
                 WHERE a.deleted_at IS NULL
                 ORDER BY a.created_at DESC

@@ -28,7 +28,7 @@ function search_clients_ajax() {
 
     $results = $wpdb->get_results(
         $wpdb->prepare("
-            SELECT user_id AS client_id, CONCAT(first_name, ' ', second_name) AS full_name
+            SELECT client_id, CONCAT(first_name, ' ', second_name) AS full_name
             FROM $table
             WHERE CONCAT(first_name, ' ', second_name) LIKE %s
             AND deleted_at IS NULL
