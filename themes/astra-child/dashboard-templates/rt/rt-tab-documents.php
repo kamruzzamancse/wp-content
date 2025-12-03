@@ -21,7 +21,7 @@
             <thead>
                 <tr>
                     <th style="width:50px;">#</th>
-                    <th>Type Name</th>
+                    <th>Document Type</th>
                     <th style="width:80px;">Actions</th>
                 </tr>
             </thead>

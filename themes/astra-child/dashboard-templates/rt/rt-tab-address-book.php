@@ -54,7 +54,7 @@
             <th class="sortable" data-sort="address">Address</th>
             <th class="sortable" data-sort="notes">Notes</th>
             <th class="sortable" data-sort="status">Status</th>
-            <th style="width: 100px">Actions</th>
+            <th style="width: 100px; text-align: center">Actions</th>
         </tr>
     </thead>
     <tbody id="addressBookBody">

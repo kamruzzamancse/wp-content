@@ -14,6 +14,7 @@
                         <option value="10" selected>10 rows</option>
                         <option value="25">25 rows</option>
                     </select>
+                    <button id="addActiveBtn" class="btn-primary">+ Add Active Client</button>
                 </div>
             </div>
 
@@ -24,6 +25,7 @@
                         <th>Email</th>
                         <th>Phone</th>
                         <th>Notes</th>
+                        <th style="width:100px; text-align:center">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="activeClientsBody">
@@ -55,7 +57,7 @@
                         <th>Last Touch</th>
                         <th>Status</th>
                         <th>Notes</th>
-                        <th style="width:140px">Actions</th>
+                        <th style="width:100px; text-align:center">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="leadsBody">
@@ -105,6 +107,9 @@
 
 <?php 
 // Include modals
+include locate_template('dashboard-templates/rt/rt-db-active-create-modal.php');
+include locate_template('dashboard-templates/rt/rt-db-active-edit-modal.php');
+
 include locate_template('dashboard-templates/rt/rt-db-lead-create-modal.php');
 include locate_template('dashboard-templates/rt/rt-db-lead-edit-modal.php');
 ?>
@@ -191,7 +196,7 @@ include locate_template('dashboard-templates/rt/rt-db-lead-edit-modal.php');
     margin-bottom: 20px;
 }
 
-#addLeadBtn, #saveLeadBtn {
+#addLeadBtn, #saveLeadBtn, #addActiveBtn {
     color: #fff!important;
 }
 

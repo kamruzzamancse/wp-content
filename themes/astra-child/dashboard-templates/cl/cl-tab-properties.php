@@ -6,12 +6,14 @@ $image_url  = $upload_dir['baseurl'];
 ?>
 
 <div class="pt-toolbar-container">
-    <div class="pt-left-section">
-        <h1 class="header-title">All Properties</h1>
+    <h1 class="header-title">All Properties</h1>
+
+    <div class="pt-right-section">
         <div class="pt-search-box">
             <span class="pt-search-icon">🔍</span>
             <input type="text" class="pt-search-input" placeholder="Search: Property Name" />
         </div>
+
         <div class="pt-sort-container">
             <select class="pt-sort-select">
                 <option value="">Sort by</option>
@@ -670,6 +672,4 @@ jQuery(document).ready(function($){
     flex: 1 1 300px; /* grow/shrink, base width 300px */
     max-width: 350px;
 }
-
-
 </style>

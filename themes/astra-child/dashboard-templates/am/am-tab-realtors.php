@@ -43,7 +43,7 @@
         <th class="agency-name">Agency</th>
         <th class="license-number">License Number</th>
         <th class="rating">Rating</th>
-        <th class="ab-actions-column">Actions</th>
+        <th class="ab-actions-column" style="width:80px">Actions</th>
       </tr>
     </thead>
     <tbody id="realtorBody">
