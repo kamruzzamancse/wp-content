@@ -26,7 +26,6 @@ jQuery(document).ready(function($){
     function openModal(modal) { modal.addClass('show'); }
     function closeModal(modal) { modal.removeClass('show'); }
 
-    // Upload modal open
     $('#uploadDocBtn').on('click', function(){
         docForm[0].reset();
         selectedFileName.text('');
@@ -34,15 +33,12 @@ jQuery(document).ready(function($){
         openModal(docModal);
     });
 
-    // Close buttons
     docModal.find('.clup-close-btn, .clup-cancel').on('click', function(){ closeModal(docModal); });
-    editModal.find('.clup-close-btn').on('click', function(){ closeModal(editModal); });
+    editModal.find('.clup-close-btn, .clup-cancel').on('click', function(){ closeModal(editModal); });
 
-    // Close when clicking outside modal
     docModal.on('click', function(e){ if(e.target === this) closeModal(docModal); });
     editModal.on('click', function(e){ if(e.target === this) closeModal(editModal); });
 
-    // Close on ESC key
     $(document).on('keydown', function(e){
         if(e.key === "Escape") {
             closeModal(docModal);
@@ -80,7 +76,7 @@ jQuery(document).ready(function($){
             const rows = res.data.data;
             rows.forEach((doc, index) => {
                 const fileName = doc.file_name ? doc.file_name.split(/[\\/]/).pop() : '';
-                const fileUrl  = doc.file_name ? upload_doc_ajax.upload_url + '/' + doc.file_name : '#';
+                const fileUrl  = doc.file_url || '#';
                 tbody.append(`
                     <tr data-id="${doc.id}" data-type-id="${doc.type_id}">
                         <td>${index + 1 + ((res.data.current - 1) * res.data.per_page)}</td>
@@ -89,6 +85,7 @@ jQuery(document).ready(function($){
                         <td>${fileName ? `<a href="${fileUrl}" target="_blank">${fileName}</a>` : '-'}</td>
                         <td>${doc.note || ''}</td>
                         <td>
+                            ${fileName ? `<a href="${fileUrl}" download title="Download ${fileName}">⬇️</a>` : '-'}
                             <span class="edit-document" title="Edit">✏️</span>
                             <span class="delete-document" title="Delete">🗑️</span>
                         </td>
@@ -96,7 +93,7 @@ jQuery(document).ready(function($){
                 `);
             });
 
-            // Pagination
+            // Pagination buttons
             if(res.data.total_pages > 1){
                 for(let i=1; i<=res.data.total_pages; i++){
                     pagination.append(`<button class="page-btn ${i===res.data.current?'active':''}" data-page="${i}">${i}</button>`);
@@ -105,7 +102,6 @@ jQuery(document).ready(function($){
         });
     }
 
-    // Pagination click
     $(document).on('click', '.page-btn', function(){
         const page = parseInt($(this).data('page'));
         const perPage = parseInt($('#docRowsPerPage').val() || 5);
@@ -156,7 +152,6 @@ jQuery(document).ready(function($){
                 docForm[0].reset();
                 selectedFileName.text('');
                 closeModal(docModal);
-
                 fetchDocuments(1, parseInt($('#docRowsPerPage').val() || 5));
             },
             error: function(){ isSubmitting = false; alert('AJAX Error. Try again.'); }
@@ -186,10 +181,9 @@ jQuery(document).ready(function($){
         });
     });
 
-    // ==============================
-    // EDIT DOCUMENT HANDLER
-    // ==============================
-
+    /* ======================================================
+       EDIT DOCUMENT HANDLER
+    ====================================================== */
     $(document).on('click', '.edit-document', function() {
         const row = $(this).closest('tr');
         const id = row.data('id');
@@ -219,8 +213,7 @@ jQuery(document).ready(function($){
 
     editForm.on('submit', function(e) {
         e.preventDefault();
-
-        console.log('Edit form submitted'); // Debug
+        if(isSubmitting) return;
 
         const id = editForm.find('[name="document_id"]').val();
         const title = editForm.find('[name="title"]').val().trim();
@@ -228,14 +221,12 @@ jQuery(document).ready(function($){
         const note = editForm.find('[name="note"]').val();
         const file = editFileInput[0].files[0];
 
-        console.log({id, title, type_id, note, file}); // Debug
-
         if(!id || !title || !type_id){
             alert('Please fill all required fields.');
-            console.log('Validation failed'); // Debug
             return;
         }
 
+        isSubmitting = true;
         const formData = new FormData();
         formData.append('action','rt_update_document');
         formData.append('nonce', upload_doc_ajax.nonce);
@@ -243,7 +234,7 @@ jQuery(document).ready(function($){
         formData.append('title', title);
         formData.append('type_id', type_id);
         formData.append('note', note);
-        if(file) formData.append('file_name', file); // optional
+        if(file) formData.append('file_name', file);
 
         $.ajax({
             url: upload_doc_ajax.ajax_url,
@@ -251,15 +242,10 @@ jQuery(document).ready(function($){
             data: formData,
             processData: false,
             contentType: false,
-            beforeSend: function() {
-                console.log('AJAX request is about to be sent');
-            },
             success: function(res) {
-                console.log('AJAX response received', res);
-
+                isSubmitting = false;
                 if(!res.success){ 
                     alert(res.data || 'Failed to update.');
-                    console.error('AJAX returned error:', res.data);
                     return;
                 }
 
@@ -269,12 +255,25 @@ jQuery(document).ready(function($){
                 row.find('td:eq(4)').text(res.data.note);
                 row.attr('data-type-id', res.data.type_id);
 
-                // Update current file info display if a new file was uploaded
-                if(res.data.file_name){
+                const fileName = res.data.file_name ? res.data.file_name.split(/[\\/]/).pop() : '';
+                const fileUrl  = res.data.file_url || '#';
+
+                // Update file column
+                row.find('td:eq(3)').html(fileName ? `<a href="${fileUrl}" target="_blank">${fileName}</a>` : '-');
+
+                // Update action column (download + edit + delete)
+                const actionsHtml = `
+                    ${fileName ? `<a href="${fileUrl}" download title="Download ${fileName}">⬇️</a>` : '-'}
+                    <span class="edit-document" title="Edit">✏️</span>
+                    <span class="delete-document" title="Delete">🗑️</span>
+                `;
+                row.find('td:eq(5)').html(actionsHtml);
+
+                // Update edit modal current file info
+                if(fileName){
                     currentFileInfo.show();
-                    currentFileLink.text(res.data.file_name)
-                                .attr('href', res.data.file_url || '#');
-                } else if(!file){ // no new file
+                    currentFileLink.text(fileName).attr('href', fileUrl);
+                } else {
                     currentFileInfo.hide();
                     currentFileLink.text('').attr('href','#');
                 }
@@ -282,13 +281,12 @@ jQuery(document).ready(function($){
                 alert('Document updated successfully!');
                 closeModal(editModal);
             },
-            error: function(jqXHR, textStatus, errorThrown){
-                console.error('AJAX error:', textStatus, errorThrown);
-                alert('AJAX Error. Try again.');
+            error: function(){ 
+                isSubmitting = false; 
+                alert('AJAX Error. Try again.'); 
             }
         });
     });
-
 
     /* ======================================================
        INITIAL LOAD

@@ -1,6 +1,9 @@
 <?php
 if (!defined('ABSPATH')) exit;
 global $wpdb;
+
+// Upload base URL
+$upload_baseurl = wp_upload_dir()['baseurl'];
 ?>
 
 <!-- ================================
@@ -48,14 +51,26 @@ global $wpdb;
                     $doc_serial = 1;
                     foreach ($docs as $doc):
                         $file_name = !empty($doc->file_name) ? basename($doc->file_name) : '';
+                        $file_url = !empty($doc->file_name) ? $upload_baseurl . '/' . $doc->file_name : '#';
                 ?>
                     <tr data-id="<?php echo esc_attr($doc->id); ?>" data-type-id="<?php echo esc_attr($doc->type_id); ?>">
                         <td><?php echo $doc_serial++; ?></td>
                         <td><?php echo esc_html($doc->title); ?></td>
                         <td><?php echo esc_html($doc->type_name); ?></td>
-                        <td><?php echo $file_name ? esc_html($file_name) : '-'; ?></td>
+                        <td>
+                            <?php if($file_name): ?>
+                                <a href="<?php echo esc_url($file_url); ?>" target="_blank"><?php echo esc_html($file_name); ?></a>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
+                        </td>
                         <td><?php echo esc_html($doc->note); ?></td>
                         <td>
+                            <?php if($file_name): ?>
+                                <a href="<?php echo esc_url($file_url); ?>" download title="Download <?php echo esc_attr($file_name); ?>">⬇️</a>
+                            <?php else: ?>
+                                -
+                            <?php endif; ?>
                             <span class="edit-doc" title="Edit">✏️</span>
                             <span class="delete-doc" title="Delete">🗑️</span>
                         </td>
