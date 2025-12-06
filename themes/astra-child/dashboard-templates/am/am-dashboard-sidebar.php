@@ -39,10 +39,18 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
             </a>
         </li>
 
-        <!-- Document Oversight -->
-        <li class="<?php echo $current_tab === 'documents' ? 'active' : ''; ?>">
-            <a href="?tab=documents" title="Documents">
-                <span class="dashicons dashicons-media-document"></span>
+       <!-- Document Types -->
+        <li class="<?php echo $current_tab === 'doc-type' ? 'active' : ''; ?>">
+            <a href="?tab=doc-type" title="Document Types">
+                <span class="dashicons dashicons-tag"></span>
+                <span>Document Types</span>
+            </a>
+        </li>
+
+        <!-- Documents -->
+        <li class="<?php echo $current_tab === 'docs' ? 'active' : ''; ?>">
+            <a href="?tab=docs" title="Documents">
+                <span class="dashicons dashicons-media-text"></span>
                 <span>Documents</span>
             </a>
         </li>

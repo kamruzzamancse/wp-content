@@ -42,7 +42,8 @@ if (!function_exists('load_admin_dashboard_data')) {
             case 'clients':
             case 'task-status':
             case 'user-management':
-            case 'documents':
+            case 'doc-type':
+            case 'docs':
             case 'am-property-details':
             case 'am-settings-pi':
             case 'am-settings-cp':
@@ -108,8 +109,11 @@ get_header();
                 case 'user-management':
                     include locate_template('dashboard-templates/am/am-tab-user-management.php');
                     break;
-                case 'documents':
-                    include locate_template('dashboard-templates/am/am-tab-documents.php');
+                case 'doc-type':
+                    include locate_template('dashboard-templates/am/am-tab-doc-type.php');
+                    break;
+                case 'docs':
+                    include locate_template('dashboard-templates/am/am-tab-docs.php');
                     break;
                 case 'settings':
                     include locate_template('dashboard-templates/am/am-tab-settings.php');

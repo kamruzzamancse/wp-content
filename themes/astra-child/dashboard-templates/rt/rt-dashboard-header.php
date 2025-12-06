@@ -72,29 +72,37 @@ if (empty($company_name)) {
                 <li class="<?php echo $current_tab === 'dashboard' ? 'active' : ''; ?>">
                     <a href="?tab=dashboard"><span class="dashicons dashicons-admin-home"></span> Dashboard</a>
                 </li>
-                <!-- <li class="<?php echo $current_tab === 'properties' ? 'active' : ''; ?>">
-                    <a href="?tab=properties"><span class="dashicons dashicons-building"></span> Properties</a>
-                </li> -->
+
                 <li class="<?php echo $current_tab === 'address-book' ? 'active' : ''; ?>">
-                    <a href="?tab=address-book"><span class="dashicons dashicons-book"></span> Address Book</a>
+                    <a href="?tab=address-book"><span class="dashicons dashicons-id"></span> Address Book</a>
                 </li>
-                <li class="<?php echo $current_tab === 'documents' ? 'active' : ''; ?>">
-                    <a href="?tab=documents"><span class="dashicons dashicons-media-document"></span> Documents</a>
+
+                <li class="<?php echo $current_tab === 'doc-type' ? 'active' : ''; ?>">
+                    <a href="?tab=doc-type"><span class="dashicons dashicons-tag"></span> Document Types</a>
                 </li>
+
+                <li class="<?php echo $current_tab === 'docs' ? 'active' : ''; ?>">
+                    <a href="?tab=docs"><span class="dashicons dashicons-media-text"></span> Documents</a>
+                </li>
+
+                <li class="<?php echo $current_tab === 'assign-property' ? 'active' : ''; ?>">
+                    <a href="?tab=assign-property"><span class="dashicons dashicons-admin-links"></span> Assign Property</a>
+                </li>
+
                 <li class="<?php echo $current_tab === 'messages' ? 'active' : ''; ?>">
                     <a href="?tab=messages"><span class="dashicons dashicons-email"></span> Messages</a>
                 </li>
+
                 <li class="<?php echo $current_tab === 'settings' ? 'active' : ''; ?>">
                     <a href="?tab=settings"><span class="dashicons dashicons-admin-settings"></span> Settings</a>
                 </li>
-                <!-- Logout Trigger -->
+
                 <li>
-                    <a href="#" id="rt-logout-trigger">
-                        <span class="dashicons dashicons-migrate"></span> Logout
-                    </a>
+                    <a href="#" id="rt-logout-trigger"><span class="dashicons dashicons-migrate"></span> Logout</a>
                 </li>
             </ul>
         </nav>
+
     </div>
 
     <!-- Overlay background -->

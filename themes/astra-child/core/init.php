@@ -10,7 +10,6 @@ $feature_groups = [
         'cl-client-profile.php',
         'cl-settings-password.php', 
         'cl-settings-support-ajax.php',
-        'cl-reply-docs-ajax.php',
         'cl-db-tracking-property.php',
         'cl-rentcast-properties-ajax.php',
         'cl-link-property-ajax.php',
@@ -22,11 +21,8 @@ $feature_groups = [
         'rt-db-lead-client-ajax.php',
         'rt-ab-client-ajax.php',
         'rt-realtor-profile.php',
-        'rt-document-type.php',
-        'rt-documents.php',
         'rt-settings-password.php',
         'rt-ap-assign-property-ajax.php',
-        'rt-ap-assign-task-ajax.php',
     ],
     
     // ADMIN & SYSTEM FEATURES
@@ -34,6 +30,8 @@ $feature_groups = [
         'am-rt-realtor-ajax.php',
         'rentcast-properties.php',
         'rentcast-cron.php',
+        'document-type-ajax.php',
+        'upload-document-ajax.php',
     ]
 ];
 

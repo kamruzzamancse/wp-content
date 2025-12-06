@@ -19,9 +19,15 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
                 <span>Address Book</span>
             </a>
         </li>
-        <li class="<?php echo $current_tab === 'documents' ? 'active' : ''; ?>">
-            <a href="?tab=documents" title="Documents">
-                <span class="dashicons dashicons-media-document"></span> <!-- Changed to document icon -->
+        <li class="<?php echo $current_tab === 'doc-type' ? 'active' : ''; ?>">
+            <a href="?tab=doc-type" title="Document Types">
+                <span class="dashicons dashicons-tag"></span>
+                <span>Document Types</span>
+            </a>
+        </li>
+        <li class="<?php echo $current_tab === 'docs' ? 'active' : ''; ?>">
+            <a href="?tab=docs" title="Documents">
+                <span class="dashicons dashicons-media-text"></span>
                 <span>Documents</span>
             </a>
         </li>
@@ -29,12 +35,6 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
             <a href="?tab=assign-property" title="Assign Property">
                 <span class="dashicons dashicons-admin-links"></span>
                 <span>Assign Property</span>
-            </a>
-        </li>
-        <li class="<?php echo $current_tab === 'assign-task' ? 'active' : ''; ?>">
-            <a href="?tab=assign-task" title="Client Documents">
-                <span class="dashicons dashicons-clipboard"></span>
-                <span>Client Documents</span>
             </a>
         </li>
         <li class="<?php echo $current_tab === 'messages' ? 'active' : ''; ?>">

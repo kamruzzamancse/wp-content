@@ -78,8 +78,11 @@ if (empty($company_name)) {
                 <li class="<?php echo $current_tab === 'clients' ? 'active' : ''; ?>">
                     <a href="?tab=clients"><span class="dashicons dashicons-buddicons-buddypress-logo"></span> Clients</a>
                 </li>
-                <li class="<?php echo $current_tab === 'documents' ? 'active' : ''; ?>">
+                <!-- <li class="<?php echo $current_tab === 'documents' ? 'active' : ''; ?>">
                     <a href="?tab=documents"><span class="dashicons dashicons-media-document"></span> Documents</a>
+                </li> -->
+                <li class="<?php echo $current_tab === 'docs' ? 'active' : ''; ?>">
+                    <a href="?tab=docs"><span class="dashicons dashicons-media-document"></span> Documents</a>
                 </li>
                 <li class="<?php echo $current_tab === 'messages' ? 'active' : ''; ?>">
                     <a href="?tab=messages"><span class="dashicons dashicons-email"></span> Messages</a>

@@ -35,7 +35,8 @@ if (!function_exists('load_realtor_dashboard_data')) {
                 ];
             case 'properties':
             case 'address-book':
-            case 'documents':
+            case 'doc-type':
+            case 'docs':
             case 'assign-property':
             case 'assign-task':
             case 'messages': 
@@ -82,15 +83,18 @@ get_header();
                 case 'address-book':
                     include locate_template('dashboard-templates/rt/rt-tab-address-book.php');
                     break;
-                case 'documents':
-                    include locate_template('dashboard-templates/rt/rt-tab-documents.php');
+                case 'doc-type':
+                    include locate_template('dashboard-templates/rt/rt-tab-doc-type.php');
+                    break;
+                case 'docs':
+                    include locate_template('dashboard-templates/rt/rt-tab-docs.php');
                     break;
                 case 'assign-property':
                     include locate_template('dashboard-templates/rt/rt-tab-assign-property.php');
                     break;
-                case 'assign-task':
+                /* case 'assign-task':
                     include locate_template('dashboard-templates/rt/rt-tab-assign-task.php');
-                    break;
+                    break; */
                 case 'messages':
                     include locate_template('dashboard-templates/rt/rt-tab-messages.php');
                     break;

@@ -37,7 +37,8 @@ if (!function_exists('load_client_dashboard_data')) {
                     'author' => $user_id,
                     'post_status' => 'publish',
                 ]);
-            case 'documents':
+            case 'doc-type':
+            case 'docs':
             case 'messages':
             case 'settings':
             case 'notifications':
@@ -88,8 +89,11 @@ get_header();
                 case 'cl-property-details':
                     include locate_template('dashboard-templates/cl/cl-property-details.php');
                     break;
-                case 'documents':
-                    include locate_template('dashboard-templates/cl/cl-tab-documents.php');
+                case 'doc-type':
+                    include locate_template('dashboard-templates/cl/cl-tab-doc-type.php');
+                    break;
+                case 'docs':
+                    include locate_template('dashboard-templates/cl/cl-tab-docs.php');
                     break;
                 case 'messages':
                     include locate_template('dashboard-templates/cl/cl-tab-messages.php');
