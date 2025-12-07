@@ -37,7 +37,7 @@ if (!defined('ABSPATH')) exit;
 
     <!-- User's Linked Properties -->
     <div class="linked-properties-section">
-        <h4>Your Linked Properties</h4>
+        <h4>🏡 Your Linked Properties</h4>
         <?php echo do_shortcode('[my_properties]'); ?>
     </div>
 </div>

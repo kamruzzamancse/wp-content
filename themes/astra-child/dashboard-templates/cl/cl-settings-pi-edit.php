@@ -36,7 +36,7 @@ $user_role_name = !empty($user_roles) ? ucfirst($user_roles[0]) : 'Client';
 <div class="cl-back-link">
     <a href="?tab=cl-settings-pi" class="cl-back-link">
         <span class="cl-header-arrow">←</span>
-        <h1 class="header-title">Personal Information</h1>
+        <h2 class="header-title">👤 Personal Information</h2>
     </a>
 </div>
 

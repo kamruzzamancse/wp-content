@@ -9,10 +9,10 @@ $upload_baseurl = wp_upload_dir()['baseurl'];
 <!-- ================================
      Documents Section
 ================================ -->
-<div class="cld-task-section" style="margin-top:30px;">
+<div class="cld-task-section">
     <div class="cld-docs-wrapper">
         <div class="cld-docs-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h2 class="header-title">Documents</h2>
+            <h2 class="header-title">📄 Documents</h2>
             <button id="uploadDocBtn" class="btn-primary">+ Upload Document</button>
         </div>
 
@@ -117,13 +117,6 @@ include locate_template('dashboard-templates/am/am-edit-document-modal.php');
     justify-content: space-between;
     align-items: center;
     margin-bottom: 15px;
-}
-
-.header-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-    color: #222;
 }
 
 #uploadDocBtn,

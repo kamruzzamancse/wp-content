@@ -6,7 +6,7 @@ $image_url  = $upload_dir['baseurl'];
 ?>
 
 <div class="pt-toolbar-container">
-    <h1 class="header-title">All Properties</h1>
+    <h2 class="header-title">🏠 All Properties</h2>
 
     <div class="pt-right-section">
         <div class="pt-search-box">

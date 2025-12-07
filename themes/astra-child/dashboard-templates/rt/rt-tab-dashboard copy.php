@@ -658,7 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
     flex-direction: column;
 }
 
-.active-clients-section .header-title {
+.active-clients-section {
     margin: 0;
     padding: 0;
     align-self: flex-start;

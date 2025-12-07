@@ -85,7 +85,7 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
 <div class="sup-am-modal" id="sup-am-logout-modal">
     <div class="sup-am-modal-content">
         <div class="sup-am-modal-header">
-            <h2 class="sup-am-modal-title">Confirm Logout</h2>
+            <h2 class="sup-am-modal-title">⚠️ Confirm Logout</h2>
         </div>
         <div class="sup-am-modal-body">
             <p class="sup-am-modal-text">Are you sure you want to logout?</p>

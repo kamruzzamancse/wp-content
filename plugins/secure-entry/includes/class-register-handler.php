@@ -68,7 +68,8 @@ class Enhanced_Register_Handler {
                         'agency_name'    => $data['agency_name'] ?? '',
                         'license_number' => $data['license_number'] ?? '',
                         'rating_avg'     => 0,
-                        'created_at'     => current_time('mysql')
+                        'created_at'     => current_time('mysql'),
+                        'created_by'     => $user_id,
                     ]);
                 }
             } else { // client
@@ -76,13 +77,33 @@ class Enhanced_Register_Handler {
                 $existing = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $table WHERE user_id = %d", $user_id));
                 if (!$existing) {
                     $wpdb->insert($table, [
-                        'user_id'            => $user_id,
-                        'full_name'          => $data['first_name'] . ' ' . $data['last_name'],
-                        'phone'              => $data['phone'] ?? '',
-                        'email'              => $data['email'],
-                        'budget'             => $data['budget'] ?? '',
-                        'preferred_location' => $data['preferred_location'] ?? '',
-                        'created_at'         => current_time('mysql')
+                        'user_id'        => $user_id,
+                        
+                        // From registration form:
+                        'first_name'     => $data['first_name'] ?? '',
+                        'second_name'    => $data['last_name'] ?? '',
+
+                        'first_email'    => $data['email'] ?? '',
+                        'second_email'   => '',
+
+                        'first_phone'    => '',
+                        'second_phone'   => '',
+                        
+                        // Optional fields: form-e nai → NULL or default
+                        'note'           => '',
+                        'address'        => '',
+                        'status'         => 'lead',
+                        'lead_status'    => 'cold',
+
+                        'profile_picture' => '',
+
+                        'created_at'     => current_time('mysql'),
+                        'created_by'     => $user_id,  // Or admin ID if needed
+
+                        'updated_at'     => null,
+                        'updated_by'     => null,
+                        'deleted_at'     => null,
+                        'deleted_by'     => null,
                     ]);
                 }
             }

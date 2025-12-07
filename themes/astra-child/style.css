@@ -217,6 +217,13 @@ html {
     z-index: -1;
 }
 
+.header-title {
+    color: #2271b1!important;
+    font-size: 1.5rem!important;
+    font-weight: 700!important;
+    line-height: 1.3em!important;
+}
+
 
 
 

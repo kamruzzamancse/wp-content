@@ -1,7 +1,7 @@
 <div class="ab-container">
   <div class="ab-table-header">
     <div class="ab-header-left">
-      <h1 class="header-title">Address Book</h1>
+      <h2 class="header-title">📖 Address Book</h2>
     </div>
     <div class="ab-header-right">
       <div class="ab-search-box">

@@ -1,12 +1,12 @@
 <div class="cl-back-link">
     <a href="?tab=settings" class="cl-back-link">
         <span class="cl-header-arrow">←</span>
-        <h1 class="header-title">Settings</h1>
+        <h1 class="header-title">⚙️ Settings</h1>
     </a>
 </div>
 
 <div class="ss-contact-form-container">
-    <h2 class="ss-contact-form-title">Send Us a Message</h2>
+    <h2 class="ss-contact-form-title">✉️ Send Us a Message</h2>
     
     <form class="ss-contact-form">
         <div class="ss-form-row">

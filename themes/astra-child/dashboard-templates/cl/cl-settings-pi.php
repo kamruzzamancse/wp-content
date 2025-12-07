@@ -45,13 +45,13 @@ if (empty($profile_picture)) {
 <div class="cl-back-link">
     <a href="?tab=settings" class="cl-back-link">
         <span class="cl-header-arrow">←</span>
-        <h1 class="header-title">Settings</h1>
+        <h1 class="header-title">⚙️ Settings</h1>
     </a>
 </div>
 
 <div class="piv-realtor-profile-container">
     <div class="piv-profile-header">
-        <h2>Personal Information</h2>
+        <h2>👤 Personal Information</h2>
         <a href="?tab=cl-settings-pi-edit" class="piv-edit-button-link">
             <button class="piv-edit-button">Edit Profile</button>
         </a>

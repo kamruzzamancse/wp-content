@@ -10,7 +10,7 @@ global $wpdb;
 
     <div class="cld-doc-types-wrapper">
         <div class="cld-doc-types-header">
-            <h2 class="header-title">Document Types</h2>
+            <h2 class="header-title">📂 Document Types</h2>
             <button id="addDocTypeBtn" class="btn-primary">+ Add Type</button>
         </div>
 
@@ -95,12 +95,6 @@ include locate_template('dashboard-templates/am/am-document-type-modal.php');
     margin-bottom: 15px;
 }
 
-.header-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-}
-
 .btn-primary {
     background-color: #0073e6;
     color: #fff;
@@ -133,7 +127,7 @@ include locate_template('dashboard-templates/am/am-document-type-modal.php');
 }
 
 #docTypeRowsPerPage {
-    width: 120px;
+    width: 100px;
     padding: 5px 10px;
     border-radius: 6px;
     border: 1px solid #ddd;
@@ -389,6 +383,10 @@ include locate_template('dashboard-templates/am/am-document-type-modal.php');
     width: 100%;
 }
 
+#addDocTypeBtn {
+    color:#FFF!important;
+}
+
 @keyframes pulse {
     0% { opacity: 0.6; }
     50% { opacity: 1; }
@@ -468,9 +466,6 @@ include locate_template('dashboard-templates/am/am-document-type-modal.php');
    Small Screen Responsive
 ========================== */
 @media(max-width: 480px){
-    .header-title {
-        font-size: 18px;
-    }
     
     .btn-primary {
         padding: 8px 16px;

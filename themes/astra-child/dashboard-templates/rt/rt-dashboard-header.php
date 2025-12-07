@@ -113,7 +113,7 @@ if (empty($company_name)) {
 <div class="rt-modal" id="rt-logout-modal">
     <div class="rt-modal-content">
         <div class="rt-modal-header">
-            <h2 class="rt-modal-title">Confirm Logout</h2>
+            <h2 class="rt-modal-title">⚠️ Confirm Logout</h2>
         </div>
         <div class="rt-modal-body">
             <p class="rt-modal-text">Are you sure you want to logout?</p>

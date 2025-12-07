@@ -5,7 +5,7 @@
         <div class="tpg-dashboard-container">
             <div class="tpg-tracking-section">
                 <div class="tpg-tracking-header">
-                    <h1 class="tpg-section-title">Tracking Property</h1>
+                    <h2 class="header-title">📈 Tracking Property</h2>
                     <div class="tpg-tracking-summary">
                         <span class="tpg-rental" id="tpg-avg-rental-price">Avg Rental: $0</span> | 
                         <span class="tpg-sales" id="tpg-avg-sales-price">Avg Sales: $0</span>
@@ -35,7 +35,7 @@
         <!-- Message Realtor Box -->
         <div class="cld-box cld-message-box">
             <div class="cld-box-header">
-                <span>Message Realtor</span>
+                <span>📩 Message Realtor</span>
                 <button class="cld-send-btn">Send</button>
             </div>
             <div class="cld-box-body">
@@ -73,7 +73,7 @@
 
         <!-- Notes Header -->
         <div class="notes-header">
-            <h1>Notes</h1>
+            <h1>📝 Notes</h1>
             <button class="add-note-btn">+</button>
         </div>
 
@@ -225,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <style>
 /* ===== GENERAL DASHBOARD STYLING ===== */
+
 .dashboard-section {
     padding: 20px;
     background: #fff;

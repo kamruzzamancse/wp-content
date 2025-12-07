@@ -74,13 +74,15 @@
 </div>
 
 <style>
+/* =========================
+   Modal Overlay
+========================= */
 .clup-modal-overlay {
     display: none;               /* hidden by default */
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.5);
     z-index: 9999;
-
     justify-content: center;     /* horizontal center */
     align-items: center;         /* vertical center */
     padding: 20px;
@@ -102,6 +104,8 @@
     position: relative;
     animation: fadeInUp 0.3s ease forwards;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;           /* limit height for large screens */
+    overflow-y: auto;           /* scroll if content overflows */
 }
 
 /* Animation */
@@ -166,12 +170,14 @@
 }
 
 .clup-field input,
-.clup-field select {
+.clup-field select,
+.clup-field textarea {
     width: 100%;
     padding: 10px;
     border-radius: 6px;
     border: 1px solid #ccc;
     font-size: 14px;
+    resize: vertical; /* allow vertical resize for textarea */
 }
 
 /* =========================
@@ -262,12 +268,33 @@
 ========================= */
 @media (max-width: 600px) {
     .clup-box {
-        padding: 20px;
+        padding: 15px 20px;
+        max-height: 80vh;        /* compact height for small screens */
+        overflow-y: auto;        /* scroll if content exceeds modal */
     }
 
     .clup-row-single {
         flex-direction: column;
     }
+
+    .clup-upload-box {
+        padding: 20px;
+    }
+
+    .clup-field textarea {
+        height: 80px;            /* smaller textarea for mobile */
+    }
 }
 
+@media (max-width: 400px) {
+    .clup-box {
+        padding: 12px 15px;
+    }
+    .clup-upload-box {
+        padding: 15px;
+    }
+    .clup-field textarea {
+        height: 70px;            /* very small screens */
+    }
+}
 </style>

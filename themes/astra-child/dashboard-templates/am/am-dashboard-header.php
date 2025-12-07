@@ -108,7 +108,7 @@ if (empty($company_name)) {
 <div class="am-modal" id="am-logout-modal">
     <div class="am-modal-content">
         <div class="am-modal-header">
-            <h2 class="am-modal-title">Confirm Logout</h2>
+            <h2 class="am-modal-title">⚠️ Confirm Logout</h2>
         </div>
         <div class="am-modal-body">
             <p class="am-modal-text">Are you sure you want to logout?</p>

@@ -119,13 +119,6 @@ include locate_template('dashboard-templates/am/am-edit-document-modal.php');
     margin-bottom: 15px;
 }
 
-.header-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-    color: #222;
-}
-
 #uploadDocBtn,
 .btn-primary {
     background-color: #0073e6;

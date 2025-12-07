@@ -8,7 +8,7 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
 ?>
 
 <div class="assign-property-container">
-    <h2>Assign Property to Client</h2>
+    <h2>🔗 Assign Property to Client</h2>
 
     <div class="assign-form">
         <!-- Client Search -->
@@ -33,7 +33,7 @@ $assigned_table   = $wpdb->prefix . 'assigned_property';
     <hr>
 
     <!-- Assigned Properties Table -->
-    <h3>Assigned Properties</h3>
+    <h3>🏠 Assigned Properties</h3>
     <table class="wp-list-table widefat fixed striped">
         <thead>
             <tr>

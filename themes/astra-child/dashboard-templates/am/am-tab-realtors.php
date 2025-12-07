@@ -398,7 +398,7 @@ document.addEventListener('DOMContentLoaded', () => {
 /* Container & Header */
 .ab-container { width: 100%; margin: 0 auto; font-family: Arial, sans-serif; }
 .ab-table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-.ab-header-left .header-title { font-size: 24px; font-weight: 600; margin: 0; }
+.ab-header-left { font-size: 24px; font-weight: 600; margin: 0; }
 .ab-header-right { display: flex; align-items: center; gap: 10px; }
 .ab-search-box { display: flex; align-items: center; border: 1px solid #ccc; border-radius: 6px; padding: 4px 6px; background: #fff; }
 .pt-search-icon { margin-right: 6px; }

@@ -95,12 +95,6 @@ include locate_template('dashboard-templates/am/am-document-type-modal.php');
     margin-bottom: 15px;
 }
 
-.header-title {
-    margin: 0;
-    font-size: 22px;
-    font-weight: 600;
-}
-
 .btn-primary {
     background-color: #0073e6;
     color: #fff;
@@ -133,7 +127,7 @@ include locate_template('dashboard-templates/am/am-document-type-modal.php');
 }
 
 #docTypeRowsPerPage {
-    width: 120px;
+    width: 100px;
     padding: 5px 10px;
     border-radius: 6px;
     border: 1px solid #ddd;
@@ -468,9 +462,6 @@ include locate_template('dashboard-templates/am/am-document-type-modal.php');
    Small Screen Responsive
 ========================== */
 @media(max-width: 480px){
-    .header-title {
-        font-size: 18px;
-    }
     
     .btn-primary {
         padding: 8px 16px;
