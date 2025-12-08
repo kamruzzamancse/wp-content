@@ -9,7 +9,7 @@ $upload_baseurl = wp_upload_dir()['baseurl'];
 <!-- ================================
      Documents Section
 ================================ -->
-<div class="cld-task-section" style="margin-top:30px;">
+<div class="cld-task-section">
     <div class="cld-docs-wrapper">
         <div class="cld-docs-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h2 class="header-title">📄 Documents</h2>

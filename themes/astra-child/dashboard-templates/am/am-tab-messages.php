@@ -2,7 +2,7 @@
 
     <!-- Top Bar -->
     <div class="top-bar">
-      <h1 class="header-title">Message</h1><br />
+      <h1 class="header-title">✉️ Message</h1><br />
     </div>
 
     <?php echo do_shortcode('[better_messages]'); ?>

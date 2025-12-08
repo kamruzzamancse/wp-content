@@ -1,12 +1,12 @@
 <div class="back-link">
     <a href="?tab=settings" class="pd-back-link">
         <span class="pd-back-link__arrow">←</span>
-        <h1 class="header-title">Settings</h1>
+        <h1 class="header-title">⚙️ Settings</h1>
     </a>
 </div>
 
 <div class="sup-password-form-container">
-    <h2 class="sup-form-title">Update Password</h2>
+    <h2 class="sup-form-title">🔒 Update Password</h2>
     
     <form class="sup-password-form">
         <div class="sup-form-group">

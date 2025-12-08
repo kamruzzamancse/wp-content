@@ -37,6 +37,7 @@ if (empty($company_name)) {
         <div class="user-info">
             <a href="?tab=notifications" class="notification-icon" aria-label="Notifications">
                 <span class="dashicons dashicons-bell"></span>
+                <?php echo bm_get_unread_count_badge(); ?>
             </a>
 
             <div class="profile-header">
@@ -157,6 +158,34 @@ if (empty($company_name)) {
 }
 .am-modal-button-primary:hover { background: #c0392b; }
 .am-modal-footer { display: flex; justify-content: flex-end; gap: 10px; }
+
+.notif-count {
+    background: red;
+    color: #fff;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-left: -8px;
+}
+
+.notification-icon {
+    position: relative;
+
+}
+
+.notif-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff3b30;
+    color: #fff;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 20px;
+    font-weight: bold;
+    min-width: 18px;
+    text-align: center;
+}
 
 @media screen and (max-width: 480px) {
     .am-modal-button {

@@ -25,6 +25,88 @@ if (!function_exists('mdk_safe_filemtime')) {
     }
 }
 
+/**
+ * Enqueue & Localize Notifications Script
+ */
+add_action('wp_enqueue_scripts', function() {
+
+    // Register a dummy script so we can localize data
+    if (!wp_script_is('am-notifications', 'enqueued')) {
+        wp_register_script('am-notifications', '', [], null, true);
+
+        wp_localize_script('am-notifications', 'AM_NOTIF', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('am_notif_nonce'),
+        ]);
+
+        wp_enqueue_script('am-notifications');
+    }
+
+});
+
+/**
+ * AJAX: Mark all notifications as read
+ */
+function am_mark_all_read() {
+    check_ajax_referer('am_notif_nonce', 'nonce');
+
+    if (!is_user_logged_in()) wp_send_json_error('not_logged_in');
+
+    global $wpdb;
+    $user_id = get_current_user_id();
+    $table = $wpdb->prefix . 'bm_message_recipients';
+
+    $wpdb->update($table, ['unread_count' => 0], ['user_id' => $user_id]);
+
+    wp_send_json_success();
+}
+add_action('wp_ajax_am_mark_all_read', 'am_mark_all_read');
+
+/**
+ * AJAX: Mark single thread as read
+ */
+function am_mark_single_read() {
+    check_ajax_referer('am_notif_nonce', 'nonce');
+
+    if (!is_user_logged_in()) wp_send_json_error('not_logged_in');
+
+    global $wpdb;
+    $user_id = get_current_user_id();
+    $thread_id = isset($_POST['thread_id']) ? intval($_POST['thread_id']) : 0;
+
+    if (!$thread_id) wp_send_json_error('invalid_thread');
+
+    $table = $wpdb->prefix . 'bm_message_recipients';
+    $wpdb->update($table, ['unread_count' => 0], ['user_id' => $user_id, 'thread_id' => $thread_id]);
+
+    wp_send_json_success();
+}
+add_action('wp_ajax_am_mark_single_read', 'am_mark_single_read');
+
+/**
+ * Optional: Auto-refresh unread badge count every 5 seconds
+ * Returns JSON: { unread_count: X }
+ */
+function am_get_unread_count() {
+    check_ajax_referer('am_notif_nonce', 'nonce');
+
+    if (!is_user_logged_in()) wp_send_json_error('not_logged_in');
+
+    global $wpdb;
+    $user_id = get_current_user_id();
+    $table = $wpdb->prefix . 'bm_message_recipients';
+
+    $unread_count = (int) $wpdb->get_var(
+        $wpdb->prepare(
+            "SELECT SUM(unread_count) FROM {$table} WHERE user_id = %d",
+            $user_id
+        )
+    );
+
+    wp_send_json_success(['unread_count' => $unread_count]);
+}
+add_action('wp_ajax_am_get_unread_count', 'am_get_unread_count');
+
 // ======================
 // Reply Docs (Client Dashboard)
 // ======================

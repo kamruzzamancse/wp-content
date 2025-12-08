@@ -156,14 +156,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-
     // ===== Sorting by clicking table headers =====
     document.querySelectorAll('#addressBookTable th.sortable').forEach(th => {
         th.style.cursor = "pointer";
         th.dataset.order = "ASC";
 
         th.addEventListener('click', () => {
-            const sort_by = th.dataset.column;
+            const sort_by = th.dataset.sort; // <-- use 'sort' instead of 'column'
             const sort_order = th.dataset.order === 'ASC' ? 'DESC' : 'ASC';
             th.dataset.order = sort_order;
 
@@ -178,7 +177,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     });
-
 
     function setupClientDetailsHandlers() {
         document.removeEventListener('click', handleClientNameClick);

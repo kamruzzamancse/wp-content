@@ -1,7 +1,7 @@
 <div class="ab-container">
   <div class="ab-table-header">
     <div class="ab-header-left">
-      <h1 class="header-title">Realtors</h1>
+      <h1 class="header-title">👥 Realtors</h1>
     </div>
     <div class="ab-header-right">
       <div class="ab-search-box">
@@ -437,7 +437,7 @@ tbody tr:last-child td { border-bottom: none; }
 
 /* Pagination */
 .ab-pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 15px; padding-right: 10px; }
-.ab-pagination button { padding: 4px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; background-color: #f9f9f9; cursor: pointer; transition: all 0.2s ease; }
+.ab-pagination button { padding: 4px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; background-color: #0056b3!important; cursor: pointer; transition: all 0.2s ease; }
 .ab-pagination button:hover { background-color: #e6e6e6; border-color: #bbb; }
 .ab-pagination button.active { background-color: #0052cc; color: #fff; border-color: #0052cc; }
 

@@ -10,7 +10,7 @@ global $wpdb;
 
     <div class="cld-doc-types-wrapper">
         <div class="cld-doc-types-header">
-            <h2 class="header-title">Document Types</h2>
+            <h2 class="header-title">📁 Document Types</h2>
             <button id="addDocTypeBtn" class="btn-primary">+ Add Type</button>
         </div>
 

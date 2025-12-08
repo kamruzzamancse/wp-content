@@ -6,7 +6,7 @@
         <!-- Active Clients Section -->
         <div class="dashboard-section active-clients-section">
             <div class="clients-header">
-                <h1 class="header-title">Active Clients</h1>
+                <h2 class="header-title">👥 Active Clients</h2>
                 <div class="table-controls-row">
                     <input type="text" id="activeClientsSearch" placeholder="Search Active Clients">
                     <select id="activeClientsRows">
@@ -38,7 +38,7 @@
         <!-- Leads Section -->
         <div class="dashboard-section leads-section">
             <div class="leads-header">
-                <h1 class="header-title">Leads</h1>
+                <h2 class="header-title">📋 Leads</h2>
                 <div class="table-controls-row">
                     <input type="text" id="leadsSearch" placeholder="Search Leads">
                     <select id="leadsRows">
@@ -97,7 +97,7 @@
         ?>
 
         <div class="notes-header">
-            <h1>Notes</h1>
+            <h1>📝 Notes</h1>
             <button class="add-note-btn">+</button>
         </div>
 
@@ -305,7 +305,7 @@ include locate_template('dashboard-templates/rt/rt-db-lead-edit-modal.php');
     flex-direction: column;
 }
 
-.active-clients-section {
+.active-clients-section .header-title {
     margin: 0;
     padding: 0;
     align-self: flex-start;

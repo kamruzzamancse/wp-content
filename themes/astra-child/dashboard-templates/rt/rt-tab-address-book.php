@@ -25,13 +25,6 @@
   </div>
 
   <div class="ab-controls" style="display:flex; gap:15px; align-items:center; flex-wrap:wrap;">
-    <!-- SORT DROPDOWN -->
-    <label for="addressBookSort">Sort by:</label>
-    <select id="addressBookSort" style="width:110px;">
-      <option value="az" selected>Name A-Z</option>
-      <option value="za">Name Z-A</option>
-    </select>
-
     <!-- ROWS DROPDOWN -->
     <label for="addressBookRows">Show:</label>
     <select id="addressBookRows">
@@ -46,13 +39,13 @@
         <tr>
             <th>Profile</th>
             <th class="sortable" data-sort="first_name">1st Name</th>
-            <th class="sortable" data-sort="last_name">2nd Name</th>
-            <th class="sortable" data-sort="email_primary">1st Email</th>
-            <th class="sortable" data-sort="email_secondary">2nd Email</th>
-            <th class="sortable" data-sort="phone_primary">1st Phone</th>
-            <th class="sortable" data-sort="phone_secondary">2nd Phone</th>
+            <th class="sortable" data-sort="second_name">2nd Name</th>
+            <th class="sortable" data-sort="first_email">1st Email</th>
+            <th class="sortable" data-sort="second_email">2nd Email</th>
+            <th class="sortable" data-sort="first_phone">1st Phone</th>
+            <th class="sortable" data-sort="second_phone">2nd Phone</th>
             <th class="sortable" data-sort="address">Address</th>
-            <th class="sortable" data-sort="notes">Notes</th>
+            <th class="sortable" data-sort="note">Notes</th>
             <th class="sortable" data-sort="status">Status</th>
             <th style="width: 100px; text-align: center">Actions</th>
         </tr>
@@ -161,30 +154,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const importStartBtn = document.getElementById('abImportStart');
   const importPreview = document.getElementById('abImportPreview');
 
-  const sortDropdown = document.getElementById('addressBookSort');
   const rowsDropdown = document.getElementById('addressBookRows');
   const searchInput = document.getElementById('addressBookSearch');
 
   const closeModal = modal => modal.style.display='none';
   const showNotification = (msg,type='success')=>{console.log(type.toUpperCase(),msg);};
 
-  // Refresh Clients Table with sorting, search, pagination
+  // Refresh Clients Table WITHOUT SORTING (sorting removed)
   const refreshClientsTable = async () => {
     if(typeof window.fetchClients==='function'){
       const clients = await window.fetchClients({
         page:1,
         rows:parseInt(rowsDropdown.value,10),
         search:searchInput.value.trim(),
-        sort:sortDropdown.value,
+        sort:null,   // removed sorting
         bodyId:'addressBookBody',
         paginationId:'addressBookPagination'
       });
 
-      // Frontend sort fallback if fetchClients doesn't handle sorting
       if(clients && Array.isArray(clients)){
-        if(sortDropdown.value==='az') clients.sort((a,b)=>a.first_name.localeCompare(b.first_name));
-        else clients.sort((a,b)=>b.first_name.localeCompare(a.first_name));
-
         const tbody = document.getElementById('addressBookBody');
         tbody.innerHTML='';
         clients.forEach(client=>{
@@ -219,8 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('abImportCancel')?.addEventListener('click',()=>closeModal(importModal));
   importModal?.addEventListener('click',e=>{if(e.target===importModal) closeModal(importModal);});
 
-  // Event listeners
-  sortDropdown?.addEventListener('change',refreshClientsTable);
+  // Event listeners (SORT REMOVED)
   rowsDropdown?.addEventListener('change',refreshClientsTable);
   searchInput?.addEventListener('input',()=>setTimeout(refreshClientsTable,300));
 
@@ -334,3 +321,53 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshClientsTable();
 });
 </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const rowsDropdown = document.getElementById('addressBookRows');
+    const searchInput = document.getElementById('addressBookSearch');
+
+    // Track current sort state
+    let currentSortBy = 'first_name';
+    let currentSortOrder = 'ASC';
+
+    const refreshClientsTable = async (page = 1) => {
+        if (typeof window.fetchClients === 'function') {
+            await window.fetchClients({
+                page,
+                rows: parseInt(rowsDropdown.value, 10),
+                search: searchInput.value.trim(),
+                sort_by: currentSortBy,
+                sort_order: currentSortOrder,
+                bodyId: 'addressBookBody',
+                paginationId: 'addressBookPagination'
+            });
+        }
+    };
+
+    // Header sorting
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', () => {
+            const sortBy = th.dataset.sort;
+            if (!sortBy) return;
+
+            // Toggle order if same column, otherwise default to ASC
+            currentSortOrder = (currentSortBy === sortBy && currentSortOrder === 'ASC') ? 'DESC' : 'ASC';
+            currentSortBy = sortBy;
+
+            refreshClientsTable(1); // Go back to page 1 when sorting
+        });
+    });
+
+    // Search & rows change
+    const debouncedRefresh = () => setTimeout(refreshClientsTable, 300);
+    searchInput?.addEventListener('input', debouncedRefresh);
+    rowsDropdown?.addEventListener('change', () => refreshClientsTable(1));
+
+    // Initial load
+    refreshClientsTable();
+});
+
+</script>
+
+

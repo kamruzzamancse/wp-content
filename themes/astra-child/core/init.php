@@ -32,6 +32,7 @@ $feature_groups = [
         'rentcast-cron.php',
         'document-type-ajax.php',
         'upload-document-ajax.php',
+        'notification.php',
     ]
 ];
 

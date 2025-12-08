@@ -386,6 +386,10 @@ input {
     gap: 8px;
 }
 
+th.sortable {
+    cursor: pointer;      /* shows pointer on hover */
+}
+
 /* ---------------------- Mobile & Tablet Responsive ------------------ */
 @media (max-width: 768px) {
     /* Header layout */

@@ -97,7 +97,7 @@
         ?>
 
         <div class="notes-header">
-            <h1>Notes</h1>
+            <h1>📝 Notes</h1>
             <button class="add-note-btn">+</button>
         </div>
 

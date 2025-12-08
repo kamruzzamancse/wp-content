@@ -434,13 +434,13 @@
     position: relative;
     width: 40px;
     height: 40px;
-    border: 1px solid #ddd; /* Light gray border */
-    border-radius: 50%; /* Makes it a perfect circle */
+    border: 1px solid #ddd;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #555;
-    background: white; /* Optional: Fill circle background */
+    background: white;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
@@ -448,7 +448,7 @@
     font-size: 16px; /* Slightly smaller icon inside the circle */
 }
 
-.notification-icon::after {
+/* .notification-icon::after {
     content: '';
     position: absolute;
     top: 5px;
@@ -457,7 +457,7 @@
     height: 8px;
     background: #ff0000;
     border-radius: 50%;
-}
+} */
 
 .profile-pic img {
     width: 40px;
