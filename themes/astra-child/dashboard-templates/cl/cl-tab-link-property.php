@@ -10,7 +10,12 @@ if (!defined('ABSPATH')) exit;
             <label for="property-search-input">Search Properties:</label>
             <div class="search-input-group">
                 <input type="text" id="property-search-input" 
-                       placeholder="e.g., Houston, New York, 77001, 14150 Tomball Pkwy">
+                      placeholder="e.g., Houston, New York, 77001, 14150 Tomball Pkwy">
+
+                <label for="property-search-limit" style="margin-left:10px;">Results Limit:</label>
+                <input type="number" id="property-search-limit" 
+                      placeholder="5" value="5" min="1" max="50" step="1" style="width:60px; margin-left:5px;">
+
                 <button id="search-property-btn" class="search-btn">
                     <span class="dashicons dashicons-search"></span>
                     Search
@@ -85,6 +90,8 @@ jQuery(document).ready(function($) {
     // Search properties
     function searchProperties() {
         const searchTerm = $('#property-search-input').val().trim();
+        const searchLimit = parseInt($('#property-search-limit').val()) || 5;
+
         if (!searchTerm) {
             alert('Please enter a city name, ZIP code, or address');
             return;
@@ -96,6 +103,7 @@ jQuery(document).ready(function($) {
         $.post(ajaxUrl, {
             action: 'real_time_property_search',
             search: searchTerm,
+            limit: searchLimit,
             nonce: searchNonce
         })
         .done(function(response) {
@@ -145,6 +153,7 @@ jQuery(document).ready(function($) {
                 $('#link-success').fadeIn();
                 $('#property-search-results').hide();
                 $('#property-search-input').val('');
+                $('#property-search-limit').val('5'); // reset limit to default
 
                 // Refresh linked properties section
                 $('.linked-properties-section').load(location.href + ' .linked-properties-section > *');
@@ -164,6 +173,7 @@ jQuery(document).ready(function($) {
     });
 });
 </script>
+
 
 <style>
 /* ===== Property Linker Page Styling ===== */

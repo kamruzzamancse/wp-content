@@ -10,15 +10,18 @@ function real_time_property_search() {
     $search_term = sanitize_text_field($_POST['search']);
     $search_term = ucwords(strtolower($search_term));
     $api_key = "7a7c73a68ffc46abae4f32d560e54bf2";
+
+    // Get limit from input, default 2
+    $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 2;
     
     // Smart search type detection
     $search_type = detect_search_type($search_term);
     
     // For address searches, try multiple approaches
     if ($search_type === 'address') {
-        $results = search_property_by_address($search_term, $api_key);
+        $results = search_property_by_address($search_term, $api_key, $limit);
     } else {
-        $results = search_property_general($search_term, $search_type, $api_key);
+        $results = search_property_general($search_term, $search_type, $api_key, $limit);
     }
     
     if ($results['success']) {
@@ -33,19 +36,17 @@ add_action('wp_ajax_nopriv_real_time_property_search', 'real_time_property_searc
 // ==============================
 // Address-specific search with fallbacks
 // ==============================
-function search_property_by_address($address, $api_key) {
+function search_property_by_address($address, $api_key, $limit = 2) {
     // Try 1: Exact address search
-    $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?address=" . urlencode($address) . "&limit=2";
+    $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?address=" . urlencode($address) . "&limit=$limit";
     $result = make_api_request($api_url, $api_key);
     
-    if ($result['success']) {
-        return $result;
-    }
+    if ($result['success']) return $result;
     
     // Try 2: Extract ZIP code and search by ZIP
     $zip_code = extract_zip_code($address);
     if ($zip_code) {
-        $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?zipCode=$zip_code&limit=2";
+        $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?zipCode=$zip_code&limit=$limit";
         $result = make_api_request($api_url, $api_key);
         if ($result['success'] && $result['count'] > 0) {
             $result['message'] = "Exact address not found. Showing properties in ZIP code $zip_code";
@@ -56,7 +57,7 @@ function search_property_by_address($address, $api_key) {
     // Try 3: Extract city and search by city
     $city = extract_city($address);
     if ($city) {
-        $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?city=" . urlencode($city) . "&limit=2";
+        $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?city=" . urlencode($city) . "&limit=$limit";
         $result = make_api_request($api_url, $api_key);
         if ($result['success'] && $result['count'] > 0) {
             $result['message'] = "Exact address not found. Showing properties in $city";
@@ -73,13 +74,13 @@ function search_property_by_address($address, $api_key) {
 // ==============================
 // General search function
 // ==============================
-function search_property_general($search_term, $search_type, $api_key) {
+function search_property_general($search_term, $search_type, $api_key, $limit = 2) {
     switch($search_type) {
         case 'zipcode':
-            $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?zipCode=$search_term&limit=2";
+            $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?zipCode=$search_term&limit=$limit";
             break;
         default:
-            $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?city=" . urlencode($search_term) . "&limit=2";
+            $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?city=" . urlencode($search_term) . "&limit=$limit";
     }
     
     return make_api_request($api_url, $api_key);
@@ -105,41 +106,20 @@ function make_api_request($api_url, $api_key) {
     $err = curl_error($curl);
     curl_close($curl);
     
-    // Check for cURL error
-    if ($err) {
-        return ['success' => false, 'message' => "Network error: $err"];
-    }
-    
-    // Check HTTP status code
-    if ($http_code === 404) {
-        return ['success' => false, 'message' => "No properties found at this location."];
-    }
-    
-    if ($http_code !== 200) {
-        return ['success' => false, 'message' => "API returned HTTP $http_code. Please try a different search."];
-    }
+    if ($err) return ['success' => false, 'message' => "Network error: $err"];
+    if ($http_code === 404) return ['success' => false, 'message' => "No properties found at this location."];
+    if ($http_code !== 200) return ['success' => false, 'message' => "API returned HTTP $http_code. Please try a different search."];
     
     $data = json_decode($response, true);
-    
-    // Check if JSON decoding failed
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['success' => false, 'message' => "Invalid response from API."];
-    }
-    
-    // Check for API errors
+    if (json_last_error() !== JSON_ERROR_NONE) return ['success' => false, 'message' => "Invalid response from API."];
     if (isset($data['error']) || isset($data['message'])) {
         $error_msg = $data['message'] ?? $data['error'] ?? 'API error';
         return ['success' => false, 'message' => $error_msg];
     }
     
-    // Check if we have valid listings
     $properties_list = $data['listings'] ?? $data;
+    if (!is_array($properties_list) || empty($properties_list)) return ['success' => false, 'message' => "No properties found. Try a different search term."];
     
-    if (!is_array($properties_list) || empty($properties_list)) {
-        return ['success' => false, 'message' => "No properties found. Try a different search term."];
-    }
-    
-    // Validate properties
     $valid_properties = array_filter($properties_list, function($property) {
         return is_array($property) && 
                !isset($property['error']) && 
@@ -147,15 +127,10 @@ function make_api_request($api_url, $api_key) {
                (!empty($property['id']) || !empty($property['listingId']));
     });
     
-    if (empty($valid_properties)) {
-        return ['success' => false, 'message' => "No valid property data found."];
-    }
+    if (empty($valid_properties)) return ['success' => false, 'message' => "No valid property data found."];
     
-    // Generate HTML
     $html = '';
-    foreach ($valid_properties as $property) {
-        $html .= render_property_item($property);
-    }
+    foreach ($valid_properties as $property) $html .= render_property_item($property);
     
     return [
         'success' => true,
@@ -173,7 +148,6 @@ function extract_zip_code($address) {
 }
 
 function extract_city($address) {
-    // Simple city extraction - you might want to improve this
     $parts = explode(',', $address);
     return count($parts) >= 2 ? trim($parts[1]) : null;
 }
@@ -183,29 +157,16 @@ function extract_city($address) {
 // ==============================
 function detect_search_type($search_term) {
     $clean_term = trim($search_term);
-    
-    // ZIP code (5 digits)
-    if (is_numeric($clean_term) && strlen($clean_term) === 5) {
-        return 'zipcode';
-    }
+    if (is_numeric($clean_term) && strlen($clean_term) === 5) return 'zipcode';
     
     $lower_term = strtolower($clean_term);
-    
-    $address_indicators = [
-        'st', 'street', 'ave', 'avenue', 'rd', 'road', 'dr', 'drive', 
-        'ln', 'lane', 'blvd', 'boulevard', 'pkwy', 'parkway', 'ct', 'court',
-        'way', 'circle', 'pl', 'place'
-    ];
+    $address_indicators = ['st','street','ave','avenue','rd','road','dr','drive','ln','lane','blvd','boulevard','pkwy','parkway','ct','court','way','circle','pl','place'];
     
     if (preg_match('/\d+/', $lower_term)) {
         foreach ($address_indicators as $indicator) {
-            if (strpos($lower_term, $indicator) !== false) {
-                return 'address';
-            }
+            if (strpos($lower_term, $indicator) !== false) return 'address';
         }
-        if (preg_match('/^\d+\s+[a-z]+\s+[a-z]+/', $lower_term)) {
-            return 'address';
-        }
+        if (preg_match('/^\d+\s+[a-z]+\s+[a-z]+/', $lower_term)) return 'address';
     }
     
     return 'city';
@@ -224,9 +185,7 @@ function render_property_item($property) {
     $bedrooms = intval($property['bedrooms'] ?? $property['bed'] ?? 0);
     $bathrooms = intval($property['bathrooms'] ?? $property['bath'] ?? 0);
     $sqft = intval($property['squareFootage'] ?? $property['sqft'] ?? 0);
-    $listing_id = sanitize_text_field($property['id'] ?? $property['listingId'] ?? '');
     
-    // Store full property payload in button for later DB insert
     $payload_json = esc_attr(wp_json_encode($property));
     
     ob_start();
@@ -239,9 +198,7 @@ function render_property_item($property) {
             <p>Rent: $<?php echo number_format((float)$price); ?>/month</p>
             <p>Bed: <?php echo $bedrooms; ?> | Bath: <?php echo $bathrooms; ?> | SqFt: <?php echo number_format($sqft); ?></p>
         </div>
-        <button class="link-property-btn" data-property-payload='<?php echo $payload_json; ?>'>
-            Link Property
-        </button>
+        <button class="link-property-btn" data-property-payload='<?php echo $payload_json; ?>'>Link Property</button>
     </div>
     <?php
     return ob_get_clean();
