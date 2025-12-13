@@ -71,7 +71,7 @@ jQuery(document).ready(function($) {
 
         $info.append($('<h4/>').text(address));
         $info.append($('<p/>').text(city + (city ? ', ' : '') + state + (zip ? (' ' + zip) : '')));
-        $info.append($('<p/>').text('Rent: $' + (price ? Number(price).toLocaleString() : 'N/A') + '/month'));
+        $info.append($('<p/>').text('Price: $' + (price ? Number(price).toLocaleString() : 'N/A')));
         $info.append($('<p/>').text('Bed: ' + bedrooms + ' | Bath: ' + bathrooms + ' | SqFt: ' + (sqft ? Number(sqft).toLocaleString() : 'N/A')));
 
         const $btn = $('<button/>', {
@@ -80,7 +80,6 @@ jQuery(document).ready(function($) {
             text: 'Link Property'
         });
 
-        // Store JS object safely in jQuery data (not as HTML attribute)
         $btn.data('propertyPayload', property);
 
         $item.append($img).append($info).append($btn);
@@ -104,6 +103,7 @@ jQuery(document).ready(function($) {
             action: 'real_time_property_search',
             search: searchTerm,
             limit: searchLimit,
+            mode: 'all', // fetch from all endpoints automatically
             nonce: searchNonce
         })
         .done(function(response) {
@@ -131,7 +131,6 @@ jQuery(document).ready(function($) {
 
         $btn.text('Linking...').prop('disabled', true);
 
-        // Extract individual fields from property object
         const payload = {
             action: 'simple_link_property',
             nonce: linkNonce,
@@ -144,6 +143,7 @@ jQuery(document).ready(function($) {
             bathrooms: property.bathrooms || property.bath || 0,
             sqft: property.squareFootage || property.sqft || 0,
             price: property.price || property.rent || '',
+            property_value: property.estimatedValue || property.property_value || 0,
             image_url: property.photos?.[0] || ''
         };
 
@@ -153,9 +153,8 @@ jQuery(document).ready(function($) {
                 $('#link-success').fadeIn();
                 $('#property-search-results').hide();
                 $('#property-search-input').val('');
-                $('#property-search-limit').val('5'); // reset limit to default
+                $('#property-search-limit').val('5');
 
-                // Refresh linked properties section
                 $('.linked-properties-section').load(location.href + ' .linked-properties-section > *');
 
                 $('html, body').animate({
@@ -173,7 +172,6 @@ jQuery(document).ready(function($) {
     });
 });
 </script>
-
 
 <style>
 /* ===== Property Linker Page Styling ===== */
@@ -217,6 +215,7 @@ jQuery(document).ready(function($) {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 #property-search-input {
@@ -225,12 +224,20 @@ jQuery(document).ready(function($) {
   border: 2px solid #e9ecef;
   border-radius: 6px;
   font-size: 14px;
+  width: 100%;
 }
 
 #property-search-input:focus {
   border-color: #007cba;
   outline: none;
   box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.1);
+}
+
+#property-search-limit {
+  width: 100px;
+  padding: 12px 10px;
+  border: 2px solid #e9ecef;
+  border-radius: 6px;
 }
 
 .search-btn {
@@ -520,6 +527,11 @@ jQuery(document).ready(function($) {
     margin-bottom: 10px;
   }
   
+  #property-search-limit {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
   .search-btn {
     width: 100%;
     justify-content: center;
@@ -584,4 +596,5 @@ jQuery(document).ready(function($) {
   outline: 2px solid #2271b1;
   outline-offset: 2px;
 }
+
 </style>
