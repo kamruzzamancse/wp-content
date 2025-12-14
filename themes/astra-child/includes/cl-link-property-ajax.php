@@ -434,56 +434,89 @@ function simple_link_property_to_user($user_id, $property_payload) {
 
 
 // ==============================
-// 9. Shortcode: User's Linked Properties
+// 9. Shortcode: User's Linked Properties (Updated: Rent 0 = N/A)
 // ==============================
 function my_properties_shortcode() {
     $user_id = get_current_user_id();
     if (!$user_id) return '<p>Please login to view your properties.</p>';
 
     global $wpdb;
-    $properties_table = $wpdb->prefix.'rentcast_properties';
-    $user_properties_table = $wpdb->prefix.'rentcast_user_properties';
+    $properties_table = $wpdb->prefix . 'rentcast_properties';
+    $user_properties_table = $wpdb->prefix . 'rentcast_user_properties';
 
     $properties = $wpdb->get_results($wpdb->prepare(
         "SELECT p.*, up.linked_date
          FROM $properties_table p
-         INNER JOIN $user_properties_table up ON p.id=up.property_id
-         WHERE up.user_id=%d AND up.is_active=1
+         INNER JOIN $user_properties_table up ON p.id = up.property_id
+         WHERE up.user_id = %d AND up.is_active = 1
          ORDER BY up.linked_date DESC",
         $user_id
     ));
 
     ob_start();
+
     if ($properties) {
         echo '<div class="my-properties-list">';
-        foreach($properties as $p) {
-            $image_url = !empty($p->image_url)?esc_url($p->image_url):'https://placehold.co/300x200?text=No+Image';
-            $rent = is_numeric($p->price)?number_format($p->price):'N/A';
-            $last_updated = !empty($p->last_updated)?date('M j, Y', strtotime($p->last_updated)):'Never';
+
+        foreach ($properties as $p) {
+
+            $image_url = !empty($p->image_url)
+                ? esc_url($p->image_url)
+                : 'https://placehold.co/300x200?text=No+Image';
+
+            // ✅ Rent: show only if > 0
+            $rent = (!empty($p->price) && is_numeric($p->price) && $p->price > 0)
+                ? number_format($p->price)
+                : 'N/A';
+
+            // Property Value
+            $property_value = (!empty($p->property_value) && is_numeric($p->property_value) && $p->property_value > 0)
+                ? number_format($p->property_value)
+                : 'N/A';
+
+            $linked_date = !empty($p->linked_date)
+                ? date('M j, Y', strtotime($p->linked_date))
+                : 'N/A';
+
+            $last_updated = !empty($p->last_updated)
+                ? date('M j, Y', strtotime($p->last_updated))
+                : 'Never';
             ?>
+            
             <div class="my-property-item">
                 <img src="<?php echo $image_url; ?>" alt="<?php echo esc_attr($p->address); ?>">
+
                 <div class="property-details">
                     <h5><?php echo esc_html($p->address); ?></h5>
-                    <p class="location"><?php echo esc_html($p->city . ', ' . $p->state); ?></p>
+
+                    <p class="location">
+                        <?php echo esc_html($p->city . ', ' . $p->state); ?>
+                    </p>
+
                     <div class="property-stats">
-                        <span>Rent: $<?php echo $rent; ?>/month</span>
+                        <span><strong>Rent:</strong> <?php echo ($rent !== 'N/A') ? '$' . $rent . ' / M' : 'N/A'; ?></span><br>
+                        <span><strong>Value:</strong> <?php echo ($property_value !== 'N/A') ? '$' . $property_value : 'N/A'; ?></span>
                     </div>
+
                     <div class="property-meta">
-                        <small>Linked: <?php echo date('M j, Y', strtotime($p->linked_date)); ?></small>
+                        <small>Linked: <?php echo esc_html($linked_date); ?></small><br>
                         <small>Updated: <?php echo esc_html($last_updated); ?></small>
                     </div>
                 </div>
             </div>
+
             <?php
         }
+
         echo '</div>';
+
     } else {
         echo '<div class="no-properties-message">';
         echo '<p>You have no linked properties yet.</p>';
         echo '<p>Use the search above to link your first property!</p>';
         echo '</div>';
     }
+
     return ob_get_clean();
 }
 add_shortcode('my_properties', 'my_properties_shortcode');
