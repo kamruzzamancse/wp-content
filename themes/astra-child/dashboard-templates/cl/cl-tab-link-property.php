@@ -493,6 +493,42 @@ jQuery(document).ready(function($) {
   margin: 0 0 15px 0;
 }
 
+/* Unlink Button Styles */
+.unlink-property-btn {
+    margin-top: 15px;
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #ff4d4f;       /* Red color for delete/unlink action */
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    text-align: center;
+    text-decoration: none;
+}
+
+/* Hover effect */
+.unlink-property-btn:hover {
+    background-color: #ff7875;
+    transform: translateY(-2px);
+}
+
+/* Active / Click effect */
+.unlink-property-btn:active {
+    background-color: #d9363e;
+    transform: translateY(0);
+}
+
+/* Focus / Accessibility */
+.unlink-property-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.4);
+}
+
+
 /* Animations */
 @keyframes pulse {
   0% { opacity: 1; }

@@ -51,7 +51,7 @@ function search_property_by_address($address, $api_key, $limit = 5, $mode = 'pro
     $rental_url = "https://api.rentcast.io/v1/listings/rental/long-term?address=" . urlencode($address) . "&status=Active&limit=1";
     $rental_result = make_api_request($rental_url, $api_key, $address, 'rental');
 
-    // ✅ BOTH EXIST → SMART MERGE
+    // BOTH EXIST → SMART MERGE
     if ($property_result['success'] && $rental_result['success']) {
 
         $merged = smart_merge_property_and_rental(
@@ -367,9 +367,6 @@ function simple_link_property() {
 }
 add_action('wp_ajax_simple_link_property', 'simple_link_property');
 
-// ==============================
-// 8. Core Property Linking Function (Updated for rent & property value)
-// ==============================
 function simple_link_property_to_user($user_id, $property_payload) {
     global $wpdb;
     $properties_table = $wpdb->prefix . 'rentcast_properties';
@@ -383,8 +380,13 @@ function simple_link_property_to_user($user_id, $property_payload) {
     $rent_price = isset($property_payload['price']) ? floatval(str_replace([',','$'],'',$property_payload['price'])) : 0;
     $property_value = isset($property_payload['property_value']) ? floatval(str_replace([',','$'],'',$property_payload['property_value'])) : 0;
 
+    $current_time = current_time('mysql');
+
     // Check if property already exists
-    $existing = $wpdb->get_row($wpdb->prepare("SELECT id FROM $properties_table WHERE listing_id=%s", $listing_id));
+    $existing = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM $properties_table WHERE listing_id=%s",
+        $listing_id
+    ));
 
     $data_to_save = [
         'address' => $address,
@@ -398,15 +400,28 @@ function simple_link_property_to_user($user_id, $property_payload) {
         'property_value' => $property_value,
         'image_url' => $property_payload['photos'][0] ?? '',
         'linked_user_id' => $user_id,
-        'linked_date' => current_time('mysql'),
-        'last_updated' => current_time('mysql'),
+        'linked_date' => $current_time,
+        'last_updated' => $current_time,
         'is_linked' => 1
     ];
 
     if ($existing) {
         $property_id = $existing->id;
+
+        // If deleted_by is not NULL, update created_by/created_at and reset deleted fields
+        if (!is_null($existing->deleted_by)) {
+            $data_to_save['created_by'] = $user_id;
+            $data_to_save['created_at'] = $current_time;
+            $data_to_save['deleted_by'] = NULL;
+            $data_to_save['deleted_at'] = NULL;
+        }
+
         $wpdb->update($properties_table, $data_to_save, ['id' => $property_id]);
     } else {
+        // For new insert, set created fields
+        $data_to_save['created_by'] = $user_id;
+        $data_to_save['created_at'] = $current_time;
+
         $wpdb->insert($properties_table, array_merge($data_to_save, [
             'listing_id' => $listing_id
         ]));
@@ -414,24 +429,154 @@ function simple_link_property_to_user($user_id, $property_payload) {
     }
 
     // Link property to user if not already linked
-    $already_linked = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $user_properties_table WHERE user_id=%d AND property_id=%d AND is_active=1",
+    $existing_link = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM $user_properties_table WHERE user_id=%d AND property_id=%d",
         $user_id, $property_id
     ));
 
-    if ($already_linked) return ['success'=>false,'message'=>'Property already linked'];
-
-    $wpdb->insert($user_properties_table, [
-        'user_id' => $user_id,
-        'property_id' => $property_id,
-        'listing_id' => $listing_id,
-        'linked_date' => current_time('mysql'),
-        'is_active' => 1
-    ]);
+    if ($existing_link) {
+        // If deleted_by is not NULL, reset and update
+        if (!is_null($existing_link->deleted_by)) {
+            $wpdb->update($user_properties_table, [
+                'is_active' => 1,
+                'linked_date' => $current_time,
+                'created_by' => $user_id,
+                'created_at' => $current_time,
+                'deleted_by' => NULL,
+                'deleted_at' => NULL
+            ], ['id' => $existing_link->id]);
+        } else {
+            return ['success'=>false,'message'=>'Property already linked'];
+        }
+    } else {
+        // New insert
+        $wpdb->insert($user_properties_table, [
+            'user_id' => $user_id,
+            'property_id' => $property_id,
+            'listing_id' => $listing_id,
+            'linked_date' => $current_time,
+            'is_active' => 1,
+            'created_at' => $current_time,
+            'created_by' => $user_id
+        ]);
+    }
 
     return ['success' => true];
 }
 
+// ==============================
+// AJAX: Unlink Property from User (FULL UPDATED)
+// ==============================
+function unlink_user_property() {
+    check_ajax_referer('unlink_property_nonce', 'nonce');
+
+    $user_id = get_current_user_id();
+    if (!$user_id) {
+        wp_send_json_error('User not logged in');
+    }
+
+    $property_id = intval($_POST['property_id'] ?? 0);
+    if (!$property_id) {
+        wp_send_json_error('Invalid property');
+    }
+
+    global $wpdb;
+    $user_properties_table = $wpdb->prefix . 'rentcast_user_properties';
+    $properties_table      = $wpdb->prefix . 'rentcast_properties';
+
+    $current_time = current_time('mysql');
+
+    /**
+     * Soft unlink from user_properties table
+     */
+    $user_prop_updated = $wpdb->update(
+        $user_properties_table,
+        [
+            'is_active'  => 0,
+            'deleted_at' => $current_time,
+            'deleted_by' => $user_id
+        ],
+        [
+            'user_id'     => $user_id,
+            'property_id' => $property_id,
+            'is_active'   => 1
+        ]
+    );
+
+    if ($user_prop_updated === false) {
+        wp_send_json_error('Failed to unlink property from user');
+    }
+
+    /**
+     * Check if this property is linked to any other active user
+     */
+    $still_linked = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) 
+         FROM $user_properties_table 
+         WHERE property_id = %d AND is_active = 1",
+        $property_id
+    ));
+
+    /**
+     * If no active links remain, soft unlink property itself
+     */
+    if ((int) $still_linked === 0) {
+        $wpdb->update(
+            $properties_table,
+            [
+                'is_linked'   => 0,
+                'deleted_at'  => $current_time,
+                'deleted_by'  => $user_id
+            ],
+            [
+                'id' => $property_id
+            ]
+        );
+    }
+
+    wp_send_json_success('Property unlinked successfully');
+}
+add_action('wp_ajax_unlink_user_property', 'unlink_user_property');
+
+// ==============================
+// JS: Unlink Property AJAX Handler
+// ==============================
+function unlink_property_js() {
+    if (!is_user_logged_in()) return;
+    ?>
+    <script type="text/javascript">
+        jQuery(document).ready(function ($) {
+
+            $(document).on('click', '.unlink-property-btn', function () {
+                if (!confirm('Are you sure you want to unlink this property?')) return;
+
+                const btn = $(this);
+
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'unlink_user_property',
+                        property_id: btn.data('property-id'),
+                        nonce: btn.data('nonce')
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            btn.closest('.my-property-item').fadeOut(300, function () {
+                                $(this).remove();
+                            });
+                        } else {
+                            alert(response.data || 'Failed to unlink property');
+                        }
+                    }
+                });
+            });
+
+        });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'unlink_property_js');
 
 // ==============================
 // 9. Shortcode: User's Linked Properties (Updated: Rent 0 = N/A)
@@ -464,7 +609,7 @@ function my_properties_shortcode() {
                 ? esc_url($p->image_url)
                 : 'https://placehold.co/300x200?text=No+Image';
 
-            // ✅ Rent: show only if > 0
+            // Rent: show only if > 0
             $rent = (!empty($p->price) && is_numeric($p->price) && $p->price > 0)
                 ? number_format($p->price)
                 : 'N/A';
@@ -502,6 +647,13 @@ function my_properties_shortcode() {
                         <small>Linked: <?php echo esc_html($linked_date); ?></small><br>
                         <small>Updated: <?php echo esc_html($last_updated); ?></small>
                     </div>
+
+                    <button 
+                        class="unlink-property-btn"
+                        data-property-id="<?php echo esc_attr($p->id); ?>"
+                        data-nonce="<?php echo wp_create_nonce('unlink_property_nonce'); ?>">
+                        Unlink
+                    </button>
                 </div>
             </div>
 
