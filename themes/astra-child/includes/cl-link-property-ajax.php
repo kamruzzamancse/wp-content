@@ -330,7 +330,7 @@ function detect_search_type($term) {
 }
 
 // ==============================
-// 7. AJAX: Link Property to User (Updated for property_value)
+// AJAX: Link Property to User (Updated: Auto-fill rental fields)
 // ==============================
 function simple_link_property() {
     check_ajax_referer('property_link_nonce', 'nonce');
@@ -338,7 +338,7 @@ function simple_link_property() {
     $user_id = get_current_user_id();
     if (!$user_id) wp_send_json_error('Please login to link properties');
 
-    // Prepare property payload
+    // Basic property payload from front-end
     $property = [
         'id' => sanitize_text_field($_POST['listing_id'] ?? ''),
         'listingId' => sanitize_text_field($_POST['listing_id'] ?? ''),
@@ -356,6 +356,16 @@ function simple_link_property() {
         'photos' => !empty($_POST['image_url']) ? [esc_url($_POST['image_url'])] : []
     ];
 
+    // Fetch rental data from Rentcast API
+    $rental_data = fetch_rental_data_for_property($property['id']);
+    if ($rental_data) {
+        $property['monthly_rental_data'] = wp_json_encode($rental_data['history'] ?? []);
+        $property['historical_rental_prices'] = wp_json_encode($rental_data['history'] ?? []);
+        $property['last_rental_trend_update'] = $rental_data['lastSeenDate'] ?? null;
+        $property['market_zip_code'] = $rental_data['zipCode'] ?? $property['zip'];
+        $property['price'] = $rental_data['price'] ?? $property['price']; // optional: update rent
+    }
+
     // Call core linking function
     $result = simple_link_property_to_user($user_id, $property);
 
@@ -367,6 +377,34 @@ function simple_link_property() {
 }
 add_action('wp_ajax_simple_link_property', 'simple_link_property');
 
+
+// ==============================
+// Helper: Fetch rental data from Rentcast API
+// ==============================
+function fetch_rental_data_for_property($listing_id) {
+    $api_key = "7a7c73a68ffc46abae4f32d560e54bf2"; // your API key
+    $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?id=" . urlencode($listing_id) . "&status=Active&limit=1";
+
+    $response = wp_remote_get($api_url, [
+        'headers' => [
+            "X-Api-Key" => $api_key,
+            "Accept" => "application/json"
+        ],
+        'timeout' => 20
+    ]);
+
+    if (is_wp_error($response)) return false;
+
+    $body = wp_remote_retrieve_body($response);
+    $data = json_decode($body, true);
+    if (!is_array($data) || empty($data[0])) return false;
+
+    return $data[0];
+}
+
+// ==============================
+// Core function to insert/update property (Updated with rental fields)
+// ==============================
 function simple_link_property_to_user($user_id, $property_payload) {
     global $wpdb;
     $properties_table = $wpdb->prefix . 'rentcast_properties';
@@ -376,10 +414,8 @@ function simple_link_property_to_user($user_id, $property_payload) {
     $address = sanitize_text_field($property_payload['formattedAddress'] ?? '');
     if (!$listing_id || !$address) return ['success'=>false,'message'=>'Invalid property data'];
 
-    // Extract rental price and property value safely
     $rent_price = isset($property_payload['price']) ? floatval(str_replace([',','$'],'',$property_payload['price'])) : 0;
     $property_value = isset($property_payload['property_value']) ? floatval(str_replace([',','$'],'',$property_payload['property_value'])) : 0;
-
     $current_time = current_time('mysql');
 
     // Check if property already exists
@@ -402,40 +438,37 @@ function simple_link_property_to_user($user_id, $property_payload) {
         'linked_user_id' => $user_id,
         'linked_date' => $current_time,
         'last_updated' => $current_time,
-        'is_linked' => 1
+        'is_linked' => 1,
+        // Rental fields
+        'monthly_rental_data' => $property_payload['monthly_rental_data'] ?? '',
+        'historical_rental_prices' => $property_payload['historical_rental_prices'] ?? '',
+        'last_rental_trend_update' => $property_payload['last_rental_trend_update'] ?? null,
+        'market_zip_code' => $property_payload['market_zip_code'] ?? ''
     ];
 
     if ($existing) {
         $property_id = $existing->id;
-
-        // If deleted_by is not NULL, update created_by/created_at and reset deleted fields
         if (!is_null($existing->deleted_by)) {
             $data_to_save['created_by'] = $user_id;
             $data_to_save['created_at'] = $current_time;
             $data_to_save['deleted_by'] = NULL;
             $data_to_save['deleted_at'] = NULL;
         }
-
         $wpdb->update($properties_table, $data_to_save, ['id' => $property_id]);
     } else {
-        // For new insert, set created fields
         $data_to_save['created_by'] = $user_id;
         $data_to_save['created_at'] = $current_time;
-
-        $wpdb->insert($properties_table, array_merge($data_to_save, [
-            'listing_id' => $listing_id
-        ]));
+        $wpdb->insert($properties_table, array_merge($data_to_save, ['listing_id' => $listing_id]));
         $property_id = $wpdb->insert_id;
     }
 
-    // Link property to user if not already linked
+    // Link property to user
     $existing_link = $wpdb->get_row($wpdb->prepare(
         "SELECT * FROM $user_properties_table WHERE user_id=%d AND property_id=%d",
         $user_id, $property_id
     ));
 
     if ($existing_link) {
-        // If deleted_by is not NULL, reset and update
         if (!is_null($existing_link->deleted_by)) {
             $wpdb->update($user_properties_table, [
                 'is_active' => 1,
@@ -449,7 +482,6 @@ function simple_link_property_to_user($user_id, $property_payload) {
             return ['success'=>false,'message'=>'Property already linked'];
         }
     } else {
-        // New insert
         $wpdb->insert($user_properties_table, [
             'user_id' => $user_id,
             'property_id' => $property_id,

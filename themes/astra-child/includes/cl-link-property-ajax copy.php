@@ -2,93 +2,187 @@
 if (!defined('ABSPATH')) exit;
 
 // ==============================
-// AJAX: Smart Property Search (DB save skipped)
+// 1. AJAX: Smart Property Search
 // ==============================
 function real_time_property_search() {
     check_ajax_referer('property_search_nonce', 'nonce');
-    
-    $search_term = sanitize_text_field($_POST['search']);
-    $search_term = ucwords(strtolower($search_term));
+
+    $search_term = sanitize_text_field($_POST['search'] ?? '');
+    $search_term = trim($search_term);
+    if (empty($search_term)) wp_send_json_error('Please enter a search term.');
+
     $api_key = "7a7c73a68ffc46abae4f32d560e54bf2";
-    
-    // Smart search type detection
+    $limit = isset($_POST['limit']) ? intval($_POST['limit']) : 5;
+    $mode = sanitize_text_field($_POST['mode'] ?? 'properties'); // properties / sale / rental
     $search_type = detect_search_type($search_term);
-    
-    // For address searches, try multiple approaches
-    if ($search_type === 'address') {
-        $results = search_property_by_address($search_term, $api_key);
-    } else {
-        $results = search_property_general($search_term, $search_type, $api_key);
-    }
-    
-    if ($results['success']) {
-        wp_send_json_success(['html' => $results['html'], 'count' => $results['count']]);
-    } else {
-        wp_send_json_error($results['message']);
+
+    try {
+        if ($search_type === 'address') {
+            $results = search_property_by_address($search_term, $api_key, $limit, $mode);
+        } else {
+            $results = search_property_general($search_term, $search_type, $api_key, $limit, $mode);
+        }
+
+        if ($results['success']) {
+            wp_send_json_success([
+                'html' => $results['html'],
+                'count' => $results['count']
+            ]);
+        } else {
+            wp_send_json_error($results['message'] ?? 'No results found.');
+        }
+    } catch (Exception $e) {
+        wp_send_json_error('Search failed: ' . $e->getMessage());
     }
 }
 add_action('wp_ajax_real_time_property_search', 'real_time_property_search');
 add_action('wp_ajax_nopriv_real_time_property_search', 'real_time_property_search');
 
 // ==============================
-// Address-specific search with fallbacks
+// 2. Address-specific search with fallback
 // ==============================
-function search_property_by_address($address, $api_key) {
-    // Try 1: Exact address search
-    $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?address=" . urlencode($address) . "&limit=5";
-    $result = make_api_request($api_url, $api_key);
-    
-    if ($result['success']) {
-        return $result;
+function search_property_by_address($address, $api_key, $limit = 5, $mode = 'properties') {
+
+    // Property details
+    $property_url = "https://api.rentcast.io/v1/properties?address=" . urlencode($address) . "&limit=1";
+    $property_result = make_api_request($property_url, $api_key, $address, 'property');
+
+    // Rental listing
+    $rental_url = "https://api.rentcast.io/v1/listings/rental/long-term?address=" . urlencode($address) . "&status=Active&limit=1";
+    $rental_result = make_api_request($rental_url, $api_key, $address, 'rental');
+
+    // BOTH EXIST → SMART MERGE
+    if ($property_result['success'] && $rental_result['success']) {
+
+        $merged = smart_merge_property_and_rental(
+            $property_result['data'],
+            $rental_result['data']
+        );
+
+        return [
+            'success' => true,
+            'html' => render_property_item_custom(
+                $merged,
+                format_rent_price($merged),
+                format_property_value($merged)
+            ),
+            'count' => 1
+        ];
     }
-    
-    // Try 2: Extract ZIP code and search by ZIP
-    $zip_code = extract_zip_code($address);
-    if ($zip_code) {
-        $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?zipCode=$zip_code&limit=5";
-        $result = make_api_request($api_url, $api_key);
-        if ($result['success'] && $result['count'] > 0) {
-            $result['message'] = "Exact address not found. Showing properties in ZIP code $zip_code";
-            return $result;
-        }
+
+    // Only property
+    if ($property_result['success']) {
+        return [
+            'success' => true,
+            'html' => render_property_item_custom(
+                $property_result['data'],
+                'N/A',
+                format_property_value($property_result['data'])
+            ),
+            'count' => 1
+        ];
     }
-    
-    // Try 3: Extract city and search by city
-    $city = extract_city($address);
-    if ($city) {
-        $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?city=" . urlencode($city) . "&limit=5";
-        $result = make_api_request($api_url, $api_key);
-        if ($result['success'] && $result['count'] > 0) {
-            $result['message'] = "Exact address not found. Showing properties in $city";
-            return $result;
-        }
+
+    // Only rental
+    if ($rental_result['success']) {
+        return [
+            'success' => true,
+            'html' => render_property_item_custom(
+                $rental_result['data'],
+                format_rent_price($rental_result['data']),
+                'N/A'
+            ),
+            'count' => 1
+        ];
     }
-    
+
     return [
         'success' => false,
-        'message' => "No properties found for '$address'. Try searching by ZIP code or city name only."
+        'message' => "No property found for this address."
     ];
 }
 
-// ==============================
-// General search function
-// ==============================
-function search_property_general($search_term, $search_type, $api_key) {
-    switch($search_type) {
-        case 'zipcode':
-            $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?zipCode=$search_term&limit=5";
-            break;
-        default:
-            $api_url = "https://api.rentcast.io/v1/listings/rental/long-term?city=" . urlencode($search_term) . "&limit=5";
+
+function smart_merge_property_and_rental($property, $rental) {
+
+    foreach ($rental as $key => $value) {
+
+        // ❌ Never override property-only data
+        if (in_array($key, [
+            'taxAssessments',
+            'propertyTaxes',
+            'owner',
+            'features',
+            'assessorID',
+            'legalDescription',
+            'subdivision'
+        ])) {
+            continue;
+        }
+
+        // Only fill missing or empty fields
+        if (
+            !isset($property[$key]) ||
+            $property[$key] === null ||
+            $property[$key] === ''
+        ) {
+            $property[$key] = $value;
+        }
     }
-    
+
+    return $property;
+}
+
+
+// ==============================
+// 3. General search by ZIP or city (Fixed)
+// ==============================
+function search_property_general($search_term, $search_type, $api_key, $limit = 5, $mode = 'properties') {
+    $search_config = get_search_endpoint_and_params($search_term, $search_type, $mode, $limit);
+    if (!$search_config) return ['success'=>false, 'message'=>'Invalid search term'];
+
+    $query_string = http_build_query($search_config['params']);
+    $api_url = "https://api.rentcast.io/v1/{$search_config['endpoint']}?$query_string";
+
     return make_api_request($api_url, $api_key);
 }
 
+function get_search_endpoint_and_params($search_term, $search_type, $mode = 'properties', $limit = 5) {
+    $endpoint = ($mode === 'properties') ? 'properties' : "listings/$mode";
+    $params = [];
+
+    if ($search_type === 'zipcode') {
+        $zip = preg_replace('/\D/', '', $search_term);
+        if (!$zip) return false;
+        $params['zipCode'] = $zip;
+    } elseif ($search_type === 'city') {
+        $city_only = trim(preg_replace('/\d{5}/', '', $search_term));
+        if (!$city_only) return false;
+
+        // Mode-specific city parameter
+        if ($mode === 'properties') {
+            $params['cityName'] = $city_only;
+        } else { // rental / sale listings
+            $params['city'] = $city_only;
+            $params['status'] = 'Active'; // optional for listings
+        }
+    } else {
+        // Address search should not go here
+        return false;
+    }
+
+    $params['limit'] = intval($limit);
+    return [
+        'endpoint' => $endpoint,
+        'params' => $params
+    ];
+}
+
+
 // ==============================
-// Make API request with proper error handling
+// Make API Request (Fixed for 'data' key)
 // ==============================
-function make_api_request($api_url, $api_key) {
+function make_api_request($api_url, $api_key, $search_address = '', $type = 'general') {
     $curl = curl_init();
     curl_setopt_array($curl, [
         CURLOPT_URL => $api_url,
@@ -96,352 +190,485 @@ function make_api_request($api_url, $api_key) {
         CURLOPT_TIMEOUT => 30,
         CURLOPT_HTTPHEADER => [
             "X-Api-Key: $api_key",
-            "accept: application/json"
+            "Accept: application/json"
         ],
     ]);
-    
+
     $response = curl_exec($curl);
     $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
     $err = curl_error($curl);
     curl_close($curl);
-    
-    // Check for cURL error
-    if ($err) {
-        return ['success' => false, 'message' => "Network error: $err"];
-    }
-    
-    // Check HTTP status code
-    if ($http_code === 404) {
-        return ['success' => false, 'message' => "No properties found at this location."];
-    }
-    
-    if ($http_code !== 200) {
-        return ['success' => false, 'message' => "API returned HTTP $http_code. Please try a different search."];
-    }
-    
+
+    if ($err) return ['success'=>false, 'message'=>$err];
+    if ($http_code !== 200) return ['success'=>false, 'message'=>"HTTP $http_code"];
+
     $data = json_decode($response, true);
-    
-    // Check if JSON decoding failed
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        return ['success' => false, 'message' => "Invalid response from API."];
+    if (!is_array($data)) return ['success'=>false, 'message'=>'Invalid JSON response from API'];
+
+    // Handle API response with 'data' key
+    if (isset($data['data']) && is_array($data['data'])) $data = $data['data'];
+
+    if ($type === 'property' || $type === 'rental') {
+        if (isset($data[0]) && is_array($data[0])) {
+            return ['success' => true, 'data' => $data[0]];
+        }
+        return ['success' => false, 'message' => "No {$type} found"];
     }
-    
-    // Check for API errors
-    if (isset($data['error']) || isset($data['message'])) {
-        $error_msg = $data['message'] ?? $data['error'] ?? 'API error';
-        return ['success' => false, 'message' => $error_msg];
-    }
-    
-    // Check if we have valid listings
-    $properties_list = $data['listings'] ?? $data;
-    
-    if (!is_array($properties_list) || empty($properties_list)) {
-        return ['success' => false, 'message' => "No properties found. Try a different search term."];
-    }
-    
-    // Validate properties
-    $valid_properties = array_filter($properties_list, function($property) {
-        return is_array($property) && 
-               !isset($property['error']) && 
-               !isset($property['message']) &&
-               (!empty($property['id']) || !empty($property['listingId']));
-    });
-    
-    if (empty($valid_properties)) {
-        return ['success' => false, 'message' => "No valid property data found."];
-    }
-    
-    // Generate HTML
+
+    if (empty($data)) return ['success'=>false,'message'=>'No results found'];
+
     $html = '';
-    foreach ($valid_properties as $property) {
-        $html .= render_property_item($property);
+    foreach ($data as $item) {
+        $rent = format_rent_price($item);
+        $value = format_property_value($item);
+        $html .= render_property_item_custom($item, $rent, $value);
     }
-    
-    return [
-        'success' => true,
-        'html' => $html,
-        'count' => count($valid_properties)
-    ];
+
+    return ['success' => true, 'html' => $html, 'count' => count($data)];
 }
 
-// ==============================
-// Helper functions
-// ==============================
-function extract_zip_code($address) {
-    preg_match('/\b\d{5}\b/', $address, $matches);
-    return $matches[0] ?? null;
-}
-
-function extract_city($address) {
-    // Simple city extraction - you might want to improve this
-    $parts = explode(',', $address);
-    return count($parts) >= 2 ? trim($parts[1]) : null;
-}
 
 // ==============================
-// Detect Search Type
+// Format Property Value
 // ==============================
-function detect_search_type($search_term) {
-    $clean_term = trim($search_term);
-    
-    // ZIP code (5 digits)
-    if (is_numeric($clean_term) && strlen($clean_term) === 5) {
-        return 'zipcode';
-    }
-    
-    $lower_term = strtolower($clean_term);
-    
-    $address_indicators = [
-        'st', 'street', 'ave', 'avenue', 'rd', 'road', 'dr', 'drive', 
-        'ln', 'lane', 'blvd', 'boulevard', 'pkwy', 'parkway', 'ct', 'court',
-        'way', 'circle', 'pl', 'place'
-    ];
-    
-    if (preg_match('/\d+/', $lower_term)) {
-        foreach ($address_indicators as $indicator) {
-            if (strpos($lower_term, $indicator) !== false) {
-                return 'address';
+function format_property_value($property) {
+    if (!empty($property['taxAssessments']) && is_array($property['taxAssessments'])) {
+        $years = array_keys($property['taxAssessments']);
+        rsort($years);
+        foreach ($years as $year) {
+            if (!empty($property['taxAssessments'][$year]['value'])) {
+                return floatval($property['taxAssessments'][$year]['value']);
             }
         }
-        if (preg_match('/^\d+\s+[a-z]+\s+[a-z]+/', $lower_term)) {
-            return 'address';
-        }
     }
-    
-    return 'city';
+    if (!empty($property['estimatedValue']) && is_numeric($property['estimatedValue'])) {
+        return floatval($property['estimatedValue']);
+    }
+    if (!empty($property['lastSalePrice']) && is_numeric($property['lastSalePrice'])) {
+        return floatval($property['lastSalePrice']);
+    }
+    return 0;
+}
+
+
+// ==============================
+// Format Rent Price
+// ==============================
+function format_rent_price($property) {
+    if (!empty($property['price']) && is_numeric($property['price'])) {
+        return floatval($property['price']);
+    }
+    return 0;
 }
 
 // ==============================
-// Render Property Item (HTML for search results)
+// Render Property Item (Custom with Rent/Value + Debug)
 // ==============================
-function render_property_item($property) {
-    $image = !empty($property['photos'][0]) ? esc_url($property['photos'][0]) : 'https://placehold.co/100x80?text=No+Image';
+function render_property_item_custom($property, $rent, $value) {
+    // Image
+    $image = !empty($property['photos'][0]) ? esc_url($property['photos'][0]) : 
+             (!empty($property['image_url']) ? esc_url($property['image_url']) : 
+             'https://placehold.co/100x80?text=No+Image');
+
+    // Address info
     $address = sanitize_text_field($property['formattedAddress'] ?? $property['address'] ?? '');
     $city = sanitize_text_field($property['city'] ?? '');
     $state = sanitize_text_field($property['state'] ?? '');
     $zip = sanitize_text_field($property['zipCode'] ?? $property['zip'] ?? '');
-    $price = sanitize_text_field($property['price'] ?? $property['rent'] ?? '');
-    $bedrooms = intval($property['bedrooms'] ?? $property['bed'] ?? 0);
-    $bathrooms = intval($property['bathrooms'] ?? $property['bath'] ?? 0);
-    $sqft = intval($property['squareFootage'] ?? $property['sqft'] ?? 0);
-    $listing_id = sanitize_text_field($property['id'] ?? $property['listingId'] ?? '');
-    
-    // Store full property payload in button for later DB insert
+
+    // Property stats
+    $bedrooms = isset($property['bedrooms']) ? intval($property['bedrooms']) : 0;
+    $bathrooms = isset($property['bathrooms']) ? intval($property['bathrooms']) : 0;
+    $sqft = isset($property['squareFootage']) ? intval($property['squareFootage']) : 0;
+
+    $bed_display = $bedrooms > 0 ? $bedrooms : 'N/A';
+    $bath_display = $bathrooms > 0 ? $bathrooms : 'N/A';
+    $sqft_display = $sqft > 0 ? number_format($sqft) : 'N/A';
+
+    // Ensure property_value is always set
+    $property['property_value'] = $property['estimatedValue'] 
+                                  ?? format_property_value($property) 
+                                  ?? 0;
+
+    // Format rent display
+    $rent_display = is_numeric($rent) && $rent > 0 ? '$' . number_format($rent) . '/Month' : 'N/A';
+
+    // JSON payload for JS
     $payload_json = esc_attr(wp_json_encode($property));
-    
-    ob_start();
-    ?>
+
+    ob_start(); ?>
     <div class="property-result-item">
         <img src="<?php echo $image; ?>" alt="Property Image">
         <div class="property-info">
             <h4><?php echo esc_html($address); ?></h4>
             <p><?php echo esc_html($city . ', ' . $state . ' ' . $zip); ?></p>
-            <p>Rent: $<?php echo number_format((float)$price); ?>/month</p>
-            <p>Bed: <?php echo $bedrooms; ?> | Bath: <?php echo $bathrooms; ?> | SqFt: <?php echo number_format($sqft); ?></p>
+            <p>Property Rent: <?php echo esc_html($rent_display); ?></p>
+            <p>Property Value: $<?php echo number_format($property['property_value']); ?></p>
+            <p>Bed: <?php echo $bed_display; ?> | Bath: <?php echo $bath_display; ?> | SqFt: <?php echo $sqft_display; ?></p>
         </div>
-        <button class="link-property-btn" data-property-payload='<?php echo $payload_json; ?>'>
-            Link Property
-        </button>
+        <button class="link-property-btn" data-property-payload='<?php echo $payload_json; ?>'>Link Property</button>
     </div>
     <?php
     return ob_get_clean();
 }
 
 // ==============================
-// AJAX: Link Property to User (DB insert happens here)
+// 6. Helpers
+// ==============================
+function extract_zip_code($address) { preg_match('/\b\d{5}\b/', $address, $matches); return $matches[0] ?? null; }
+function extract_city($address) { $parts = explode(',', $address); return count($parts) >= 2 ? trim($parts[1]) : null; }
+function detect_search_type($term) {
+    $term = trim($term);
+    if (is_numeric($term) && strlen($term) === 5) return 'zipcode';
+    $lower = strtolower($term);
+    $address_indicators = ['st','street','ave','avenue','rd','road','dr','drive','ln','lane','blvd','boulevard','pkwy','parkway','ct','court','way','circle','pl','place'];
+    if (preg_match('/\d+/', $lower)) {
+        foreach ($address_indicators as $indicator) if (strpos($lower, $indicator) !== false) return 'address';
+        if (preg_match('/^\d+\s+[a-z]+\s+[a-z]+/', $lower)) return 'address';
+    }
+    return 'city';
+}
+
+// ==============================
+// 7. AJAX: Link Property to User (Updated for property_value)
 // ==============================
 function simple_link_property() {
     check_ajax_referer('property_link_nonce', 'nonce');
-    
+
     $user_id = get_current_user_id();
-    if (!$user_id) {
-        wp_send_json_error('Please login to link properties');
-    }
-    
-    // Get individual property fields from POST data
-    $listing_id = sanitize_text_field($_POST['listing_id'] ?? '');
-    $address = sanitize_text_field($_POST['address'] ?? '');
-    $city = sanitize_text_field($_POST['city'] ?? '');
-    $state = sanitize_text_field($_POST['state'] ?? '');
-    $zip = sanitize_text_field($_POST['zip'] ?? '');
-    $bedrooms = intval($_POST['bedrooms'] ?? 0);
-    $bathrooms = intval($_POST['bathrooms'] ?? 0);
-    $sqft = intval($_POST['sqft'] ?? 0);
-    $price = sanitize_text_field($_POST['price'] ?? '');
-    $image_url = esc_url($_POST['image_url'] ?? '');
-    
-    // Create property array from individual fields
+    if (!$user_id) wp_send_json_error('Please login to link properties');
+
+    // Prepare property payload
     $property = [
-        'id' => $listing_id,
-        'listingId' => $listing_id,
-        'formattedAddress' => $address,
-        'address' => $address,
-        'city' => $city,
-        'state' => $state,
-        'zipCode' => $zip,
-        'zip' => $zip,
-        'bedrooms' => $bedrooms,
-        'bed' => $bedrooms,
-        'bathrooms' => $bathrooms,
-        'bath' => $bathrooms,
-        'squareFootage' => $sqft,
-        'sqft' => $sqft,
-        'price' => $price,
-        'rent' => $price,
-        'photos' => $image_url ? [$image_url] : []
+        'id' => sanitize_text_field($_POST['listing_id'] ?? ''),
+        'listingId' => sanitize_text_field($_POST['listing_id'] ?? ''),
+        'formattedAddress' => sanitize_text_field($_POST['address'] ?? ''),
+        'address' => sanitize_text_field($_POST['address'] ?? ''),
+        'city' => sanitize_text_field($_POST['city'] ?? ''),
+        'state' => sanitize_text_field($_POST['state'] ?? ''),
+        'zipCode' => sanitize_text_field($_POST['zip'] ?? ''),
+        'zip' => sanitize_text_field($_POST['zip'] ?? ''),
+        'bedrooms' => intval($_POST['bedrooms'] ?? 0),
+        'bathrooms' => intval($_POST['bathrooms'] ?? 0),
+        'squareFootage' => intval($_POST['sqft'] ?? 0),
+        'price' => sanitize_text_field($_POST['price'] ?? ''),                
+        'property_value' => sanitize_text_field($_POST['property_value'] ?? ''),
+        'photos' => !empty($_POST['image_url']) ? [esc_url($_POST['image_url'])] : []
     ];
-    
+
+    // Call core linking function
     $result = simple_link_property_to_user($user_id, $property);
-    
+
     if ($result['success']) {
         wp_send_json_success('Property linked successfully');
-    } else {
-        wp_send_json_error($result['message']);
     }
+
+    wp_send_json_error($result['message']);
 }
 add_action('wp_ajax_simple_link_property', 'simple_link_property');
 
-// ==============================
-// Core Property Linking Function (insert/update DB)
-// ==============================
 function simple_link_property_to_user($user_id, $property_payload) {
     global $wpdb;
     $properties_table = $wpdb->prefix . 'rentcast_properties';
     $user_properties_table = $wpdb->prefix . 'rentcast_user_properties';
-    
-    $listing_id = sanitize_text_field($property_payload['id'] ?? $property_payload['listingId'] ?? '');
-    $address = sanitize_text_field($property_payload['formattedAddress'] ?? $property_payload['address'] ?? '');
-    $city = sanitize_text_field($property_payload['city'] ?? '');
-    $state = sanitize_text_field($property_payload['state'] ?? '');
-    $zip = sanitize_text_field($property_payload['zipCode'] ?? $property_payload['zip'] ?? '');
-    $bedrooms = intval($property_payload['bedrooms'] ?? $property_payload['bed'] ?? 0);
-    $bathrooms = intval($property_payload['bathrooms'] ?? $property_payload['bath'] ?? 0);
-    $sqft = intval($property_payload['squareFootage'] ?? $property_payload['sqft'] ?? 0);
-    $price = sanitize_text_field($property_payload['price'] ?? $property_payload['rent'] ?? '');
-    $image_url = !empty($property_payload['photos'][0]) ? esc_url($property_payload['photos'][0]) : '';
-    
-    // Validate required fields
-    if (empty($listing_id) || empty($address)) {
-        return ['success' => false, 'message' => 'Invalid property data: missing listing ID or address'];
-    }
-    
-    // 1) Check if property exists
+
+    $listing_id = sanitize_text_field($property_payload['id'] ?? '');
+    $address = sanitize_text_field($property_payload['formattedAddress'] ?? '');
+    if (!$listing_id || !$address) return ['success'=>false,'message'=>'Invalid property data'];
+
+    // Extract rental price and property value safely
+    $rent_price = isset($property_payload['price']) ? floatval(str_replace([',','$'],'',$property_payload['price'])) : 0;
+    $property_value = isset($property_payload['property_value']) ? floatval(str_replace([',','$'],'',$property_payload['property_value'])) : 0;
+
+    $current_time = current_time('mysql');
+
+    // Check if property already exists
     $existing = $wpdb->get_row($wpdb->prepare(
-        "SELECT * FROM $properties_table WHERE listing_id = %s",
+        "SELECT * FROM $properties_table WHERE listing_id=%s",
         $listing_id
     ));
-    
+
+    $data_to_save = [
+        'address' => $address,
+        'city' => sanitize_text_field($property_payload['city'] ?? ''),
+        'state' => sanitize_text_field($property_payload['state'] ?? ''),
+        'zip' => sanitize_text_field($property_payload['zip'] ?? ''),
+        'bedrooms' => intval($property_payload['bedrooms'] ?? 0),
+        'bathrooms' => intval($property_payload['bathrooms'] ?? 0),
+        'sqft' => intval($property_payload['squareFootage'] ?? 0),
+        'price' => $rent_price,
+        'property_value' => $property_value,
+        'image_url' => $property_payload['photos'][0] ?? '',
+        'linked_user_id' => $user_id,
+        'linked_date' => $current_time,
+        'last_updated' => $current_time,
+        'is_linked' => 1
+    ];
+
     if ($existing) {
         $property_id = $existing->id;
-        $wpdb->update($properties_table, [
-            'address' => $address,
-            'city' => $city,
-            'state' => $state,
-            'zip' => $zip,
-            'bedrooms' => $bedrooms,
-            'bathrooms' => $bathrooms,
-            'sqft' => $sqft,
-            'price' => $price,
-            'image_url' => $image_url,
-            'linked_user_id' => $user_id,
-            'linked_date' => current_time('mysql'),
-            'is_linked' => 1
-        ], ['id' => $property_id]);
+
+        // If deleted_by is not NULL, update created_by/created_at and reset deleted fields
+        if (!is_null($existing->deleted_by)) {
+            $data_to_save['created_by'] = $user_id;
+            $data_to_save['created_at'] = $current_time;
+            $data_to_save['deleted_by'] = NULL;
+            $data_to_save['deleted_at'] = NULL;
+        }
+
+        $wpdb->update($properties_table, $data_to_save, ['id' => $property_id]);
     } else {
-        $wpdb->insert($properties_table, [
-            'listing_id' => $listing_id,
-            'address' => $address,
-            'city' => $city,
-            'state' => $state,
-            'zip' => $zip,
-            'bedrooms' => $bedrooms,
-            'bathrooms' => $bathrooms,
-            'sqft' => $sqft,
-            'price' => $price,
-            'image_url' => $image_url,
-            'linked_user_id' => $user_id,
-            'linked_date' => current_time('mysql'),
-            'is_linked' => 1
-        ]);
+        // For new insert, set created fields
+        $data_to_save['created_by'] = $user_id;
+        $data_to_save['created_at'] = $current_time;
+
+        $wpdb->insert($properties_table, array_merge($data_to_save, [
+            'listing_id' => $listing_id
+        ]));
         $property_id = $wpdb->insert_id;
     }
-    
-    // 2) Link property to user
-    $already_linked = $wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM $user_properties_table WHERE user_id = %d AND property_id = %d AND is_active = 1",
+
+    // Link property to user if not already linked
+    $existing_link = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM $user_properties_table WHERE user_id=%d AND property_id=%d",
         $user_id, $property_id
     ));
-    
-    if ($already_linked) {
-        return ['success' => false, 'message' => 'You have already linked this property'];
+
+    if ($existing_link) {
+        // If deleted_by is not NULL, reset and update
+        if (!is_null($existing_link->deleted_by)) {
+            $wpdb->update($user_properties_table, [
+                'is_active' => 1,
+                'linked_date' => $current_time,
+                'created_by' => $user_id,
+                'created_at' => $current_time,
+                'deleted_by' => NULL,
+                'deleted_at' => NULL
+            ], ['id' => $existing_link->id]);
+        } else {
+            return ['success'=>false,'message'=>'Property already linked'];
+        }
+    } else {
+        // New insert
+        $wpdb->insert($user_properties_table, [
+            'user_id' => $user_id,
+            'property_id' => $property_id,
+            'listing_id' => $listing_id,
+            'linked_date' => $current_time,
+            'is_active' => 1,
+            'created_at' => $current_time,
+            'created_by' => $user_id
+        ]);
     }
-    
-    $insert_link = $wpdb->insert($user_properties_table, [
-        'user_id' => $user_id,
-        'property_id' => $property_id,
-        'listing_id' => $listing_id,
-        'linked_date' => current_time('mysql'),
-        'is_active' => 1
-    ]);
-    
-    if ($insert_link === false) {
-        return ['success' => false, 'message' => 'Failed to link property to user'];
-    }
-    
+
     return ['success' => true];
 }
 
 // ==============================
-// Shortcode: User's Linked Properties
+// AJAX: Unlink Property from User (FULL UPDATED)
+// ==============================
+function unlink_user_property() {
+    check_ajax_referer('unlink_property_nonce', 'nonce');
+
+    $user_id = get_current_user_id();
+    if (!$user_id) {
+        wp_send_json_error('User not logged in');
+    }
+
+    $property_id = intval($_POST['property_id'] ?? 0);
+    if (!$property_id) {
+        wp_send_json_error('Invalid property');
+    }
+
+    global $wpdb;
+    $user_properties_table = $wpdb->prefix . 'rentcast_user_properties';
+    $properties_table      = $wpdb->prefix . 'rentcast_properties';
+
+    $current_time = current_time('mysql');
+
+    /**
+     * Soft unlink from user_properties table
+     */
+    $user_prop_updated = $wpdb->update(
+        $user_properties_table,
+        [
+            'is_active'  => 0,
+            'deleted_at' => $current_time,
+            'deleted_by' => $user_id
+        ],
+        [
+            'user_id'     => $user_id,
+            'property_id' => $property_id,
+            'is_active'   => 1
+        ]
+    );
+
+    if ($user_prop_updated === false) {
+        wp_send_json_error('Failed to unlink property from user');
+    }
+
+    /**
+     * Check if this property is linked to any other active user
+     */
+    $still_linked = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) 
+         FROM $user_properties_table 
+         WHERE property_id = %d AND is_active = 1",
+        $property_id
+    ));
+
+    /**
+     * If no active links remain, soft unlink property itself
+     */
+    if ((int) $still_linked === 0) {
+        $wpdb->update(
+            $properties_table,
+            [
+                'is_linked'   => 0,
+                'deleted_at'  => $current_time,
+                'deleted_by'  => $user_id
+            ],
+            [
+                'id' => $property_id
+            ]
+        );
+    }
+
+    wp_send_json_success('Property unlinked successfully');
+}
+add_action('wp_ajax_unlink_user_property', 'unlink_user_property');
+
+// ==============================
+// JS: Unlink Property AJAX Handler
+// ==============================
+function unlink_property_js() {
+    if (!is_user_logged_in()) return;
+    ?>
+    <script type="text/javascript">
+        jQuery(document).ready(function ($) {
+
+            $(document).on('click', '.unlink-property-btn', function () {
+                if (!confirm('Are you sure you want to unlink this property?')) return;
+
+                const btn = $(this);
+
+                $.ajax({
+                    url: '<?php echo admin_url('admin-ajax.php'); ?>',
+                    type: 'POST',
+                    data: {
+                        action: 'unlink_user_property',
+                        property_id: btn.data('property-id'),
+                        nonce: btn.data('nonce')
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            btn.closest('.my-property-item').fadeOut(300, function () {
+                                $(this).remove();
+                            });
+                        } else {
+                            alert(response.data || 'Failed to unlink property');
+                        }
+                    }
+                });
+            });
+
+        });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'unlink_property_js');
+
+// ==============================
+// 9. Shortcode: User's Linked Properties (Updated: Rent 0 = N/A)
 // ==============================
 function my_properties_shortcode() {
     $user_id = get_current_user_id();
     if (!$user_id) return '<p>Please login to view your properties.</p>';
-    
+
     global $wpdb;
     $properties_table = $wpdb->prefix . 'rentcast_properties';
     $user_properties_table = $wpdb->prefix . 'rentcast_user_properties';
-    
-    $properties = $wpdb->get_results($wpdb->prepare("
-        SELECT p.*, up.linked_date 
-        FROM $properties_table p
-        INNER JOIN $user_properties_table up ON p.id = up.property_id
-        WHERE up.user_id = %d AND up.is_active = 1
-        ORDER BY up.linked_date DESC
-    ", $user_id));
-    
+
+    $properties = $wpdb->get_results($wpdb->prepare(
+        "SELECT p.*, up.linked_date
+         FROM $properties_table p
+         INNER JOIN $user_properties_table up ON p.id = up.property_id
+         WHERE up.user_id = %d AND up.is_active = 1
+         ORDER BY up.linked_date DESC",
+        $user_id
+    ));
+
     ob_start();
+
     if ($properties) {
         echo '<div class="my-properties-list">';
-        foreach ($properties as $property) {
-            $image_url = $property->image_url ?: 'https://placehold.co/300x200?text=No+Image';
-            $last_updated = $property->last_updated ? date('M j, Y', strtotime($property->last_updated)) : 'Never';
+
+        foreach ($properties as $p) {
+
+            $image_url = !empty($p->image_url)
+                ? esc_url($p->image_url)
+                : 'https://placehold.co/300x200?text=No+Image';
+
+            // Rent: show only if > 0
+            $rent = (!empty($p->price) && is_numeric($p->price) && $p->price > 0)
+                ? number_format($p->price)
+                : 'N/A';
+
+            // Property Value
+            $property_value = (!empty($p->property_value) && is_numeric($p->property_value) && $p->property_value > 0)
+                ? number_format($p->property_value)
+                : 'N/A';
+
+            $linked_date = !empty($p->linked_date)
+                ? date('M j, Y', strtotime($p->linked_date))
+                : 'N/A';
+
+            $last_updated = !empty($p->last_updated)
+                ? date('M j, Y', strtotime($p->last_updated))
+                : 'Never';
             ?>
+            
             <div class="my-property-item">
-                <img src="<?php echo $image_url; ?>" alt="<?php echo esc_attr($property->address); ?>">
+                <img src="<?php echo $image_url; ?>" alt="<?php echo esc_attr($p->address); ?>">
+
                 <div class="property-details">
-                    <h5><?php echo esc_html($property->address); ?></h5>
-                    <p class="location"><?php echo esc_html($property->city . ', ' . $property->state); ?></p>
+                    <h5><?php echo esc_html($p->address); ?></h5>
+
+                    <p class="location">
+                        <?php echo esc_html($p->city . ', ' . $p->state); ?>
+                    </p>
+
                     <div class="property-stats">
-                        <span>Rent: $<?php echo number_format($property->price); ?>/month</span>
-                        <span>Value: $<?php echo number_format($property->property_value); ?></span>
+                        <span><strong>Rent:</strong> <?php echo ($rent !== 'N/A') ? '$' . $rent . ' / M' : 'N/A'; ?></span><br>
+                        <span><strong>Value:</strong> <?php echo ($property_value !== 'N/A') ? '$' . $property_value : 'N/A'; ?></span>
                     </div>
+
                     <div class="property-meta">
-                        <small>Linked: <?php echo date('M j, Y', strtotime($property->linked_date)); ?></small>
-                        <small>Updated: <?php echo $last_updated; ?></small>
+                        <small>Linked: <?php echo esc_html($linked_date); ?></small><br>
+                        <small>Updated: <?php echo esc_html($last_updated); ?></small>
                     </div>
+
+                    <button 
+                        class="unlink-property-btn"
+                        data-property-id="<?php echo esc_attr($p->id); ?>"
+                        data-nonce="<?php echo wp_create_nonce('unlink_property_nonce'); ?>">
+                        Unlink
+                    </button>
                 </div>
             </div>
+
             <?php
         }
+
         echo '</div>';
+
     } else {
         echo '<div class="no-properties-message">';
         echo '<p>You have no linked properties yet.</p>';
         echo '<p>Use the search above to link your first property!</p>';
         echo '</div>';
     }
-    
+
     return ob_get_clean();
 }
 add_shortcode('my_properties', 'my_properties_shortcode');

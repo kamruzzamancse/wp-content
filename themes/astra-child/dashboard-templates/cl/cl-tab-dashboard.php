@@ -10,6 +10,19 @@
                         <span class="tpg-rental" id="tpg-avg-rental-price">Avg Rental: $0</span> | 
                         <span class="tpg-sales" id="tpg-avg-sales-price">Avg Sales: $0</span>
                     </div>
+                    
+                    <!-- Radio Buttons for Chart Type -->
+                    <div class="tpg-chart-type-selector" style="margin: 15px 0; display: flex; gap: 20px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="chartType" value="rental" checked style="cursor: pointer;">
+                            <span>Rental</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="radio" name="chartType" value="sale" style="cursor: pointer;">
+                            <span>Sale</span>
+                        </label>
+                    </div>
+                    
                     <select id="tpg-property-select">
                         <option value="">Loading...</option>
                     </select>
@@ -21,7 +34,7 @@
                     <div class="tpg-x-axis"></div>
                 </div>
 
-                <div class="tpg-chart-legend" style="display:flex; gap:20px; margin-top:25px;">
+                <div class="tpg-chart-legend" id="tpg-chart-legend" style="display:flex; gap:20px; margin-top:25px;">
                     <span style="display:flex; align-items:center; gap:5px;">
                         <span style="width:12px; height:12px; background:#4e6ef2; display:inline-block;"></span> Rental Income
                     </span>
@@ -90,134 +103,242 @@ document.addEventListener('DOMContentLoaded', function () {
     const propertySelect = document.getElementById('tpg-property-select');
     const svg = document.querySelector('.tpg-line-chart');
     const yAxisDiv = document.querySelector('.tpg-y-axis');
+    const xAxisDiv = document.querySelector('.tpg-x-axis');
+    const chartLegend = document.getElementById('tpg-chart-legend');
     const chartWidth = 600;
     const chartHeight = 250;
-    const leftPadding = 50;
-    const rightPadding = 50;
-    const topPadding = 30;
-    const bottomPadding = 50;
+
+    let chartData = null;
+    let currentChartType = 'rental';
+
+    // Handle chart type change
+    document.querySelectorAll('input[name="chartType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            currentChartType = this.value;
+            if (chartData && propertySelect.value) updateChart(propertySelect.value);
+        });
+    });
+
+    function formatFullCurrency(value) {
+        if (value === null || value === undefined) return '$0';
+        return '$' + value.toLocaleString();
+    }
+
+    function drawYAxis(max) {
+        yAxisDiv.innerHTML = '';
+        if (!max || max <= 0) max = 10000;
+        const ticks = 5;
+        for (let i = ticks; i >= 0; i--) {
+            const span = document.createElement('span');
+            span.textContent = formatFullCurrency(Math.round(max * i / ticks));
+            yAxisDiv.appendChild(span);
+        }
+    }
+
+    function drawXAxis(labels) {
+        xAxisDiv.innerHTML = '';
+        labels.forEach(label => {
+            const span = document.createElement('span');
+            span.textContent = label;
+            xAxisDiv.appendChild(span);
+        });
+    }
+
+    function updateLegendVisibility() {
+        const rentalLegend = chartLegend.querySelector('span:nth-child(1)');
+        const salesLegend = chartLegend.querySelector('span:nth-child(2)');
+        rentalLegend.style.display = (currentChartType === 'rental' || currentChartType === 'both') ? 'flex' : 'none';
+        salesLegend.style.display = (currentChartType === 'sale' || currentChartType === 'both') ? 'flex' : 'none';
+    }
+
+    function drawAnimatedLine(points, color, width) {
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+        line.setAttribute("points", points.map(p => p.join(',')).join(' '));
+        line.setAttribute("fill", "none");
+        line.setAttribute("stroke", color);
+        line.setAttribute("stroke-width", width);
+        line.setAttribute("stroke-linecap", "round");
+        line.setAttribute("stroke-linejoin", "round");
+        line.setAttribute("stroke-dasharray", "1000");
+        line.setAttribute("stroke-dashoffset", "1000");
+        svg.appendChild(line);
+
+        setTimeout(() => {
+            line.style.transition = "stroke-dashoffset 1s ease-in-out";
+            line.setAttribute("stroke-dashoffset", "0");
+        }, 50);
+    }
+
+    function renderRentalTrendChart(property) {
+        const data = property.monthly_rental_data || property.historical_rental_prices;
+        if (!data || Object.keys(data).length === 0) return;
+
+        svg.innerHTML = '';
+        const leftPadding = 60, rightPadding = 30, topPadding = 30, bottomPadding = 60;
+        const usableWidth = chartWidth - leftPadding - rightPadding;
+        const usableHeight = chartHeight - topPadding - bottomPadding;
+
+        const dates = Object.keys(data).sort();
+        const values = dates.map(d => data[d].price || 0);
+
+        const maxValue = Math.max(...values);
+        const yAxisMax = maxValue * 1.2;
+
+        drawYAxis(yAxisMax);
+        drawXAxis(dates.map(d => {
+            const dt = new Date(d);
+            if (isNaN(dt)) return d;
+            const day   = dt.getDate().toString().padStart(2,'0');
+            const month = (dt.getMonth()+1).toString().padStart(2,'0');
+            const year  = dt.getFullYear().toString().slice(-2);
+            return `${month}-${day}-${year}`;
+        }));
+
+        const points = [];
+        dates.forEach((date, idx) => {
+            const value = values[idx];
+            if (value === null || value === undefined || value <= 0) return;
+
+            const x = leftPadding + (idx * usableWidth / (dates.length - 1));
+            const y = topPadding + ((yAxisMax - value) / yAxisMax) * usableHeight;
+            points.push([x, y]);
+
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", x);
+            circle.setAttribute("cy", y);
+            circle.setAttribute("r", 4);
+            circle.setAttribute("fill", "#4e6ef2");
+            svg.appendChild(circle);
+
+            const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+            label.setAttribute("x", x);
+            label.setAttribute("y", y - 10);
+            label.setAttribute("font-size", "9");
+            label.setAttribute("fill", "#4e6ef2");
+            label.setAttribute("text-anchor", "middle");
+            label.textContent = formatFullCurrency(value);
+            svg.appendChild(label);
+        });
+
+        if (points.length > 1) drawAnimatedLine(points, "#4e6ef2", 2);
+
+        const title = document.createElementNS("http://www.w3.org/2000/svg","text");
+        title.setAttribute("x", chartWidth / 2);
+        title.setAttribute("y", 15);
+        title.setAttribute("font-size","14");
+        title.setAttribute("fill","#333");
+        title.setAttribute("text-anchor","middle");
+        title.setAttribute("font-weight","bold");
+        title.textContent = `Rental Trend - ${property.address}`;
+        svg.appendChild(title);
+
+        updateLegendVisibility();
+
+        rentalDisplay.textContent = `Avg Rental: ${formatFullCurrency(chartData.avg_rental)}`;
+        salesDisplay.textContent  = `Avg Sales: ${formatFullCurrency(chartData.avg_sales)}`;
+    }
+
+    function updateChart(selectedValue) {
+        if (!chartData || !chartData.properties) return;
+
+        const properties = chartData.properties;
+        let propsToShow = selectedValue === 'all' ? properties : properties.filter(p => p.id == selectedValue);
+        if (!propsToShow.length) return;
+
+        if (selectedValue !== 'all' && currentChartType === 'rental' && 
+            (propsToShow[0].monthly_rental_data || propsToShow[0].historical_rental_prices)) {
+            renderRentalTrendChart(propsToShow[0]);
+            return;
+        }
+
+        svg.innerHTML = '';
+        const yAxisMax = Math.max(...propsToShow.map(p => {
+            const value = currentChartType==='rental'?p.rental:p.sales;
+            return value > 0 ? value : 0;
+        })) * 1.25 || 10000;
+
+        drawYAxis(yAxisMax);
+        drawXAxis(propsToShow.map((_, idx) => `P${idx+1}`));
+        updateLegendVisibility();
+
+        const leftPadding = 50, rightPadding=50, topPadding=30, bottomPadding=50;
+        const usableWidth = chartWidth - leftPadding - rightPadding;
+        const usableHeight = chartHeight - topPadding - bottomPadding;
+        const stepX = propsToShow.length>1 ? usableWidth/(propsToShow.length-1) : usableWidth/2;
+
+        const points = [];
+        propsToShow.forEach((p, idx) => {
+            const value = currentChartType==='rental'?p.rental:p.sales;
+            if (value === null || value === undefined || value <= 0) return;
+
+            const x = leftPadding + idx*stepX;
+            const y = topPadding + ((yAxisMax - value) / yAxisMax)*usableHeight;
+            points.push([x,y]);
+
+            const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+            circle.setAttribute("cx", x);
+            circle.setAttribute("cy", y);
+            circle.setAttribute("r", 6);
+            circle.setAttribute("fill", currentChartType==='rental'?'#4e6ef2':'#e74c3c');
+            svg.appendChild(circle);
+
+            const label = document.createElementNS("http://www.w3.org/2000/svg","text");
+            label.setAttribute("x", x);
+            label.setAttribute("y", y - 12);
+            label.setAttribute("font-size","10");
+            label.setAttribute("fill", currentChartType==='rental'?'#4e6ef2':'#e74c3c');
+            label.setAttribute("text-anchor","middle");
+            label.textContent = formatFullCurrency(value);
+            svg.appendChild(label);
+        });
+
+        if (points.length>1) drawAnimatedLine(points,currentChartType==='rental'?'#4e6ef2':'#e74c3c',2);
+
+        const title = document.createElementNS("http://www.w3.org/2000/svg","text");
+        title.setAttribute("x", chartWidth/2);
+        title.setAttribute("y",15);
+        title.setAttribute("font-size","14");
+        title.setAttribute("fill","#333");
+        title.setAttribute("text-anchor","middle");
+        title.setAttribute("font-weight","bold");
+        title.textContent = currentChartType==='rental'?'Rental Income':'Sales Price';
+        if (selectedValue!=='all') title.textContent += ` - ${propsToShow[0].address}`;
+        svg.appendChild(title);
+
+        rentalDisplay.textContent = `Avg Rental: ${formatFullCurrency(chartData.avg_rental)}`;
+        salesDisplay.textContent = `Avg Sales: ${formatFullCurrency(chartData.avg_sales)}`;
+    }
 
     fetch('<?php echo admin_url("admin-ajax.php?action=get_rentcast_chart_data"); ?>')
         .then(res => res.json())
         .then(data => {
-            const properties = data.properties || [];
+            chartData = data;
+            let properties = data.properties || [];
             if (!properties.length) {
                 propertySelect.innerHTML = '<option value="">No properties assigned</option>';
                 return;
             }
 
-            // Populate dropdown
-            propertySelect.innerHTML = '';
-            properties.forEach(prop => {
+            // Descending order by address
+            properties.sort((a, b) => (a.address < b.address ? 1 : a.address > b.address ? -1 : 0));
+
+            propertySelect.innerHTML = '<option value="">Select a property</option>';
+            properties.forEach(p => {
                 const opt = document.createElement('option');
-                opt.value = prop.id;
-                opt.textContent = prop.address;
+                opt.value = p.id;
+                opt.textContent = p.address;
+                opt.setAttribute('title',`Rental: $${p.rental.toLocaleString()} | Sales: $${p.sales.toLocaleString()}`);
                 propertySelect.appendChild(opt);
             });
 
-            function drawYAxis(max) {
-                yAxisDiv.innerHTML = '';
-                for (let i = 5; i >= 0; i--) {
-                    const span = document.createElement('span');
-                    span.textContent = `$${Math.round(max * i / 5)}`;
-                    yAxisDiv.appendChild(span);
-                }
-            }
-
-            function updateChart(selectedId) {
-                const selected = properties.filter(p => p.id == selectedId);
-                if (!selected.length) return;
-
-                svg.innerHTML = '';
-                rentalDisplay.textContent = `Avg Rental: $${data.avg_rental}`;
-                salesDisplay.textContent  = `Avg Sales: $${data.avg_sales}`;
-
-                const points = [];
-                const salesPoints = [];
-                const usableWidth = chartWidth - leftPadding - rightPadding;
-                const stepX = usableWidth / (properties.length - 1 || 1);
-                const yAxisMax = data.y_axis_max;
-                const usableHeight = chartHeight - topPadding - bottomPadding;
-
-                drawYAxis(yAxisMax);
-
-                selected.forEach((p, idx) => {
-                    const x = leftPadding + idx * stepX;
-
-                    // Map rental and sales values to Y-axis
-                    const rentalY = topPadding + ((yAxisMax - p.rental) / yAxisMax) * usableHeight;
-                    const salesY  = topPadding + ((yAxisMax - p.sales) / yAxisMax) * usableHeight;
-
-                    // Draw circles
-                    const rc = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    rc.setAttribute("cx", x);
-                    rc.setAttribute("cy", rentalY);
-                    rc.setAttribute("r", 6);
-                    rc.setAttribute("fill", "#4e6ef2");
-                    svg.appendChild(rc);
-
-                    const sc = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    sc.setAttribute("cx", x);
-                    sc.setAttribute("cy", salesY);
-                    sc.setAttribute("r", 6);
-                    sc.setAttribute("fill", "#e74c3c");
-                    svg.appendChild(sc);
-
-                    // Draw value labels on the right side of circle
-                    const valueOffsetX = 10; // px to the right of circle
-                    const valueOffsetY = 4;  // vertically aligned with circle
-
-                    const rl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                    rl.setAttribute("x", x + valueOffsetX);
-                    rl.setAttribute("y", rentalY + valueOffsetY);
-                    rl.setAttribute("font-size", "12");
-                    rl.setAttribute("fill", "#4e6ef2");
-                    rl.setAttribute("text-anchor", "start");
-                    rl.textContent = `$${p.rental}`;
-                    svg.appendChild(rl);
-
-                    const sl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                    sl.setAttribute("x", x + valueOffsetX);
-                    sl.setAttribute("y", salesY + valueOffsetY);
-                    sl.setAttribute("font-size", "12");
-                    sl.setAttribute("fill", "#e74c3c");
-                    sl.setAttribute("text-anchor", "start");
-                    sl.textContent = `$${p.sales}`;
-                    svg.appendChild(sl);
-
-                    points.push([x, rentalY]);
-                    salesPoints.push([x, salesY]);
-                });
-
-                // Draw animated lines
-                function drawLine(pointsArr, color) {
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-                    line.setAttribute("points", pointsArr.map(p => p.join(',')).join(' '));
-                    line.setAttribute("fill", "none");
-                    line.setAttribute("stroke", color);
-                    line.setAttribute("stroke-width", "2");
-                    line.setAttribute("stroke-linecap", "round");
-                    line.setAttribute("stroke-linejoin", "round");
-                    line.setAttribute("stroke-dasharray", "1000");
-                    line.setAttribute("stroke-dashoffset", "1000");
-                    svg.appendChild(line);
-
-                    requestAnimationFrame(() => {
-                        line.style.transition = "stroke-dashoffset 1s ease-in-out";
-                        line.setAttribute("stroke-dashoffset", "0");
-                    });
-                }
-
-                drawLine(points, "#4e6ef2");
-                drawLine(salesPoints, "#e74c3c");
-            }
-
-            // Initial chart: first property
+            propertySelect.value = properties[0].id;
             updateChart(properties[0].id);
-
-            propertySelect.addEventListener('change', function () {
-                updateChart(this.value);
-            });
+            propertySelect.addEventListener('change', function(){ if(this.value) updateChart(this.value); });
+        })
+        .catch(err => {
+            console.error(err);
+            propertySelect.innerHTML = '<option value="">Error loading properties</option>';
+            svg.innerHTML = `<text x="${chartWidth/2}" y="${chartHeight/2}" font-size="14" fill="#999" text-anchor="middle">Error loading chart data. Please try again.</text>`;
         });
 });
 </script>
@@ -381,6 +502,10 @@ document.addEventListener('DOMContentLoaded', function () {
     padding-right: 5px;
 }
 
+.tpg-y-axis span {
+    line-height: 1.4;
+}
+
 /* Chart Legend */
 .tpg-chart-legend {
     display: flex;
@@ -394,6 +519,10 @@ document.addEventListener('DOMContentLoaded', function () {
 .tpg-line-chart {
     width: 100%;
     height: 100%;
+    font-size: 14px;
+    font-weight: bold;
+    fill: #333;
+    text-anchor: middle;
 }
 
 .tpg-line-chart polyline {
@@ -417,6 +546,7 @@ document.addEventListener('DOMContentLoaded', function () {
 .tpg-line-chart text {
     font-family: Arial, sans-serif;
     font-weight: 600;
+    dominant-baseline: hanging; /* ensures the text starts at the y position */
 }
 
 /* Rental & Sales colors */

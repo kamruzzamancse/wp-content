@@ -125,51 +125,53 @@ jQuery(document).ready(function($) {
     });
 
     // Link property
-    $(document).on('click', '.link-property-btn', function() {
-        const $btn = $(this);
-        const property = $btn.data('propertyPayload') || {};
+    $(document).on('click', '.link-property-btn', function () {
+      const $btn = $(this);
 
-        $btn.text('Linking...').prop('disabled', true);
+      let property = {};
+      try {
+          property = JSON.parse($btn.attr('data-property-payload'));
+      } catch (e) {
+          alert('Invalid property data');
+          return;
+      }
 
-        const payload = {
-            action: 'simple_link_property',
-            nonce: linkNonce,
-            listing_id: property.id || property.listingId || '',
-            address: property.formattedAddress || property.address || '',
-            city: property.city || '',
-            state: property.state || '',
-            zip: property.zipCode || property.zip || '',
-            bedrooms: property.bedrooms || property.bed || 0,
-            bathrooms: property.bathrooms || property.bath || 0,
-            sqft: property.squareFootage || property.sqft || 0,
-            price: property.price || property.rent || '',
-            property_value: property.estimatedValue || property.property_value || 0,
-            image_url: property.photos?.[0] || ''
-        };
+      $btn.text('Linking...').prop('disabled', true);
 
-        $.post(ajaxUrl, payload)
-        .done(function(response) {
-            if (response.success) {
-                $('#link-success').fadeIn();
-                $('#property-search-results').hide();
-                $('#property-search-input').val('');
-                $('#property-search-limit').val('5');
+      $.post(ajaxUrl, {
+          action: 'simple_link_property',
+          nonce: linkNonce,
 
-                $('.linked-properties-section').load(location.href + ' .linked-properties-section > *');
+          listing_id: property.id || property.listingId || '',
+          address: property.formattedAddress || '',
+          city: property.city || '',
+          state: property.state || '',
+          zip: property.zipCode || '',
+          bedrooms: property.bedrooms || 0,
+          bathrooms: property.bathrooms || 0,
+          sqft: property.squareFootage || 0,
+          price: property.price || 0,
+          property_value: property.property_value || property.estimatedValue || 0,
+          image_url: property.photos?.[0] || ''
+      })
+      .done(function (response) {
+          if (response.success) {
+              $('#link-success').fadeIn();
+              $('#property-search-results').hide();
 
-                $('html, body').animate({
-                    scrollTop: $('#link-success').offset().top - 100
-                }, 800);
-            } else {
-                alert('Error: ' + (response.data || 'Failed to link property.'));
-                $btn.text('Link Property').prop('disabled', false);
-            }
-        })
-        .fail(function() {
-            alert('Link request failed. Please try again.');
-            $btn.text('Link Property').prop('disabled', false);
-        });
-    });
+              $('.linked-properties-section')
+                  .load(location.href + ' .linked-properties-section > *');
+          } else {
+              alert(response.data || 'Failed to link property');
+              $btn.prop('disabled', false).text('Link Property');
+          }
+      })
+      .fail(function () {
+          alert('Request failed');
+          $btn.prop('disabled', false).text('Link Property');
+      });
+  });
+
 });
 </script>
 

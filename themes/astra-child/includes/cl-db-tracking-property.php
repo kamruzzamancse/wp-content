@@ -1,6 +1,6 @@
 <?php
 // ==============================
-// AJAX Handler: Get Rentcast Chart Data
+// AJAX Handler: Get Rentcast Chart Data (UPDATED)
 // ==============================
 add_action('wp_ajax_get_rentcast_chart_data', 'get_rentcast_chart_data');
 add_action('wp_ajax_nopriv_get_rentcast_chart_data', 'get_rentcast_chart_data');
@@ -26,18 +26,20 @@ function get_rentcast_chart_data() {
         return;
     }
 
-    // Query assigned properties
+    // Query assigned properties WITH rental trend data
     $assigned_table = $wpdb->prefix . 'assigned_property';
     $property_table = $wpdb->prefix . 'rentcast_properties';
 
     $query = $wpdb->prepare("
-        SELECT p.id, p.address, p.price, p.property_value
+        SELECT p.id, p.address, p.price, p.property_value, 
+            p.monthly_rental_data, p.historical_rental_prices
         FROM {$property_table} AS p
         INNER JOIN {$assigned_table} AS a
         ON p.id = a.property_id
         WHERE a.client_id = %d
+        AND a.deleted_by IS NULL  -- Only show not deleted assignments
         ORDER BY a.id ASC
-        LIMIT 10
+        LIMIT 20
     ", $client_id);
 
     $properties = $wpdb->get_results($query);
@@ -47,21 +49,47 @@ function get_rentcast_chart_data() {
         return;
     }
 
-    // Process properties
     $data = [];
     $rentalSum = 0;
-    $salesSum = 0;
+    $salesSum  = 0;
     $allValues = [];
 
     foreach ($properties as $prop) {
         $rental = floatval($prop->price);
         $sales  = floatval($prop->property_value);
 
+        // Decode monthly rental data
+        $monthly_data = [];
+
+        if (!empty($prop->monthly_rental_data)) {
+            $raw_data = json_decode($prop->monthly_rental_data, true);
+            if (is_array($raw_data)) {
+                foreach ($raw_data as $date => $entry) {
+                    $monthly_data[$date] = [
+                        'price' => floatval($entry['price'] ?? 0)
+                    ];
+                }
+            }
+        }
+
+        // Fallback to historical_rental_prices if monthly_rental_data is empty
+        if (empty($monthly_data) && !empty($prop->historical_rental_prices)) {
+            $raw_hist = json_decode($prop->historical_rental_prices, true);
+            if (is_array($raw_hist)) {
+                foreach ($raw_hist as $date => $entry) {
+                    $monthly_data[$date] = [
+                        'price' => floatval($entry['price'] ?? 0)
+                    ];
+                }
+            }
+        }
+
         $data[] = [
             'id'      => $prop->id,
             'address' => $prop->address,
             'rental'  => $rental,
-            'sales'   => $sales
+            'sales'   => $sales,
+            'monthly_rental_data' => $monthly_data
         ];
 
         $rentalSum += $rental;
@@ -74,14 +102,18 @@ function get_rentcast_chart_data() {
     $avgRental = $count ? round($rentalSum / $count, 2) : 0;
     $avgSales  = $count ? round($salesSum / $count, 2) : 0;
 
-    // Y-axis max = highest value + 25%
-    $yAxisMax = max($allValues) * 1.25;
+    // Y-axis max calculation
+    $yAxisMax = !empty($allValues) ? max($allValues) * 1.25 : 10000;
 
     wp_send_json([
         'properties' => $data,
         'avg_rental' => $avgRental,
         'avg_sales'  => $avgSales,
-        'y_axis_max' => $yAxisMax
+        'y_axis_max' => [
+            'rental' => $yAxisMax,
+            'sale'   => $yAxisMax,
+            'both'   => $yAxisMax
+        ]
     ]);
 }
 ?>
