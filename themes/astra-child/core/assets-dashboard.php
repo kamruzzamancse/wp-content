@@ -26,6 +26,27 @@ if (!function_exists('mdk_safe_filemtime')) {
 }
 
 /**
+ * Enqueue & Localize for Note heder 
+ */
+function cld_note_header_assets() {
+    wp_enqueue_script(
+        'note-header-js',
+        get_stylesheet_directory_uri() .  '/assets/js/note-header.js',
+        ['jquery'],
+        time(),
+        true
+    );
+
+    wp_localize_script('note-header-js', 'noteHeaderAjax', [
+        'ajax_url'   => admin_url('admin-ajax.php'),
+        'nonce'      => wp_create_nonce('note_header_nonce'),
+        'table_one'  => 'first_table_name',   // First table
+        'table_two'  => 'second_table_name',  // Second table
+    ]);
+}
+add_action('wp_enqueue_scripts', 'cld_note_header_assets');
+
+/**
  * Enqueue & Localize Notifications Script
  */
 add_action('wp_enqueue_scripts', function() {

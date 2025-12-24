@@ -13,6 +13,8 @@ $feature_groups = [
         'cl-db-tracking-property.php',
         'cl-rentcast-properties-ajax.php',
         'cl-link-property-ajax.php',
+        'note-header-ajax.php',
+        'notes-ajax.php',
     ],
     
     // REALTOR FEATURES  

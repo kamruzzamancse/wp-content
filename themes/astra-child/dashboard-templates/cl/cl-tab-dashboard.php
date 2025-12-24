@@ -46,7 +46,7 @@
         </div>
 
         <!-- Message Realtor Box -->
-        <div class="cld-box cld-message-box">
+        <!-- <div class="cld-box cld-message-box">
             <div class="cld-box-header">
                 <span>📩 Message Realtor</span>
                 <button class="cld-send-btn">Send</button>
@@ -54,7 +54,33 @@
             <div class="cld-box-body">
                 <textarea class="cld-textarea" placeholder="Type your message here"></textarea>
             </div>
+        </div> -->
+
+        <!-- ===== NOTE HEADER BOX ===== -->
+        <div class="cld-box cld-note-header-box">
+            <div class="cld-box-header">
+                <span>📝 Notes Header</span>
+                <button class="cld-send-btn" id="add-note-header-btn">Add</button>
+            </div>
+            <div class="cld-box-body">
+                <ul id="note-header-list"></ul>
+            </div>
         </div>
+
+        <!-- ===== NOTE HEADER MODAL ===== -->
+        <div id="noteHeaderModal" class="note-modal">
+            <div class="note-modal-content">
+                <span class="note-modal-close">&times;</span>
+
+                <h3 id="note-modal-title">Add Note Header</h3>
+
+                <input type="hidden" id="note_id">
+                <input type="text" id="note_header_input" placeholder="Note Header">
+
+                <button id="save_note_header" class="cld-send-btn">Save</button>
+            </div>
+        </div>
+
     </div>
 
     <!-- RIGHT SIDE: Calendar + Notes -->
@@ -85,13 +111,45 @@
         ?>
 
         <!-- Notes Header -->
-        <div class="notes-header">
+        <!-- <div class="notes-header">
             <h1>📝 Notes</h1>
             <button class="add-note-btn">+</button>
-        </div>
+        </div> -->
 
         <!-- Sticky Notes Container -->
-        <div class="sticky-notes-container"></div>
+        <!-- <div class="sticky-notes-container"></div> -->
+
+        <!-- ===== NOTES SECTION ===== -->
+        <div class="cld-box cld-notes-box">
+            <div class="cld-box-header">
+                <span>📝 Notes</span>
+                <button class="cld-send-btn" id="add-note-btn">Add Note</button>
+            </div>
+
+            <div class="cld-box-body">
+                <ul id="notes-list"></ul>
+            </div>
+        </div>
+
+        <!-- ===== NOTE MODAL ===== -->
+        <div id="noteModal" class="note-modal">
+            <div class="note-modal-content">
+                <span class="note-modal-close">&times;</span>
+
+                <h3 id="note-modal-title">Add Note</h3>
+
+                <input type="hidden" id="note_row_id">
+
+                <select id="note_header_select">
+                    <option value="">Select Note Header</option>
+                </select>
+
+                <textarea id="note_text" placeholder="Write your note..." rows="5"></textarea>
+
+                <button id="save_note" class="cld-send-btn">Save</button>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -639,4 +697,105 @@ table {
     vertical-align: top;
     text-align: center;
 }
+
+/* notes css*/
+
+/* ===== NOTE LIST ===== */
+#note-header-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#note-header-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.note-actions span {
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.note-actions .edit {
+    color: #3578c6;
+}
+
+.note-actions .delete {
+    color: #e74c3c;
+}
+
+/* ===== MODAL ===== */
+.note-modal {
+    display: none;                 /* IMPORTANT */
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.4);
+}
+
+.note-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.note-modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 320px;
+    border-radius: 10px;
+    position: relative;
+}
+
+.note-modal-content input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.note-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+#notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#notes-list li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.note-header-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.note-text {
+    font-size: 14px;
+    color: #555;
+}
+
+.note-actions {
+    margin-top: 6px;
+}
+
+.note-actions span {
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 13px;
+}
+
+
 </style>
