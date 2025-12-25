@@ -26,6 +26,56 @@ if (!function_exists('mdk_safe_filemtime')) {
 }
 
 /**
+ * Create Notes tables on Astra Child Theme activation
+ */
+
+/* add_action('after_switch_theme', 'cld_create_notes_tables');
+
+function cld_create_notes_tables() {
+    global $wpdb;
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $notes_table = $wpdb->prefix . 'notes';
+    $note_header_table = $wpdb->prefix . 'note_header';
+
+    $sql_notes = "CREATE TABLE $notes_table (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        note_header_id BIGINT(20) UNSIGNED NOT NULL,
+        note LONGTEXT NULL,
+        created_at DATETIME NOT NULL,
+        created_by BIGINT(20) UNSIGNED NOT NULL,
+        updated_at DATETIME NULL,
+        updated_by BIGINT(20) UNSIGNED NULL,
+        deleted_at DATETIME NULL,
+        deleted_by BIGINT(20) UNSIGNED NULL,
+        PRIMARY KEY  (id),
+        KEY note_header_id (note_header_id),
+        KEY created_by (created_by),
+        KEY deleted_at (deleted_at)
+    ) $charset_collate;";
+
+    $sql_note_header = "CREATE TABLE $note_header_table (
+        id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+        note_header VARCHAR(255) NOT NULL,
+        created_at DATETIME NOT NULL,
+        created_by BIGINT(20) UNSIGNED NOT NULL,
+        updated_at DATETIME NULL,
+        updated_by BIGINT(20) UNSIGNED NULL,
+        deleted_at DATETIME NULL,
+        deleted_by BIGINT(20) UNSIGNED NULL,
+        PRIMARY KEY  (id),
+        KEY created_by (created_by),
+        KEY deleted_at (deleted_at)
+    ) $charset_collate;";
+
+    dbDelta($sql_notes);
+    dbDelta($sql_note_header);
+} */
+
+/**
  * Enqueue Note Header JS
  */
 function cld_note_header_assets() {
