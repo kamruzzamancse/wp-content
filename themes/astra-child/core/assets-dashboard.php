@@ -26,25 +26,52 @@ if (!function_exists('mdk_safe_filemtime')) {
 }
 
 /**
- * Enqueue & Localize for Note heder 
+ * Enqueue Note Header JS
  */
 function cld_note_header_assets() {
+
     wp_enqueue_script(
-        'note-header-js',
-        get_stylesheet_directory_uri() .  '/assets/js/note-header.js',
+        'cld-note-header-js',
+        get_stylesheet_directory_uri() . '/assets/js/note-header.js',
         ['jquery'],
-        time(),
+        filemtime(get_stylesheet_directory() . '/assets/js/note-header.js'),
         true
     );
 
-    wp_localize_script('note-header-js', 'noteHeaderAjax', [
-        'ajax_url'   => admin_url('admin-ajax.php'),
-        'nonce'      => wp_create_nonce('note_header_nonce'),
-        'table_one'  => 'first_table_name',   // First table
-        'table_two'  => 'second_table_name',  // Second table
-    ]);
+    wp_localize_script(
+        'cld-note-header-js',
+        'noteHeaderAjax',
+        [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('note_header_nonce'),
+        ]
+    );
 }
 add_action('wp_enqueue_scripts', 'cld_note_header_assets');
+
+/**
+ * Enqueue & Localize – Notes
+ */
+function cld_notes_assets() {
+
+    wp_enqueue_script(
+        'cld-notes-js',
+        get_stylesheet_directory_uri() . '/assets/js/notes.js',
+        ['jquery'],
+        filemtime(get_stylesheet_directory() . '/assets/js/notes.js'),
+        true
+    );
+
+    wp_localize_script(
+        'cld-notes-js',
+        'notesAjax',
+        [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('notes_nonce'), // Separate nonce for Notes
+        ]
+    );
+}
+add_action('wp_enqueue_scripts', 'cld_notes_assets');
 
 /**
  * Enqueue & Localize Notifications Script

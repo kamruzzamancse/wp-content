@@ -1,151 +1,108 @@
-// note-header.js - Updated for 2 tables
 jQuery(document).ready(function ($) {
-    const noteModal = $('#noteModal');
-    let editingNoteId = 0;
 
-    /* ================= LOAD HEADERS FOR DROPDOWN ================= */
-    function loadHeaderDropdown() {
+    // Load all note headers
+    function loadNoteHeaders() {
         $.post(noteHeaderAjax.ajax_url, {
-            action: 'get_note_headers_for_notes'
+            action: 'get_note_headers',
+            nonce: noteHeaderAjax.nonce
         }, function (res) {
             if (!res.success) return;
-            let opts = '<option value="">Select Note Header</option>';
-            res.data.forEach(h => {
-                opts += `<option value="${h.id}">${h.note_header}</option>`;
-            });
-            $('#note_header_select').html(opts);
-        });
-    }
 
-    /* ================= LOAD NOTES FROM BOTH TABLES ================= */
-    function loadNotes() {
-        $.post(noteHeaderAjax.ajax_url, {
-            action: 'get_notes'
-        }, function (res) {
-            if (!res.success) return;
             let html = '';
-            res.data.forEach(n => {
-                html += `
-                    <li data-id="${n.id}">
-                        <div class="note-header-title">${n.note_header}</div>
-                        <div class="note-text">${n.note || ''}</div>
-                        <div class="note-meta">Updated: ${n.updated_at || n.created_at}</div>
-                        <div class="note-actions">
-                            <span class="edit-note">✏️ Edit</span>
-                            <span class="delete-note">🗑️ Delete</span>
-                        </div>
-                    </li>`;
-            });
-            $('#notes-list').html(html);
+            if (res.data.length === 0) {
+                html = '<li class="empty">No note headers found</li>';
+            } else {
+                res.data.forEach(h => {
+                    html += `
+                        <li data-id="${h.id}">
+                            <span class="note-header-text">${h.note_header}</span>
+                            <span class="edit-header" style="cursor:pointer;">✏️</span>
+                            <span class="delete-header" style="cursor:pointer;">🗑️</span>
+                        </li>`;
+                });
+            }
+
+            $('#note-header-list').html(html);
         });
     }
 
-    // Initial load
-    loadHeaderDropdown();
-    loadNotes();
+    loadNoteHeaders();
 
-    /* ================= ADD NEW NOTE ================= */
-    $(document).on('click', '#add-note-btn', function () {
-        editingNoteId = 0;
+    // Open Add Modal
+    $('#add-note-header-btn').on('click', function () {
         $('#note_id').val('');
-        $('#note_text').val('');
-        $('#save_note').text('Save Note');
-        loadHeaderDropdown();
-        noteModal.addClass('show');
+        $('#note_header_input').val('');
+        $('#note-header-modal-title').text('Add Note Header');
+        $('#noteHeaderModal').addClass('show');
     });
 
-    /* ================= EDIT NOTE ================= */
-    $(document).on('click', '.edit-note', function () {
-        editingNoteId = $(this).closest('li').data('id');
-        
+    // Edit header
+    $(document).on('click', '.edit-header', function () {
+        const li = $(this).closest('li');
+        const id = li.data('id');
+        const title = li.find('.note-header-text').text(); // updated selector
+
+        $('#note_id').val(id);
+        $('#note_header_input').val(title);
+        $('#note-header-modal-title').text('Edit Note Header');
+        $('#noteHeaderModal').addClass('show');
+    });
+
+    // Save header (Add / Update)
+    $('#save_note_header').on('click', function () {
+        const header = $('#note_header_input').val().trim();
+        const id = $('#note_id').val();
+
+        if (!header) { 
+            alert('Please enter a header'); 
+            return; 
+        }
+
         $.post(noteHeaderAjax.ajax_url, {
-            action: 'get_single_note',
-            note_id: editingNoteId
-        }, function (res) {
-            if (!res.success) return;
-            
-            $('#note_id').val(editingNoteId);
-            $('#note_header_select').val(res.data.note_header_id);
-            $('#note_text').val(res.data.note);
-            $('#save_note').text('Update Note');
-            noteModal.addClass('show');
-        });
-    });
-
-    /* ================= SAVE/UPDATE NOTE ================= */
-    $('#save_note').on('click', function () {
-        const note_header_id = $('#note_header_select').val();
-        const note_text = $('#note_text').val().trim();
-        const note_id = $('#note_id').val();
-
-        if (!note_header_id || !note_text) {
-            alert('Please select a Note Header and write your note.');
-            return;
-        }
-
-        const postData = {
-            action: 'save_note',
+            action: 'save_note_header',
             nonce: noteHeaderAjax.nonce,
-            note_header_id: note_header_id,
-            note: note_text
-        };
-
-        if (note_id) {
-            postData.note_id = note_id;
-        }
-
-        $.post(noteHeaderAjax.ajax_url, postData, function (res) {
+            id: id,
+            note_header: header
+        }, function (res) {
             if (res.success) {
-                noteModal.removeClass('show');
-                loadNotes();
-                alert(res.data.message);
-                // Reset form
-                editingNoteId = 0;
-                $('#note_id').val('');
-                $('#note_text').val('');
-                $('#save_note').text('Save Note');
+                $('#noteHeaderModal').removeClass('show');
+                loadNoteHeaders();
+                alert(res.data.message || 'Success');
             } else {
-                alert(res.data);
+                alert(res.data || 'Error saving note header');
             }
         });
     });
 
-    /* ================= DELETE NOTE ================= */
-    $(document).on('click', '.delete-note', function () {
-        if (!confirm('Delete this note?')) return;
-
+    // Delete header
+    $(document).on('click', '.delete-header', function () {
+        if (!confirm('Delete this header?')) return;
         const id = $(this).closest('li').data('id');
 
         $.post(noteHeaderAjax.ajax_url, {
-            action: 'delete_note',
+            action: 'delete_note_header',
             nonce: noteHeaderAjax.nonce,
             id: id
         }, function (res) {
             if (res.success) {
-                loadNotes();
-                alert('Note deleted successfully');
+                loadNoteHeaders();
+                alert(res.data.message || 'Deleted successfully');
             } else {
-                alert('Error deleting note');
+                alert(res.data || 'Error deleting header');
             }
         });
     });
 
-    /* ================= CLOSE MODAL ================= */
-    $('.note-modal-close').on('click', function () {
-        noteModal.removeClass('show');
-        editingNoteId = 0;
-        $('#note_id').val('');
-        $('#note_text').val('');
-        $('#save_note').text('Save Note');
+    // Close modal
+    $('[data-modal="noteHeaderModal"]').on('click', function () {
+        $('#noteHeaderModal').removeClass('show');
     });
 
+    // Close modal when clicking outside modal content
     $(window).on('click', function (e) {
         if ($(e.target).hasClass('note-modal')) {
-            noteModal.removeClass('show');
-            editingNoteId = 0;
-            $('#note_id').val('');
-            $('#note_text').val('');
-            $('#save_note').text('Save Note');
+            $('#noteHeaderModal').removeClass('show');
         }
     });
+
 });

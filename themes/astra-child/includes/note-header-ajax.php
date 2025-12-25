@@ -1,15 +1,18 @@
 <?php
-add_action('wp_ajax_get_note_headers', 'get_note_headers');
-add_action('wp_ajax_save_note_header', 'save_note_header');
-add_action('wp_ajax_delete_note_header', 'delete_note_header');
+/**
+ * Note Header AJAX handlers
+ */
 
-/* ===== READ ===== */
-function get_note_headers() {
+add_action('wp_ajax_get_note_headers', 'cld_get_note_headers');
+add_action('wp_ajax_save_note_header', 'cld_save_note_header');
+add_action('wp_ajax_delete_note_header', 'cld_delete_note_header');
 
+/* ================= READ NOTE HEADERS ================= */
+function cld_get_note_headers() {
     check_ajax_referer('note_header_nonce', 'nonce');
 
     global $wpdb;
-    $table = $wpdb->prefix . 'notes';
+    $table = $wpdb->prefix . 'note_header';
     $user_id = get_current_user_id();
 
     $results = $wpdb->get_results(
@@ -19,36 +22,47 @@ function get_note_headers() {
              WHERE created_by=%d AND deleted_at IS NULL 
              ORDER BY id DESC",
             $user_id
-        )
+        ),
+        ARRAY_A
     );
 
     wp_send_json_success($results);
 }
 
-/* ===== CREATE & UPDATE ===== */
-function save_note_header() {
-
+/* ================= CREATE / UPDATE NOTE HEADER ================= */
+function cld_save_note_header() {
     check_ajax_referer('note_header_nonce', 'nonce');
 
     global $wpdb;
-    $table = $wpdb->prefix . 'notes';
-
-    $id = intval($_POST['id']);
-    $header = sanitize_text_field($_POST['note_header']);
+    $table = $wpdb->prefix . 'note_header';
     $user_id = get_current_user_id();
 
-    if (!$header) {
-        wp_send_json_error('Empty header');
-    }
+    $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+    $header = isset($_POST['note_header']) ? sanitize_text_field($_POST['note_header']) : '';
+
+    if (empty($header)) wp_send_json_error('Note header cannot be empty');
 
     if ($id) {
-        $wpdb->update(
+        // Update existing header
+        $updated = $wpdb->update(
             $table,
-            ['note_header' => $header],
-            ['id' => $id]
+            [
+                'note_header' => $header,
+                'updated_at'  => current_time('mysql'),
+                'updated_by'  => $user_id
+            ],
+            ['id' => $id, 'created_by' => $user_id]
         );
+
+        if ($updated !== false) {
+            wp_send_json_success(['message' => 'Note header updated successfully']);
+        } else {
+            wp_send_json_error('Error updating note header');
+        }
+
     } else {
-        $wpdb->insert(
+        // Insert new header
+        $inserted = $wpdb->insert(
             $table,
             [
                 'note_header' => $header,
@@ -56,27 +70,36 @@ function save_note_header() {
                 'created_by'  => $user_id
             ]
         );
-    }
 
-    wp_send_json_success();
+        if ($inserted) {
+            wp_send_json_success(['message' => 'Note header added successfully']);
+        } else {
+            $wpdb_error = $wpdb->last_error;
+            wp_send_json_error("Error saving note header: $wpdb_error");
+        }
+    }
 }
 
-/* ===== DELETE (SOFT DELETE) ===== */
-function delete_note_header() {
-
+/* ================= DELETE NOTE HEADER ================= */
+function cld_delete_note_header() {
     check_ajax_referer('note_header_nonce', 'nonce');
 
     global $wpdb;
-    $table = $wpdb->prefix . 'notes';
+    $table = $wpdb->prefix . 'note_header';
+    $user_id = get_current_user_id();
 
-    $wpdb->update(
+    $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+    if (!$id) wp_send_json_error('Invalid note header ID');
+
+    $deleted = $wpdb->update(
         $table,
         [
             'deleted_at' => current_time('mysql'),
-            'deleted_by' => get_current_user_id()
+            'deleted_by' => $user_id
         ],
-        ['id' => intval($_POST['id'])]
+        ['id' => $id, 'created_by' => $user_id]
     );
 
-    wp_send_json_success();
+    if ($deleted !== false) wp_send_json_success(['message' => 'Note header deleted successfully']);
+    else wp_send_json_error('Error deleting note header');
 }
