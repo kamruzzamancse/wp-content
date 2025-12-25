@@ -96,12 +96,81 @@
         }
         ?>
 
-        <div class="notes-header">
+        <!-- <div class="notes-header">
             <h1>📝 Notes</h1>
             <button class="add-note-btn">+</button>
         </div>
 
-        <div class="sticky-notes-container"></div>
+        <div class="sticky-notes-container"></div> -->
+
+        <!-- ===== NOTE HEADER BOX ===== -->
+        <div class="cld-box cld-note-header-box">
+            <div class="cld-box-header">
+                <span>📝 Note Header</span>
+                <button type="button" class="cld-send-btn" id="add-note-header-btn">
+                    Add Note Header
+                </button>
+            </div>
+            <div class="cld-box-body">
+                <ul id="note-header-list">
+                    <li class="empty">No note headers found</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ===== NOTE HEADER MODAL ===== -->
+        <div id="noteHeaderModal" class="note-modal">
+            <div class="note-modal-content">
+                <span class="note-modal-close" data-modal="noteHeaderModal">&times;</span>
+                <h3 id="note-header-modal-title">Add Note Header</h3>
+                <input type="hidden" id="note_id">
+                <label for="note_header_input">Note Header</label>
+                <input type="text" id="note_header_input" placeholder="Note Header">
+                <button type="button" id="save_note_header" class="cld-send-btn">Save</button>
+            </div>
+        </div>
+
+        <!-- ===== NOTES BOX ===== -->
+        <div class="cld-box cld-notes-box">
+            <div class="cld-box-header">
+                <span>📝 Notes</span>
+                <button type="button" class="cld-send-btn" id="add-note-btn">Add Note</button>
+            </div>
+            <div class="cld-box-body">
+                <ul id="notes-list" class="notes-preview-list">
+                    <li class="empty">No notes found</li>
+                </ul>
+                <button id="view-all-notes-btn" class="cld-send-btn" style="display:none; margin-top:10px;">View All Notes</button>
+            </div>
+        </div>
+
+        <!-- ===== NOTE MODAL (Add/Edit Note) ===== -->
+        <div id="noteModal" class="note-modal">
+            <div class="note-modal-content">
+                <span class="note-modal-close" data-modal="noteModal">&times;</span>
+                <h3 id="note-modal-title">Add Note</h3>
+                <input type="hidden" id="note_row_id">
+                <label for="note_header_select">Note Header</label>
+                <select id="note_header_select">
+                    <option value="">Select Note Header</option>
+                </select>
+                <label for="note_text">Note</label>
+                <textarea id="note_text" placeholder="Write your note..." rows="5"></textarea>
+                <button type="button" id="save_note" class="cld-send-btn">Save</button>
+            </div>
+        </div>
+
+        <!-- ===== VIEW ALL NOTES MODAL ===== -->
+        <div id="allNotesModal" class="note-modal">
+            <div class="note-modal-content" style="width:500px; max-height:70vh; overflow-y:auto;">
+                <span class="note-modal-close" data-modal="allNotesModal">&times;</span>
+                <h3>All Notes</h3>
+                <ul id="all-notes-list">
+                    <!-- All notes will be appended here -->
+                </ul>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -438,4 +507,211 @@ include locate_template('dashboard-templates/rt/rt-db-lead-edit-modal.php');
         justify-content: flex-start;
     }
 }
+
+
+
+/* css for note header and notes section ************************************/
+
+/* ===============================
+   CLD BOX (Note Header & Notes)
+   =============================== */
+
+.cld-box {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.cld-box-header {
+    background: #3578c6;
+    color: #fff;
+    padding: 12px 16px;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cld-box-body {
+    padding: 20px;
+}
+
+/* ===============================
+   BUTTONS
+   =============================== */
+
+.cld-send-btn {
+    padding: 8px 14px;
+    background: #4e6ef2;
+    color: #fff !important;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.cld-send-btn:hover {
+    background: #3b54c1;
+}
+
+#save_note {
+    width: 100%;
+}
+
+#view-all-notes-btn {
+    margin-top: 10px;
+    display: none;
+}
+
+/* ===============================
+   NOTE HEADER LIST
+   =============================== */
+
+#note-header-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#note-header-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 15px;
+}
+
+.note-header-text {
+    flex: 1;
+    font-weight: 500;
+}
+
+.edit-header,
+.delete-header {
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.edit-header:hover { color: #3578c6; }
+.delete-header:hover { color: #e74c3c; }
+
+/* ===============================
+   NOTES LIST
+   =============================== */
+
+#notes-list,
+#all-notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.notes-preview-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+#notes-list li,
+#all-notes-list li {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.note-header-title {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+
+.note-text {
+    font-size: 14px;
+    color: #555;
+}
+
+.note-actions {
+    margin-top: 6px;
+}
+
+.note-actions span {
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 13px;
+    color: #3578c6;
+}
+
+.note-actions .delete-note {
+    color: #e74c3c;
+}
+
+/* ===============================
+   MODALS
+   =============================== */
+
+.note-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+.note-modal.show {
+    display: flex;
+}
+
+.note-modal-content {
+    background: #fff;
+    padding: 20px;
+    width: 400px;
+    border-radius: 10px;
+    position: relative;
+}
+
+#allNotesModal .note-modal-content {
+    width: 500px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.note-modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.note-modal-content label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.note-modal-content input,
+.note-modal-content select,
+.note-modal-content textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.note-modal-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 22px;
+    cursor: pointer;
+}
+
 </style>
