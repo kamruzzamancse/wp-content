@@ -387,7 +387,7 @@ function rt_enqueue_active_client_dashboard_scripts() {
     // Only treat explicit dashboard tab (don't treat empty as dashboard to avoid duplicate loads)
     $is_dashboard_tab  = ($current_tab === 'dashboard');
 
-    if ($is_dashboard_page && $is_dashboard_tab) {
+    if ($is_dashboard_page || $is_dashboard_tab) {
         $script_path = get_stylesheet_directory() . '/assets/js/rt-db-active-client.js';
 
         if (!wp_script_is('rt-db-active-client-js', 'enqueued')) {
@@ -422,7 +422,7 @@ function rt_enqueue_lead_client_scripts() {
     // Only explicit dashboard tab; avoid empty tab match to prevent duplicate loads
     $is_dashboard_tab = ($current_tab === 'dashboard');
 
-    if ($is_dashboard_page && $is_dashboard_tab) {
+    if ($is_dashboard_page || $is_dashboard_tab) {
         $script_path = get_stylesheet_directory() . '/assets/js/rt-db-lead-client.js';
         if (!wp_script_is('rt-db-lead-client-js', 'enqueued')) {
             wp_enqueue_script(

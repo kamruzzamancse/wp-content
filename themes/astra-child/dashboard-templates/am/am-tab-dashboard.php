@@ -104,7 +104,7 @@
         <div class="sticky-notes-container"></div> -->
 
         <!-- ===== NOTE HEADER BOX ===== -->
-        <div class="cld-box cld-note-header-box">
+        <!-- <div class="cld-box cld-note-header-box">
             <div class="cld-box-header">
                 <span>📝 Note Header</span>
                 <button type="button" class="cld-send-btn" id="add-note-header-btn">
@@ -116,10 +116,10 @@
                     <li class="empty">No note headers found</li>
                 </ul>
             </div>
-        </div>
+        </div> -->
 
         <!-- ===== NOTE HEADER MODAL ===== -->
-        <div id="noteHeaderModal" class="note-modal">
+        <!-- <div id="noteHeaderModal" class="note-modal">
             <div class="note-modal-content">
                 <span class="note-modal-close" data-modal="noteHeaderModal">&times;</span>
                 <h3 id="note-header-modal-title">Add Note Header</h3>
@@ -128,7 +128,7 @@
                 <input type="text" id="note_header_input" placeholder="Note Header">
                 <button type="button" id="save_note_header" class="cld-send-btn">Save</button>
             </div>
-        </div>
+        </div> -->
 
         <!-- ===== NOTES BOX ===== -->
         <div class="cld-box cld-notes-box">
