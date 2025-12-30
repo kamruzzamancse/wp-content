@@ -45,7 +45,7 @@ function am_enqueue_notification_assets() {
     wp_localize_script('am-notif-script', 'AM_NOTIF', $local);
 
     // Inline JS (we'll output the full script below)
-    $inline_js = file_get_contents(__DIR__ . '/am-notif-inline.js'); // optional external file
+    //$inline_js = file_get_contents(__DIR__ . '/am-notif-inline.js'); // optional external file
     // If you prefer inline directly here, use wp_add_inline_script:
     wp_add_inline_script('am-notif-script', am_notif_get_inline_js());
 

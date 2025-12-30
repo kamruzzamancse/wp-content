@@ -16,4 +16,8 @@
     <a href="?tab=cl-settings-nh" class="realtor-settings-link">
         <div class="realtor-settings-item">📌 Note Header</div>
     </a>
+
+    <a href="?tab=cl-settings-dt" class="realtor-settings-link">
+        <div class="realtor-settings-item">📄 Document Type</div>
+    </a>
 </div>

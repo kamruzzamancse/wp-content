@@ -35,7 +35,7 @@ if (!function_exists('load_realtor_dashboard_data')) {
                 ];
             case 'properties':
             case 'address-book':
-            case 'doc-type':
+            //case 'doc-type':
             case 'docs':
             case 'assign-property':
             case 'assign-task':
@@ -48,6 +48,7 @@ if (!function_exists('load_realtor_dashboard_data')) {
             case 'rt-settings-pi-edit':
             case 'rt-settings-support':
             case 'rt-settings-nh':
+            case 'rt-settings-dt':
                 return []; // Placeholder, replace with actual data queries
             default:
                 return null;
@@ -84,9 +85,9 @@ get_header();
                 case 'address-book':
                     include locate_template('dashboard-templates/rt/rt-tab-address-book.php');
                     break;
-                case 'doc-type':
+                /* case 'doc-type':
                     include locate_template('dashboard-templates/rt/rt-tab-doc-type.php');
-                    break;
+                    break; */
                 case 'docs':
                     include locate_template('dashboard-templates/rt/rt-tab-docs.php');
                     break;
@@ -122,6 +123,9 @@ get_header();
                     break;
                 case 'rt-settings-nh':
                     include locate_template('dashboard-templates/rt/rt-settings-nh.php');
+                    break;
+                case 'rt-settings-dt':
+                    include locate_template('dashboard-templates/rt/rt-settings-dt.php');
                     break;
                 default:
                     wp_redirect(add_query_arg('tab', 'dashboard'));

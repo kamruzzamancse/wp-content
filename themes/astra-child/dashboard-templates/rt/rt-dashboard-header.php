@@ -78,9 +78,9 @@ if (empty($company_name)) {
                     <a href="?tab=address-book"><span class="dashicons dashicons-id"></span> Address Book</a>
                 </li>
 
-                <li class="<?php echo $current_tab === 'doc-type' ? 'active' : ''; ?>">
+                <!-- <li class="<?php echo $current_tab === 'doc-type' ? 'active' : ''; ?>">
                     <a href="?tab=doc-type"><span class="dashicons dashicons-tag"></span> Document Types</a>
-                </li>
+                </li> -->
 
                 <li class="<?php echo $current_tab === 'docs' ? 'active' : ''; ?>">
                     <a href="?tab=docs"><span class="dashicons dashicons-media-text"></span> Documents</a>

@@ -37,7 +37,7 @@ if (!function_exists('load_client_dashboard_data')) {
                     'author' => $user_id,
                     'post_status' => 'publish',
                 ]);
-            case 'doc-type':
+            //case 'doc-type':
             case 'docs':
             case 'messages':
             case 'settings':
@@ -48,6 +48,7 @@ if (!function_exists('load_client_dashboard_data')) {
             case 'cl-settings-pi-edit':
             case 'cl-settings-support':
             case 'cl-settings-nh':
+            case 'cl-settings-dt':
                 return []; // Placeholder, replace with actual data queries
             default:
                 return null;
@@ -90,9 +91,9 @@ get_header();
                 case 'cl-property-details':
                     include locate_template('dashboard-templates/cl/cl-property-details.php');
                     break;
-                case 'doc-type':
+                /* case 'doc-type':
                     include locate_template('dashboard-templates/cl/cl-tab-doc-type.php');
-                    break;
+                    break; */
                 case 'docs':
                     include locate_template('dashboard-templates/cl/cl-tab-docs.php');
                     break;
@@ -116,6 +117,9 @@ get_header();
                     break;
                 case 'cl-settings-nh':
                     include locate_template('dashboard-templates/cl/cl-settings-nh.php');
+                    break;
+                case 'cl-settings-dt':
+                    include locate_template('dashboard-templates/cl/cl-settings-dt.php');
                     break;
                 default:
                     wp_redirect(add_query_arg('tab', 'dashboard'));
