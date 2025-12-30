@@ -12,4 +12,8 @@
     <a href="?tab=cl-settings-support" class="realtor-settings-link">
         <div class="realtor-settings-item">🛠️ Support</div>
     </a>
+
+    <a href="?tab=cl-settings-nh" class="realtor-settings-link">
+        <div class="realtor-settings-item">📌 Note Header</div>
+    </a>
 </div>

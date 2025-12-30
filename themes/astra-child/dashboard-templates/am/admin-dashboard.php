@@ -49,6 +49,7 @@ if (!function_exists('load_admin_dashboard_data')) {
             case 'am-settings-cp':
             case 'am-settings-pi-edit':
             case 'am-settings-support':
+            case 'am-settings-nh':
                 return []; // Placeholder for future implementation
             default:
                 return null;
@@ -117,6 +118,9 @@ get_header();
                     break;
                 case 'settings':
                     include locate_template('dashboard-templates/am/am-tab-settings.php');
+                    break;
+                case 'am-settings-nh':
+                    include locate_template('dashboard-templates/am/am-settings-nh.php');
                     break;
                 default:
                     wp_redirect(add_query_arg('tab', 'dashboard'));

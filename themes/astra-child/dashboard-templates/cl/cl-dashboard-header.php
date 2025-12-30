@@ -34,7 +34,7 @@ $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'dashbo
 <header class="dashboard-header desktop-header">
     <div class="header-row-1">
         <a href="?tab=dashboard" class="logo-link">
-            <img src="<?php echo esc_url(content_url('/uploads/2025/08/mary-logo.png')); ?>" 
+            <img src="<?php echo esc_url(content_url('/uploads/2025/12/syncronest-logo.png')); ?>" 
                 alt="<?php echo esc_attr(get_bloginfo('name')); ?> Logo" 
                 class="site-logo">
         </a>

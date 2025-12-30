@@ -47,6 +47,7 @@ if (!function_exists('load_client_dashboard_data')) {
             case 'cl-settings-cp':
             case 'cl-settings-pi-edit':
             case 'cl-settings-support':
+            case 'cl-settings-nh':
                 return []; // Placeholder, replace with actual data queries
             default:
                 return null;
@@ -112,6 +113,9 @@ get_header();
                     break;
                 case 'cl-settings-support':
                     include locate_template('dashboard-templates/cl/cl-settings-support.php');
+                    break;
+                case 'cl-settings-nh':
+                    include locate_template('dashboard-templates/cl/cl-settings-nh.php');
                     break;
                 default:
                     wp_redirect(add_query_arg('tab', 'dashboard'));

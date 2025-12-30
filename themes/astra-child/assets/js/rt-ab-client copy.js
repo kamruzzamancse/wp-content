@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     let isProcessing = false;
 
-    // ---------------------------
-    // AJAX wrapper
-    // ---------------------------
+    // ===== Utility Functions =====
     async function ajaxFetch(formData) {
         try {
             const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
@@ -13,9 +11,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ---------------------------
-    // Debounce
-    // ---------------------------
     function debounce(func, wait) {
         let timeout;
         return function (...args) {
@@ -24,9 +19,6 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
-    // ---------------------------
-    // Show notification
-    // ---------------------------
     function showNotification(message, type = 'success') {
         document.querySelectorAll('.client-notification').forEach(n => n.remove());
         const notification = document.createElement('div');
@@ -64,16 +56,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ---------------------------
-    // Fetch clients
-    // ---------------------------
-    window.fetchClients = async function({ page = 1, rows = 10, search = '', bodyId, paginationId }) {
+   // ===== Fetch Clients (with working sorting, search, pagination) =====
+    window.fetchClients = async function(params) {
+        const {
+            page = 1,
+            rows = 10,
+            search = '',
+            sort_by,
+            sort_order,
+            bodyId,
+            paginationId
+        } = params;
+
+        // Apply default sorting ONLY when not provided
+        const finalSortBy = sort_by || 'created_at';
+        const finalSortOrder = sort_order || 'DESC';
+
         const formData = new FormData();
         formData.append('action', 'fetch_clients_ajax');
         formData.append('nonce', rtClientAjax.edit_nonce);
         formData.append('page', page);
         formData.append('rows', rows);
         formData.append('search', search);
+        formData.append('sort_by', finalSortBy);
+        formData.append('sort_order', finalSortOrder);
 
         const result = await ajaxFetch(formData);
         const tbody = document.getElementById(bodyId);
@@ -84,45 +90,94 @@ document.addEventListener('DOMContentLoaded', function () {
         pagination.innerHTML = '';
 
         if (result.success && result.data.clients.length > 0) {
+
             result.data.clients.forEach(client => {
                 const tr = document.createElement('tr');
                 tr.dataset.clientId = client.client_id;
+
                 tr.innerHTML = `
-                    <td><img src="${client.profile_picture || rtClientAjax.default_avatar}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;"></td>
-                    <td class="client-name-cell" style="cursor: pointer; color: #007bff; font-weight: 500;">
-                        ${client.full_name}
+                    <td>
+                        <img src="${client.profile_picture || rtClientAjax.default_avatar}"
+                            style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
                     </td>
-                    <td>${client.email}</td>
-                    <td>${client.phone || ''}</td>
+
+                    <td class="client-name-cell" 
+                        style="cursor:pointer;color:#007bff;font-weight:500;">
+                        ${client.first_name || ''}
+                    </td>
+
+                    <td>${client.second_name || ''}</td>
+                    <td>${client.first_email || ''}</td>
+                    <td>${client.second_email || ''}</td>
+                    <td>${client.first_phone || ''}</td>
+                    <td>${client.second_phone || ''}</td>
                     <td>${client.address || ''}</td>
                     <td>${client.note || ''}</td>
                     <td>${client.status || ''}</td>
+
                     <td>
-                        <span class="editClientBtn" style="cursor:pointer; margin-right: 10px;">✏️</span>
-                        <span class="deleteClientBtn" style="cursor:pointer; margin-right: 10px;">🗑️</span>
+                        <span class="editClientBtn" style="cursor:pointer;margin-right:10px;">✏️</span>
+                        <span class="deleteClientBtn" style="cursor:pointer;margin-right:10px;">🗑️</span>
                     </td>
                 `;
+
                 tbody.appendChild(tr);
             });
 
+            // ===== Pagination Buttons =====
             for (let i = 1; i <= result.data.total_pages; i++) {
                 const btn = document.createElement('button');
                 btn.textContent = i;
+
                 if (i === page) btn.classList.add('active');
-                btn.addEventListener('click', () => fetchClients({ page: i, rows, search, bodyId, paginationId }));
+
+                btn.addEventListener('click', () => fetchClients({
+                    page: i,
+                    rows,
+                    search,
+                    sort_by: finalSortBy,
+                    sort_order: finalSortOrder,
+                    bodyId,
+                    paginationId
+                }));
+
                 pagination.appendChild(btn);
             }
 
+            // Re-bind click handlers after rows load
             setupRowButtons(bodyId);
             setupClientDetailsHandlers();
+
         } else {
-            tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No clients found</td></tr>`;
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="11" style="text-align:center;">No clients found</td>
+                </tr>`;
         }
     };
 
-    // ---------------------------
-    // Client Details Handlers
-    // ---------------------------
+    // ===== Sorting by clicking table headers =====
+    document.querySelectorAll('#addressBookTable th.sortable').forEach(th => {
+        th.style.cursor = "pointer";
+        th.dataset.order = "ASC";
+
+        th.addEventListener('click', () => {
+            const sort_by = th.dataset.sort; // <-- use 'sort' instead of 'column'
+            const sort_order = th.dataset.order === 'ASC' ? 'DESC' : 'ASC';
+            th.dataset.order = sort_order;
+
+            fetchClients({
+                page: 1,
+                rows: parseInt(document.getElementById('addressBookRows').value, 10),
+                search: document.getElementById('addressBookSearch').value.trim(),
+                sort_by,
+                sort_order,
+                bodyId: 'addressBookBody',
+                paginationId: 'addressBookPagination'
+            });
+        });
+    });
+
     function setupClientDetailsHandlers() {
         document.removeEventListener('click', handleClientNameClick);
         document.removeEventListener('click', handleViewButtonClick);
@@ -131,10 +186,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function handleClientNameClick(e) {
-        const clientNameCell = e.target.closest('.client-name-cell');
-        if (clientNameCell) {
+        const cell = e.target.closest('.client-name-cell');
+        if (cell) {
             e.preventDefault();
-            const row = clientNameCell.closest('tr');
+            const row = cell.closest('tr');
             const clientId = row.dataset.clientId;
             if (clientId && typeof window.openClientDetailsModal === 'function') {
                 window.openClientDetailsModal(clientId);
@@ -153,101 +208,130 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // ---------------------------
-    // Create client
-    // ---------------------------
+    // ===== Create Client Form =====
     const createForm = document.getElementById('createRealtorClientForm');
     if (createForm) {
         createForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const submitBtn = this.querySelector('button[type="submit"]');
             if (submitBtn.disabled) return;
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Creating...';
 
             const formData = new FormData(this);
+
+            const first_name  = (formData.get('first_name') || '').trim();
+            const first_email = (formData.get('first_email') || '').trim();
+            const first_phone = (formData.get('first_phone') || '').trim();
+            const status      = formData.get('status') || 'lead'; // optional
+
+            // Backend-aligned validation
+            if (!first_name) {
+                showNotification('First Name is required', 'error');
+                resetBtn(); return;
+            }
+            if (!first_email) {
+                showNotification('Primary Email is required', 'error');
+                resetBtn(); return;
+            }
+            if (!first_phone) {
+                showNotification('Primary Phone is required', 'error');
+                resetBtn(); return;
+            }
+
+            // sanitize
+            formData.set('first_name', first_name);
+            formData.set('first_email', first_email);
+            formData.set('first_phone', first_phone);
+            formData.set('second_name', (formData.get('second_name') || '').trim());
+            formData.set('second_email', (formData.get('second_email') || '').trim());
+            formData.set('second_phone', (formData.get('second_phone') || '').trim());
+            formData.set('address', (formData.get('address') || '').trim());
+            formData.set('note', (formData.get('note') || '').trim());
+            formData.set('status', status);
+
             formData.append('action', 'create_realtor_client_ajax');
             formData.append('nonce', rtClientAjax.create_nonce);
 
-            try {
-                const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                const result = await response.json();
-                
-                if (result.success) {
-                    showNotification('Client created successfully!');
-                    this.reset();
-                    document.getElementById('createRealtorClientPreviewAvatar').src = rtClientAjax.default_avatar;
-                    document.getElementById('rmRealtorClientCreateModal').style.display = 'none';
-                    
-                    setTimeout(() => {
-                        fetchClients({
-                            page: 1,
-                            rows: parseInt(document.getElementById('addressBookRows').value, 10),
-                            search: document.getElementById('addressBookSearch').value.trim(),
-                            bodyId: 'addressBookBody',
-                            paginationId: 'addressBookPagination'
-                        });
-                    }, 500);
-                } else {
-                    showNotification('Error: ' + result.data, 'error');
-                }
-            } catch (error) {
-                showNotification('Network error. Please try again.', 'error');
-            } finally {
+            const result = await ajaxFetch(formData);
+
+            if (result.success) {
+                showNotification('Client created successfully!');
+                this.reset();
+                document.getElementById('createRealtorClientPreviewAvatar').src = rtClientAjax.default_avatar;
+                document.getElementById('rmRealtorClientCreateModal').style.display = 'none';
+                fetchClients({ page:1, rows:10, search:'', bodyId:'addressBookBody', paginationId:'addressBookPagination' });
+            } else {
+                showNotification('Error: ' + result.data, 'error');
+            }
+
+            resetBtn();
+
+            function resetBtn(){
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Client';
             }
         });
     }
 
-    // ---------------------------
-    // Edit client
-    // ---------------------------
+    // ===== Edit Client Form =====
     const editForm = document.getElementById('editRealtorClientForm');
     if (editForm) {
-        editForm.addEventListener('submit', async function (e) {
+        editForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const submitBtn = editForm.querySelector('button[type="submit"]');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn.disabled) return;
+
             submitBtn.disabled = true;
             submitBtn.textContent = 'Updating...';
 
-            const formData = new FormData(editForm);
+            const formData = new FormData(this);
+
+            const first_name  = (formData.get('first_name') || '').trim();
+            const first_email = (formData.get('first_email') || '').trim();
+            const first_phone = (formData.get('first_phone') || '').trim();
+            const status      = formData.get('status') || 'lead';
+
+            if (!first_name) {
+                showNotification('First Name is required', 'error');
+                resetBtn(); return;
+            }
+            if (!first_email) {
+                showNotification('Primary Email is required', 'error');
+                resetBtn(); return;
+            }
+            if (!first_phone) {
+                showNotification('Primary Phone is required', 'error');
+                resetBtn(); return;
+            }
+
+            formData.set('status', status);
             formData.append('action', 'update_realtor_client_ajax');
             formData.append('nonce', rtClientAjax.edit_nonce);
 
-            try {
-                const res = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                const result = await res.json();
+            const result = await ajaxFetch(formData);
 
-                if (result.success) {
-                    showNotification('Client updated successfully!');
-                    document.getElementById('rmRealtorClientEditModal').style.display = 'none';
-                    if (typeof fetchClients === 'function') {
-                        fetchClients({
-                            page: 1,
-                            rows: parseInt(document.getElementById('addressBookRows').value, 10),
-                            search: document.getElementById('addressBookSearch').value.trim(),
-                            bodyId: 'addressBookBody',
-                            paginationId: 'addressBookPagination'
-                        });
-                    }
-                } else {
-                    showNotification('Update failed: ' + result.data, 'error');
-                }
-            } catch (err) {
-                showNotification('Network error: ' + err.message, 'error');
-            } finally {
+            if (result.success) {
+                showNotification('Client updated successfully!');
+                document.getElementById('rmRealtorClientEditModal').style.display = 'none';
+                fetchClients({ page:1, rows:10, search:'', bodyId:'addressBookBody', paginationId:'addressBookPagination' });
+            } else {
+                showNotification('Error: ' + result.data, 'error');
+            }
+
+            resetBtn();
+
+            function resetBtn(){
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Update Client';
             }
         });
     }
 
-    // ---------------------------
-    // Profile picture preview
-    // ---------------------------
+    // ===== Image Preview =====
     const profileInputs = [
         { input: 'create_realtor_client_profile_picture', preview: 'createRealtorClientPreviewAvatar' },
         { input: 'edit_realtor_client_profile_picture', preview: 'editRealtorClientPreviewAvatar' }
@@ -267,10 +351,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // ---------------------------
-    // Modal functionality
-    // ---------------------------
+    // ===== Modal open/close =====
     function initializeModalFunctionality() {
+        // Create modal
         const createModal = document.getElementById('rmRealtorClientCreateModal');
         const addContactBtn = document.querySelector('.ab-btn-create');
         const closeBtn = document.getElementById('closeRealtorClientCreateModal');
@@ -280,11 +363,18 @@ document.addEventListener('DOMContentLoaded', function () {
             closeBtn.addEventListener('click', () => createModal.style.display = 'none');
             createModal.addEventListener('click', e => { if (e.target === createModal) createModal.style.display = 'none'; });
         }
+
+        // Edit modal
+        const editModal = document.getElementById('rmRealtorClientEditModal');
+        const closeEditBtn = document.getElementById('closeRealtorClientEditModal');
+        if (closeEditBtn && editModal) {
+            closeEditBtn.addEventListener('click', () => editModal.style.display = 'none');
+            editModal.addEventListener('click', e => { if (e.target === editModal) editModal.style.display = 'none'; });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') editModal.style.display = 'none'; });
+        }
     }
 
-    // ---------------------------
-    // Edit/Delete row buttons
-    // ---------------------------
+    // ===== Row buttons (edit/delete) =====
     function setupRowButtons(bodyId) {
         const tbody = document.getElementById(bodyId);
         if (!tbody) return;
@@ -306,25 +396,26 @@ document.addEventListener('DOMContentLoaded', function () {
                     formData.append('nonce', rtClientAjax.edit_nonce);
                     formData.append('client_id', clientId);
 
-                    const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                    const result = await response.json();
+                    const result = await ajaxFetch(formData);
                     if (!result.success) throw new Error(result.data || 'Failed to fetch client data');
 
                     const client = result.data;
 
                     document.getElementById('edit_realtor_client_id').value = client.client_id;
-                    document.getElementById('edit_realtor_client_full_name').value = client.full_name || '';
-                    document.getElementById('edit_realtor_client_email').value = client.email || '';
-                    document.getElementById('edit_realtor_client_phone').value = client.phone || '';
+                    document.getElementById('edit_realtor_client_first_name').value = client.first_name || '';
+                    document.getElementById('edit_realtor_client_second_name').value = client.second_name || '';
+                    document.getElementById('edit_realtor_client_first_email').value = client.first_email || '';
+                    document.getElementById('edit_realtor_client_second_email').value = client.second_email || '';
+                    document.getElementById('edit_realtor_client_first_phone').value = client.first_phone || '';
+                    document.getElementById('edit_realtor_client_second_phone').value = client.second_phone || '';
                     document.getElementById('edit_realtor_client_address').value = client.address || '';
                     document.getElementById('edit_realtor_client_notes').value = client.note || '';
                     document.getElementById('edit_realtor_client_status').value = client.status || '';
 
                     const previewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
                     if (previewAvatar) previewAvatar.src = client.profile_picture || rtClientAjax.default_avatar;
-
                 } catch (error) {
-                    alert('Error loading client data: ' + error.message);
+                    showNotification('Error loading client data: ' + error.message, 'error');
                 }
             });
         });
@@ -347,8 +438,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     formData.append('nonce', rtClientAjax.delete_nonce);
                     formData.append('client_id', clientId);
 
-                    const response = await fetch(rtClientAjax.ajax_url, { method: 'POST', body: formData });
-                    const result = await response.json();
+                    const result = await ajaxFetch(formData);
 
                     if (result.success) {
                         showNotification('Client deleted successfully!', 'success');
@@ -373,9 +463,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // ---------------------------
-    // Search & Rows
-    // ---------------------------
+    // ===== Search and rows setup =====
     function setupSearchAndRows(searchInputId, rowsSelectId, bodyId, paginationId) {
         const searchInput = document.getElementById(searchInputId);
         const rowsSelect = document.getElementById(rowsSelectId);
@@ -395,9 +483,7 @@ document.addEventListener('DOMContentLoaded', function () {
         rowsSelect.addEventListener('change', fetchTable);
     }
 
-    // ---------------------------
-    // Initialize
-    // ---------------------------
+    // ===== Initialize =====
     function initialize() {
         initializeModalFunctionality();
         fetchClients({

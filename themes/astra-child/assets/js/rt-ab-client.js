@@ -221,12 +221,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const formData = new FormData(this);
             const first_name = (formData.get('first_name') || '').trim();
             const first_email = (formData.get('first_email') || '').trim();
-            const status = formData.get('status') || '';
+            const lead_status = (formData.get('lead_status') || 'cold').trim(); // default to 'cold'
 
             if (!first_name) { showNotification('First Name is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
             if (!first_email) { showNotification('Primary Email is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
-            if (!status) { showNotification('Status is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Create Client'; return; }
 
+            // Trim other fields
             formData.set('first_name', first_name);
             formData.set('second_name', (formData.get('second_name') || '').trim());
             formData.set('first_email', first_email);
@@ -235,7 +235,8 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.set('second_phone', (formData.get('second_phone') || '').trim());
             formData.set('address', (formData.get('address') || '').trim());
             formData.set('note', (formData.get('note') || '').trim());
-            formData.set('status', status);
+            formData.set('status', (formData.get('status') || '').trim());
+            formData.set('lead_status', lead_status);
 
             formData.append('action', 'create_realtor_client_ajax');
             formData.append('nonce', rtClientAjax.create_nonce);
@@ -278,16 +279,27 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!clientId) { showNotification('Missing client ID', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
 
             const formData = new FormData(this);
-            formData.append('action', 'update_realtor_client_ajax');
-            formData.append('nonce', rtClientAjax.edit_nonce);
-
             const first_name = (formData.get('first_name') || '').trim();
             const first_email = (formData.get('first_email') || '').trim();
-            const status = formData.get('status') || '';
+            const lead_status = (formData.get('lead_status') || 'cold').trim();
 
             if (!first_name) { showNotification('First Name is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
             if (!first_email) { showNotification('Primary Email is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
-            if (!status) { showNotification('Status is required', 'error'); submitBtn.disabled = false; submitBtn.textContent = 'Update Client'; return; }
+
+            // Trim other fields
+            formData.set('first_name', first_name);
+            formData.set('second_name', (formData.get('second_name') || '').trim());
+            formData.set('first_email', first_email);
+            formData.set('second_email', (formData.get('second_email') || '').trim());
+            formData.set('first_phone', (formData.get('first_phone') || '').trim());
+            formData.set('second_phone', (formData.get('second_phone') || '').trim());
+            formData.set('address', (formData.get('address') || '').trim());
+            formData.set('note', (formData.get('note') || '').trim());
+            formData.set('status', (formData.get('status') || '').trim());
+            formData.set('lead_status', lead_status);
+
+            formData.append('action', 'update_realtor_client_ajax');
+            formData.append('nonce', rtClientAjax.edit_nonce);
 
             const result = await ajaxFetch(formData);
 
@@ -390,9 +402,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     document.getElementById('edit_realtor_client_address').value = client.address || '';
                     document.getElementById('edit_realtor_client_notes').value = client.note || '';
                     document.getElementById('edit_realtor_client_status').value = client.status || '';
+                    document.getElementById('edit_realtor_client_lead_status').value = client.lead_status || 'cold';
 
                     const previewAvatar = document.getElementById('editRealtorClientPreviewAvatar');
                     if (previewAvatar) previewAvatar.src = client.profile_picture || rtClientAjax.default_avatar;
+
                 } catch (error) {
                     showNotification('Error loading client data: ' + error.message, 'error');
                 }

@@ -47,6 +47,7 @@ if (!function_exists('load_realtor_dashboard_data')) {
             case 'rt-settings-cp':
             case 'rt-settings-pi-edit':
             case 'rt-settings-support':
+            case 'rt-settings-nh':
                 return []; // Placeholder, replace with actual data queries
             default:
                 return null;
@@ -118,6 +119,9 @@ get_header();
                     break;
                 case 'rt-settings-support':
                     include locate_template('dashboard-templates/rt/rt-settings-support.php');
+                    break;
+                case 'rt-settings-nh':
+                    include locate_template('dashboard-templates/rt/rt-settings-nh.php');
                     break;
                 default:
                     wp_redirect(add_query_arg('tab', 'dashboard'));

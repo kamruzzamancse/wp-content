@@ -37,7 +37,7 @@ function get_rentcast_chart_data() {
         INNER JOIN {$assigned_table} AS a
         ON p.id = a.property_id
         WHERE a.client_id = %d
-        AND a.deleted_by IS NULL  -- Only show not deleted assignments
+        AND a.deleted_by IS NULL
         ORDER BY a.id ASC
         LIMIT 20
     ", $client_id);

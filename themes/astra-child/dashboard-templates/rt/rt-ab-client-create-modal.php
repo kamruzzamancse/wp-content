@@ -53,9 +53,9 @@
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label for="create_realtor_client_first_phone">Primary Phone:</label>
+                            <label for="create_realtor_client_first_phone">Primary Phone: *</label>
                             <input type="text" id="create_realtor_client_first_phone" name="first_phone"
-                                   placeholder="Enter primary phone number">
+                                   required placeholder="Enter primary phone number">
                         </div>
 
                         <div class="create-detail-row-realtor-client">
@@ -77,8 +77,8 @@
                         </div>
 
                         <div class="create-detail-row-realtor-client">
-                            <label for="create_realtor_client_status">Status: *</label>
-                            <select id="create_realtor_client_status" name="status" required>
+                            <label for="create_realtor_client_status">Status:</label>
+                            <select id="create_realtor_client_status" name="status">
                                 <option value="" disabled selected>Select Status</option>
                                 <option value="lead">Lead</option>
                                 <option value="active">Active</option>

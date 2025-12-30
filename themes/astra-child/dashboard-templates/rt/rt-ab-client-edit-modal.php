@@ -47,8 +47,8 @@
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label for="edit_realtor_client_first_phone">Primary Phone:</label>
-                            <input type="text" id="edit_realtor_client_first_phone" name="first_phone">
+                            <label for="edit_realtor_client_first_phone">Primary Phone: *</label>
+                            <input type="text" id="edit_realtor_client_first_phone" name="first_phone" required>
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
@@ -67,20 +67,11 @@
                         </div>
 
                         <div class="edit-detail-row-realtor-client">
-                            <label for="edit_realtor_client_status">Status: *</label>
-                            <select id="edit_realtor_client_status" name="status" required>
-                                <option value="" disabled>Select Status</option>
+                            <label for="edit_realtor_client_status">Status:</label>
+                            <select id="edit_realtor_client_status" name="status">
+                                <option value="" disabled selected>Select Status</option>
                                 <option value="lead">Lead</option>
                                 <option value="active">Active</option>
-                            </select>
-                        </div>
-
-                        <div class="edit-detail-row-realtor-client" id="leadStatusRow" style="display:none;">
-                            <label for="edit_realtor_lead_status">Lead Status:</label>
-                            <select id="edit_realtor_lead_status" name="lead_status">
-                                <option value="hot">Hot</option>
-                                <option value="warm">Warm</option>
-                                <option value="cold" selected>Cold</option>
                             </select>
                         </div>
 
