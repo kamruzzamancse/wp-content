@@ -491,7 +491,7 @@ function mdk_enqueue_profile_scripts() {
 
     // doc type and docs
     if ((is_page('realtor-dashboard') || is_page('admin-dashboard') || is_page('client-dashboard')) 
-        && in_array($tab, ['cl-settings-dt', 'rt-settings-dt', 'docs'], true)) {
+        && in_array($tab, ['cl-settings-dt', 'rt-settings-dt', 'am-settings-dt', 'docs'], true)) {
 
         if (!wp_script_is('document-type-script', 'enqueued')) {
             $doc_type_path = get_stylesheet_directory() . '/assets/js/document-type.js';

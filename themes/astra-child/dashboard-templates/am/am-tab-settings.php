@@ -6,4 +6,8 @@
     <a href="?tab=am-settings-nh">
         <div class="realtor-settings-item">📌 Note Header</div>
     </a>
+
+    <a href="?tab=am-settings-dt">
+        <div class="realtor-settings-item">📄 Document Type</div>
+    </a>
 </div>

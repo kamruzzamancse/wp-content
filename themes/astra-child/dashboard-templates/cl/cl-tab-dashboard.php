@@ -186,13 +186,22 @@ document.addEventListener('DOMContentLoaded', function () {
     let chartData = null;
     let currentMode = 'rental';
 
+    // Draw chart for selected property
     function drawChart(propId) {
         if (!chartData) return;
         const prop = chartData.properties.find(p => p.id == propId);
         if (!prop) return;
 
-        rentalDisplay.textContent = `Avg Rental: $${Number(chartData.avg_rental || 0).toLocaleString()}`;
-        salesDisplay.textContent = `Avg Sales: $${Number(chartData.avg_sales || 0).toLocaleString()}`;
+        // Calculate Avg Rental from monthly data
+        let avgRental = 0;
+        if(prop.monthly_rental_data && Object.keys(prop.monthly_rental_data).length) {
+            const values = Object.values(prop.monthly_rental_data).map(d => parseFloat(d.price || 0));
+            avgRental = values.reduce((a,b)=>a+b,0) / values.length;
+        }
+
+        rentalDisplay.textContent = `Avg Rental: $${Number(avgRental).toLocaleString()}`;
+        salesDisplay.textContent = `Avg Sales: $${Number(prop.sales || 0).toLocaleString()}`;
+
         titleOuter.textContent = (currentMode === 'rental' ? 'Rental Trend' : 'Sales Price') + ' - ' + prop.address;
 
         svg.innerHTML = '';
@@ -200,9 +209,8 @@ document.addEventListener('DOMContentLoaded', function () {
         yAxisLabels.innerHTML = '';
 
         const width = 600, height = 250;
-        // Overlap prevent korar jonno left margin 70px kora hoyeche
         const margin = { top: 60, bottom: 20, left: 70, right: 30 };
-        
+
         let labels = [], values = [];
         if (currentMode === 'rental') {
             const history = prop.monthly_rental_data || {};
@@ -215,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const maxVal = Math.max(...values, 1000) * 1.3;
 
-        // Y-Axis Labels logic
+        // Y-Axis Labels
         for (let i = 5; i >= 0; i--) {
             const span = document.createElement('span');
             span.textContent = '$' + Math.round(maxVal * i / 5).toLocaleString();
@@ -227,17 +235,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         labels.forEach((label, idx) => {
             const val = values[idx];
-            
-            // Value gulo jeno label er opore na jay sheijonno drawing area width adjust kora hoyeche
             const chartAreaWidth = width - margin.left - margin.right;
             const x = labels.length > 1 
                 ? margin.left + (idx * (chartAreaWidth / (labels.length - 1))) 
-                : margin.left + (chartAreaWidth / 2); // Single point (Sales) thakle center position
-
+                : margin.left + (chartAreaWidth / 2);
             const y = ((maxVal - val) / maxVal) * (height - margin.top - margin.bottom) + margin.top;
             points.push([x, y]);
 
-            // Value Text (Exact center alignment)
+            // Value Text
             const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
             text.setAttribute("x", x);
             text.setAttribute("y", y - 15);
@@ -253,13 +258,12 @@ document.addEventListener('DOMContentLoaded', function () {
             circle.setAttribute("fill", themeColor);
             svg.appendChild(circle);
 
-            // X-Axis Label (P1 alignment fix)
+            // X-Axis Label
             const xSpan = document.createElement('span');
             xSpan.textContent = label;
             xSpan.style.position = "absolute";
-            // SVG x coordinate ke container er percentage e convert kora hoyeche
             xSpan.style.left = `${(x / width) * 100}%`;
-            xSpan.style.transform = "translateX(-50%)"; // Thik center alignment
+            xSpan.style.transform = "translateX(-50%)";
             xSpan.style.whiteSpace = "nowrap";
             xAxisLabels.appendChild(xSpan);
         });
@@ -274,6 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Change chart mode (Rental/Sale)
     document.querySelectorAll('input[name="chartType"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             currentMode = e.target.value;
@@ -281,8 +286,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Change property
     propertySelect.addEventListener('change', (e) => drawChart(e.target.value));
 
+    // Fetch chart data via AJAX
     fetch('<?php echo admin_url("admin-ajax.php?action=get_rentcast_chart_data"); ?>')
         .then(res => res.json())
         .then(data => {
@@ -294,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 });
 </script>
+
 
 <style>
 /* ============================================================

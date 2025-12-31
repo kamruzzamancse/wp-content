@@ -6,7 +6,6 @@ add_action('wp_ajax_get_rentcast_chart_data', 'get_rentcast_chart_data');
 add_action('wp_ajax_nopriv_get_rentcast_chart_data', 'get_rentcast_chart_data');
 
 function get_rentcast_chart_data() {
-
     if (!is_user_logged_in()) {
         wp_send_json(['properties' => []]);
         return;
@@ -15,12 +14,7 @@ function get_rentcast_chart_data() {
     global $wpdb;
     $user_id = get_current_user_id();
 
-    // 🔹 Selected property ID from dropdown (AJAX)
-    $selected_property_id = isset($_POST['property_id']) 
-        ? intval($_POST['property_id']) 
-        : 0;
-
-    // Get client_id
+    // Get client_id from wp_clients table
     $clients_table = $wpdb->prefix . 'clients';
     $client_id = $wpdb->get_var($wpdb->prepare(
         "SELECT client_id FROM {$clients_table} WHERE user_id = %d LIMIT 1",
@@ -32,20 +26,20 @@ function get_rentcast_chart_data() {
         return;
     }
 
-    // Tables
+    // Query assigned properties WITH rental trend data
     $assigned_table = $wpdb->prefix . 'assigned_property';
     $property_table = $wpdb->prefix . 'rentcast_properties';
 
-    // Fetch assigned properties
     $query = $wpdb->prepare("
         SELECT p.id, p.address, p.price, p.property_value, 
-               p.monthly_rental_data, p.historical_rental_prices
+            p.monthly_rental_data, p.historical_rental_prices
         FROM {$property_table} AS p
         INNER JOIN {$assigned_table} AS a
-            ON p.id = a.property_id
+        ON p.id = a.property_id
         WHERE a.client_id = %d
-          AND a.deleted_by IS NULL
+        AND a.deleted_by IS NULL
         ORDER BY a.id ASC
+        LIMIT 20
     ", $client_id);
 
     $properties = $wpdb->get_results($query);
@@ -55,18 +49,12 @@ function get_rentcast_chart_data() {
         return;
     }
 
-    $data       = [];
-    $rentalSum  = 0;
-    $salesSum   = 0;
-    $allValues  = [];
+    $data = [];
+    $rentalSum = 0;
+    $salesSum  = 0;
+    $allValues = [];
 
     foreach ($properties as $prop) {
-
-        // 🔴 Only selected property
-        if ($selected_property_id && $prop->id != $selected_property_id) {
-            continue;
-        }
-
         $rental = floatval($prop->price);
         $sales  = floatval($prop->property_value);
 
@@ -84,7 +72,7 @@ function get_rentcast_chart_data() {
             }
         }
 
-        // Fallback historical data
+        // Fallback to historical_rental_prices if monthly_rental_data is empty
         if (empty($monthly_data) && !empty($prop->historical_rental_prices)) {
             $raw_hist = json_decode($prop->historical_rental_prices, true);
             if (is_array($raw_hist)) {
@@ -104,19 +92,17 @@ function get_rentcast_chart_data() {
             'monthly_rental_data' => $monthly_data
         ];
 
-        // Avg calculation (single property)
         $rentalSum += $rental;
         $salesSum  += $sales;
-
         $allValues[] = $rental;
         $allValues[] = $sales;
     }
 
-    // Since only one property is selected
-    $avgRental = round($rentalSum, 2);
-    $avgSales  = round($salesSum, 2);
+    $count = count($properties);
+    $avgRental = $count ? round($rentalSum / $count, 2) : 0;
+    $avgSales  = $count ? round($salesSum / $count, 2) : 0;
 
-    // Y-axis max
+    // Y-axis max calculation
     $yAxisMax = !empty($allValues) ? max($allValues) * 1.25 : 10000;
 
     wp_send_json([

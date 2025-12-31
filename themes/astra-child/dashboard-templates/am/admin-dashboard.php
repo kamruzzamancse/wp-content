@@ -42,7 +42,7 @@ if (!function_exists('load_admin_dashboard_data')) {
             case 'clients':
             case 'task-status':
             case 'user-management':
-            case 'doc-type':
+            //case 'doc-type':
             case 'docs':
             case 'am-property-details':
             case 'am-settings-pi':
@@ -50,6 +50,7 @@ if (!function_exists('load_admin_dashboard_data')) {
             case 'am-settings-pi-edit':
             case 'am-settings-support':
             case 'am-settings-nh':
+            case 'am-settings-dt':
                 return []; // Placeholder for future implementation
             default:
                 return null;
@@ -110,9 +111,9 @@ get_header();
                 case 'user-management':
                     include locate_template('dashboard-templates/am/am-tab-user-management.php');
                     break;
-                case 'doc-type':
+                /* case 'doc-type':
                     include locate_template('dashboard-templates/am/am-tab-doc-type.php');
-                    break;
+                    break; */
                 case 'docs':
                     include locate_template('dashboard-templates/am/am-tab-docs.php');
                     break;
@@ -121,6 +122,9 @@ get_header();
                     break;
                 case 'am-settings-nh':
                     include locate_template('dashboard-templates/am/am-settings-nh.php');
+                    break;
+                case 'am-settings-dt':
+                    include locate_template('dashboard-templates/am/am-settings-dt.php');
                     break;
                 default:
                     wp_redirect(add_query_arg('tab', 'dashboard'));
